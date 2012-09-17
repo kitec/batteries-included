@@ -12,93 +12,102 @@
 open Camlp4.PreCast
 open Camlp4.Sig
 
-let print_token ?(oc=stdout) = function
-  | KEYWORD kwd ->
-      Printf.fprintf oc "%s" kwd
-  | SYMBOL sym ->
-      Printf.fprintf oc "%s" sym
-  | LIDENT lid ->
-      Printf.fprintf oc "%s" lid
-  | UIDENT uid ->
-      Printf.fprintf oc "%s" uid
-  | ESCAPED_IDENT id ->
-      Printf.fprintf oc "%s" "( ";
-      Printf.fprintf oc "%s" id;
-      Printf.fprintf oc "%s" " )"
-  | INT(_, s) ->
-      Printf.fprintf oc "%s" s
-  | INT32(_, s) ->
-      Printf.fprintf oc "%s" s;
-      Printf.fprintf oc "%c" 'l'
-  | INT64(_, s) ->
-      Printf.fprintf oc "%s" s;
-      Printf.fprintf oc "%c" 'L'
-  | NATIVEINT(_, s) ->
-      Printf.fprintf oc "%s" s;
-      Printf.fprintf oc "%c" 'n'
-  | FLOAT(_, s) ->
-      Printf.fprintf oc "%s" s
-  | CHAR(_, s) ->
-      Printf.fprintf oc "%s" s
-  | STRING(_, s) ->
-      Printf.fprintf oc "%c" '"';
-      Printf.fprintf oc "%s" s;
-      Printf.fprintf oc "%c" '"'
-  | LABEL lbl ->
-      Printf.fprintf oc "%c" '~';
-      Printf.fprintf oc "%s" lbl;
-      Printf.fprintf oc "%c" ':'
-  | OPTLABEL lbl ->
-      Printf.fprintf oc "%c" '?';
-      Printf.fprintf oc "%s" lbl;
-      Printf.fprintf oc "%c" ':'
-  | QUOTATION quot ->
-      if quot.q_name = "" then
-        Printf.fprintf oc "%s" "<<"
-      else begin
-        Printf.fprintf oc "%s" "<:";
-        Printf.fprintf oc "%s" quot.q_name;
-        if quot.q_loc <> "" then begin
-          Printf.fprintf oc "%c" '@';
-          Printf.fprintf oc "%s" quot.q_loc
-        end;
-        Printf.fprintf oc "%c" '<'
-      end;
-      Printf.fprintf oc "%s" quot.q_contents;
-      Printf.fprintf oc "%s" ">>"
-  | ANTIQUOT(n, s) ->
-      Printf.fprintf oc "%c" '$';
-      if n <> "" then begin
-        Printf.fprintf oc "%s" n;
-        Printf.fprintf oc "%c" ':'
-      end;
-      Printf.fprintf oc "%s" s;
-      Printf.fprintf oc "%c" '$'
-  | COMMENT comment ->
-      Printf.fprintf oc "%s" comment
-  | BLANKS s ->
-      Printf.fprintf oc "%s" s
-  | NEWLINE ->
-      Printf.fprintf oc "\n"
-  | LINE_DIRECTIVE(n, fname_opt) ->
-      Printf.fprintf oc "# %d" n;
-      begin match fname_opt with
-        | Some fname ->
-            Printf.fprintf oc " \"%s\"\n" fname
-        | None ->
-            Printf.fprintf oc "\n"
-      end
-  | EOI ->
-      raise Exit
+type mode = O | R
 
-let filter_keywords stream =
-  Stream.from (fun _ -> match Stream.next stream with
-                 | (SYMBOL ("#"|"="|"("|")"|"{"|"}"|"["|"]" as sym), loc) -> Some(KEYWORD sym, loc)
-                 | x -> Some x)
+(* +-----------------------------------------------------------------+
+   | The lexer                                                       |
+   +-----------------------------------------------------------------+ *)
 
 external filter : 'a Gram.not_filtered -> 'a = "%identity"
 
-let main () =
+(* A lexer that does not filter tokens. *)
+let lexer fname ic =
+  let stream = filter (Gram.lex (Loc.mk fname) (Stream.of_channel ic)) in
+  let pos = ref None in
+  (* Fix the Camlp4 lexer. Start locations are often wrong but end
+     locations are always correct. *)
+  let next i =
+    let tok, loc = Stream.next stream in
+    match !pos with
+      | None ->
+          pos := Some loc;
+          Some (tok, loc)
+      | Some loc' ->
+          pos := Some loc;
+          if Loc.file_name loc' = Loc.file_name loc then
+            let _, _, _, _, a, b, c, _ = Loc.to_tuple loc'
+            and n, _, _, _, d, e, f, g = Loc.to_tuple loc in
+            Some (tok, Loc.of_tuple (n, a, b, c, d, e, f, g))
+          else
+            Some (tok, loc)
+  in
+  Stream.from next
+
+(* +-----------------------------------------------------------------+
+   | Printer                                                         |
+   +-----------------------------------------------------------------+ *)
+
+module File_map = Map.Make(String)
+
+(* Iterate over the filtered stream. *)
+let rec print mode current_fname current_line current_col files token_stream =
+  match try Some (Stream.next token_stream) with Stream.Failure -> None with
+    | None ->
+        ()
+    | Some (EOI, _) ->
+        flush stdout
+    | Some (tok, loc) ->
+        let fname = Loc.file_name loc
+        and off = Loc.start_off loc
+        and line = Loc.start_line loc
+        and col = Loc.start_off loc - Loc.start_bol loc
+        and len = Loc.stop_off loc - Loc.start_off loc in
+        (* Get the input. *)
+        let ic, files =
+          try
+            (File_map.find fname files, files)
+          with Not_found ->
+            let ic = open_in fname in
+            (ic, File_map.add fname ic files)
+        in
+        let str, stop_line, stop_col =
+          match tok with
+            | QUOTATION { q_name = "optcomp"; q_contents = str } ->
+                let str =
+                  (match mode with
+                     | O -> Pa_optcomp.string_of_value_o
+                     | R -> Pa_optcomp.string_of_value_r)
+                    (Pa_optcomp.get_quotation_value str)
+                in
+                (str, line, col + String.length str)
+            | tok ->
+                (* Go to the right position in the input. *)
+                if pos_in ic <> off then seek_in ic off;
+                (* Read the part to copy. *)
+                let str = String.create len in
+                really_input ic str 0 len;
+                (str, Loc.stop_line loc, Loc.stop_off loc - Loc.stop_bol loc)
+        in
+        if current_fname = fname && current_line = line && current_col = col then
+          (* If we at the right position, just print the string. *)
+          print_string str
+        else begin
+          (* Otherwise print a location directive. *)
+          if current_col > 0 then print_char '\n';
+          Printf.printf "# %d %S\n" line fname;
+          (* Ensure that the string start at the right column. *)
+          for i = 1 to col do
+            print_char ' '
+          done;
+          print_string str
+        end;
+        print mode fname stop_line stop_col files token_stream
+
+(* +-----------------------------------------------------------------+
+   | Entry point                                                     |
+   +-----------------------------------------------------------------+ *)
+
+let main mode =
   if Array.length Sys.argv <> 2 then begin
     Printf.eprintf "usage: %s <file>\n%!" (Filename.basename Sys.argv.(0));
     exit 2
@@ -106,15 +115,10 @@ let main () =
   try
     let fname = Sys.argv.(1) in
     let ic = open_in fname in
-    Stream.iter
-      (fun (tok, loc) -> print_token tok)
-      (Pa_optcomp.stream_filter (fun x -> x)
-         (filter_keywords
-            (filter
-               (Gram.lex (Loc.mk fname)
-                  (Stream.of_channel ic)))));
-    close_in ic
-  with
-    | Exit -> ()
-    | exn ->
-        Format.eprintf "@[<v0>%a@]@." Camlp4.ErrorHandler.print exn
+    (* Create the filtered token stream. *)
+    let token_stream = Pa_optcomp.filter ~lexer (lexer fname ic) in
+    print mode "" (-1) (-1) File_map.empty token_stream
+  with exn ->
+    flush stdout;
+    Format.eprintf "@[<v0>%a@]@." Camlp4.ErrorHandler.print exn;
+    exit 1
