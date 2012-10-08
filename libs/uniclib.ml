@@ -73,6 +73,8 @@
 
 (* You can contact the authour by sending email to *)
 (* yoriyuki.y@gmail.com *)
+#include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 module UChar = struct
   type t = int
@@ -1282,3 +1284,4 @@ let of_list l =
 
   (* =end *)
 end
+#endif

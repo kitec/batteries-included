@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 (**  Lazy lists of elements.
 
      Lazy lists are similar to lists, with the exception that their contents are
@@ -652,3 +653,4 @@ module Labels : sig
 end
 
 
+#endif

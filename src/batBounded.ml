@@ -1,3 +1,5 @@
+#include "src/config_incl.ml"
+#if not BATTERIES_JS
 module O = BatOrd
 
 let ( |? ) = BatOption.( |? )
@@ -256,3 +258,4 @@ module Make(M : BoundedType) : (
     make (base_of_t_exn (M.map2 f x y))
 end
 
+#endif

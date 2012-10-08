@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Formatted input functions.
 
@@ -435,3 +436,4 @@ val format_from_string :
     Raise [Scan_failure] if [s], considered as a format string, does not
     have the same type as [fmt]. *)
 
+#endif

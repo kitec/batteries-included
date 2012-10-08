@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (* Most of this code is lifted from J.-C. Fillâtre and S. Conchon's
    implementation:
@@ -171,3 +172,4 @@ module H = struct
   let hc1_ x h = x + 19 * h
   let hc1  x = hc1_ x.hcode
 end
+#endif

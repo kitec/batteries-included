@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Base64 codec.
 
@@ -60,3 +61,4 @@ val decode : ?tbl:decoding_table -> BatIO.input -> BatIO.input
 
 (** Create a valid decoding table from an encoding one. *)
 val make_decoding_table : encoding_table -> decoding_table
+#endif

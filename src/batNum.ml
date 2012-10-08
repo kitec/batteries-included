@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 
@@ -82,3 +83,4 @@ let quo   = quo_num
 let sign  = sign_num
 
 let print out t = BatInnerIO.nwrite out (to_string t)
+#endif

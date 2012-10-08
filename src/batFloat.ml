@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 open BatNumber
@@ -386,3 +387,4 @@ end
   try ignore (Safe_float.modf neg_infinity); false with Number.Overflow -> true
   let (frac, int) = Safe_float.modf 3.234 in approx_equal frac 0.234 && approx_equal int 3.
 *)
+#endif

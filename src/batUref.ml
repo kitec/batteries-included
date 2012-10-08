@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (* Implements union-find with ranks and path-compression  *)
 
@@ -114,3 +115,4 @@ let t_printer elepr paren out ur =
 *)
 
 let uref_printer = t_printer
+#endif

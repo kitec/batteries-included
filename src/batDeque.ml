@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 type 'a dq = { front : 'a list ; flen : int ;
                rear : 'a list  ; rlen : int }
@@ -257,3 +258,4 @@ let print ?(first="[") ?(last="]") ?(sep="; ") elepr out dq =
 
 let t_printer elepr _paren out x = print (elepr false) out x
 let dq_printer = t_printer
+#endif

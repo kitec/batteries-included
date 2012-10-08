@@ -1,5 +1,6 @@
 (*TODO: What is this module? Is it meant for public use?*)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 type t
 (**
@@ -294,3 +295,4 @@ val split_on_slash : t -> t list
 
 val print : 'a BatIO.output -> t -> unit
 (** [print oc ss] prints [ss] to the output channel [oc] *)
+#endif

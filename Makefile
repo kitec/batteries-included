@@ -88,6 +88,10 @@ all: $(QTEST_RUNTIME)
 	@echo "Build mode:" $(MODE)
 	$(OCAMLBUILD) $(OCAMLBUILDFLAGS) $(TARGETS)
 
+all-notest:
+	@echo "Build mode:" $(MODE)
+	$(OCAMLBUILD) $(OCAMLBUILDFLAGS) $(TARGETS)
+
 clean:
 	@${RM} src/batteriesConfig.ml batteries.odocl bench.log
 	@${RM} $(QTESTDIR)/all_tests.ml

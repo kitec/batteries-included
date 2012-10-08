@@ -1,4 +1,5 @@
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 open BatList
 open BatString
@@ -331,3 +332,4 @@ let sat f = (satisfy f) >>> return ()
 module Infix = struct
   let (<|>), (~?), (>>=), (>>>), (>::), ( ~* ), (~+), (^^) = (<|>), (~?), (>>=), (>>>), (>::), ( ~* ), (~+), (^^)
 end
+#endif

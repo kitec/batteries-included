@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 module Tuple2 = struct
   type ('a,'b) t = 'a * 'b
@@ -441,3 +442,4 @@ module Tuple5 = struct
     let compare = comp A.compare B.compare C.compare D.compare E.compare
   end
 end
+#endif

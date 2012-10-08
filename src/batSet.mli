@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Sets over ordered types.
 
@@ -641,3 +642,4 @@ module PSet : sig
     ('a BatInnerIO.output -> 'c -> unit) ->
     'a BatInnerIO.output -> 'c t -> unit
 end
+#endif

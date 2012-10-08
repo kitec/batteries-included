@@ -1,4 +1,5 @@
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 module Mutex = BatMutex
 module RMutex = BatRMutex
@@ -9,3 +10,4 @@ let () =
   BatIO.lock_factory := RMutex.make;
   BatPervasives.lock := RMutex.make ();
   ()
+#endif

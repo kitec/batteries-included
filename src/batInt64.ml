@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 module BaseInt64 = struct
@@ -63,3 +64,4 @@ external format : string -> int64 -> string = "caml_int64_format"
 let print out t = BatInnerIO.nwrite out (to_string t)
 let xprint out t = BatPrintf.fprintf out "%Lx" t
 let t_printer _paren out t = print out t
+#endif

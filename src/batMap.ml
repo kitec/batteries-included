@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (* A concrete implementation for the direct balanced maps structure,
    without carrying the ordering information with the data.
@@ -1155,3 +1156,4 @@ module PMap = struct (*$< PMap *)
 
   include Infix
 end (*$>*)
+#endif

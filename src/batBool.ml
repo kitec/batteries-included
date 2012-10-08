@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 open BatNumber
@@ -133,3 +134,4 @@ let t_printer _paren out t = print out t
   BatIO.string_of_t_printer t_printer true = "true"
   BatIO.string_of_t_printer t_printer false = "false"
 *)
+#endif

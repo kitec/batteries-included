@@ -21,6 +21,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 open Pervasives
@@ -558,3 +559,4 @@ let exn_printer paren out x =
 
 let _ = at_exit close_all; (*Called second*)
 	at_exit flush_all  (*Called first*)
+#endif

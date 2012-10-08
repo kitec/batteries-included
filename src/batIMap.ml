@@ -1,6 +1,7 @@
 (* Copyright 2003 Yamagata Yoriyuki. distributed with LGPL *)
 (* Modified by Edgar Friendly <thelema314@gmail.com> *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 module Core = struct
 
@@ -311,3 +312,4 @@ module Infix = struct
   let (-->) {m} k = Core.find k m
   let (<--) m (k,v) = add k v m
 end
+#endif

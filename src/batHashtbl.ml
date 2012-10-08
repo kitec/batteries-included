@@ -21,6 +21,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 (** {6 Import the contents of {!Hashtbl}}
@@ -521,3 +522,4 @@ module Cap =
 	    let find = find_option
       end
   end
+#endif

@@ -18,6 +18,7 @@
  * Foundation, Inc.
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (*BISECT-IGNORE-BEGIN*)
 
@@ -32,3 +33,4 @@ let compare () () = 0
 let print out () = BatInnerIO.nwrite out unit_string
 
 (*BISECT-IGNORE-END*)
+#endif

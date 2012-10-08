@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 open BatIO
 
@@ -416,3 +417,4 @@ val write_lines : (Text.t BatEnum.t, 'a) printer
 val write_texts : (Text.t BatEnum.t, 'a) printer
 val write_chars : (UChar.t BatEnum.t, 'a) printer
 (**/**)
+#endif

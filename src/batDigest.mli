@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 (** MD5 message digest.
@@ -85,3 +86,4 @@ val compare : t -> t -> int
     function [compare] allows the module [Digest] to be passed as
     argument to the functors {!Set.Make} and {!Map.Make}.
     @since 4.00.0 *)
+#endif

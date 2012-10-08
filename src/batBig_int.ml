@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 let big_int_base_default_symbols = 
   let s = String.create (10 + 26*2) in
@@ -156,3 +157,4 @@ let print out t = BatIO.nwrite out (to_string t)
   BatIO.to_string print (power_int_positive_int 10 31) = "10000000000000000000000000000000"
   BatIO.to_string print (power_int_positive_int (-10) 31) = "-10000000000000000000000000000000"
 *)
+#endif

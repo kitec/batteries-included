@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 let print_uchar fmt t =
   Format.fprintf fmt "UChar.of_char '%s'" (Uniclib.UTF8.init 1 (fun _ -> t))
@@ -82,3 +83,4 @@ let str_int_pmap = to_format (BatMap.print BatString.print BatInt.print)
 let str_str_pmap = to_format (BatMap.print BatString.print BatString.print)
 
 (*let bitset = to_format BatBitSet.print*)
+#endif

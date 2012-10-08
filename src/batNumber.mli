@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (**
    A common interface for numbers.
@@ -267,3 +268,4 @@ module MakeNumeric :
    the product of repeated squares, depending on the base-2 expansion
    of the exponent. ex. a^1 * a^4 * ... a^8 for n=13 *)
 val generic_pow : zero:'a -> one:'a -> div_two:('a -> 'a) -> mod_two:('a -> 'a) -> mul:('a -> 'a -> 'a) -> 'a -> 'a -> 'a
+#endif

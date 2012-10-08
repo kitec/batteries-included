@@ -18,6 +18,7 @@
  * Foundation, Inc.
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (**
    Operations on [unit].
@@ -49,3 +50,4 @@ val compare : t -> t -> int
 
 (** {7 Printing}*)
 val print: 'a BatInnerIO.output -> unit -> unit
+#endif

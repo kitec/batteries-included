@@ -21,6 +21,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Additional and modified functions for lists.
 
@@ -754,3 +755,4 @@ end
 
 val ( @ ) : 'a list -> 'a list -> 'a list
 (** Tail recursive [List.append]. *)
+#endif

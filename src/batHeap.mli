@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Functional heaps over ordered types
 
@@ -130,3 +131,4 @@ end
 module Make (Ord : BatInterfaces.OrderedType) : H with type elem = Ord.t
   (** Functorized heaps over arbitrary orderings. All the functions have
       the same complexity as the non-functorized versions. *)
+#endif

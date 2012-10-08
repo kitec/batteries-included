@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 type ('a, 'b) t = ('a, 'b BatSet.t) BatMap.t
@@ -64,3 +65,4 @@ struct
   let (-->) map key = find key map
   let (<--) map (key, value) = add key value map
 end
+#endif

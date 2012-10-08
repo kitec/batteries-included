@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (**
     Polymorphic Multi-Map.
@@ -120,3 +121,4 @@ val print : ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
                              ('a BatInnerIO.output -> 'b -> unit) ->
                              ('a BatInnerIO.output -> 'c -> unit) ->
                              'a BatInnerIO.output -> ('b, 'c) t -> unit
+#endif

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 let min x y = if Pervasives.compare x y <= 0 then x else y
 
@@ -348,3 +349,4 @@ module Make (Ord : BatInterfaces.OrderedType) = struct
   let t_printer elepr _paren out x = print (elepr false) out x
 
 end
+#endif

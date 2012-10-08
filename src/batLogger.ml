@@ -26,6 +26,7 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 open BatPrintf
 
@@ -213,3 +214,4 @@ let test =
  *)
 
 (******************************************************************************)
+#endif

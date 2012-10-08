@@ -20,6 +20,7 @@
     the standard Hashtbl module.
 *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 (** {6 Generic interface} *)
@@ -112,3 +113,4 @@ module Make (H : Hashtbl.HashedType) : Hashtbl.S with type key = H.t
     interface, but use the hashing and equality functions
     specified in the functor argument [H] instead of generic
     equality and hashing. *)
+#endif

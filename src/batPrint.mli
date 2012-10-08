@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Formatted output functions (also known as unparsing).
 
@@ -480,3 +481,4 @@ val ksprintf : (string -> 'b) -> ('a, 'b) format -> 'a
 val kbprintf : (Buffer.t -> 'b) -> Buffer.t -> ('a, 'b) format -> 'a
   (** [bprintf k buf fmt] prints into the buffer [buf], then call [k]
       with [buf] as argument. *)
+#endif

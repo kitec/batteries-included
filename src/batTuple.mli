@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Tuples.
 
@@ -349,3 +350,4 @@ module Tuple5 : sig
   module Comp (T1 : Comp) (T2 : Comp) (T3 : Comp) (T4 : Comp) (T5 : Comp)
     : Comp with type t = T1.t * T2.t * T3.t * T4.t * T5.t
 end
+#endif

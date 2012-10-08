@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 type resizer_t = currslots:int -> oldlength:int -> newlength:int -> int
@@ -756,3 +757,4 @@ let unsafe_set a n x =
 let print ?(first="[|") ?(last="|]") ?(sep="; ") print_a out t =
   BatEnum.print ~first ~last ~sep print_a out (enum t)
 let t_printer a_printer _paren out t = print (a_printer false) out t
+#endif

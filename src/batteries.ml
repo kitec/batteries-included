@@ -1,5 +1,6 @@
 (* open this to extend all Foo with BatFoo *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 module Legacy = struct
   include Pervasives
@@ -162,3 +163,4 @@ end
 (* Pervasives last *)
 include Pervasives
 include BatPervasives
+#endif

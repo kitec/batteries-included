@@ -1,6 +1,7 @@
 (* Copyright 2003 Yamagata Yoriyuki. distributed with LGPL *)
 (* Modified by Edgar Friendly <thelema314@gmail.com> *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 include BatAvlTree
 
@@ -426,3 +427,4 @@ let print oc t =
 (*$= print & ~printer:(fun x -> x)
   "(1,3) (5,6)" (IO.to_string print (of_list [1,3;5,6]))
  *)
+#endif

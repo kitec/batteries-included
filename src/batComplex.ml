@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 module BaseComplex = struct
   include Complex
@@ -197,3 +198,4 @@ let print out t = BatInnerIO.nwrite out (to_string t)
 (*$T print
   BatIO.to_string print {re=3.4; im= -5.6} = "3.4 + i -5.6"
 *)
+#endif

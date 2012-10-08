@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 type ('a, 'b) directive = ((unit BatInnerIO.output -> unit) -> 'b) -> 'a
 type pattern = string
@@ -107,3 +108,4 @@ let sprintf fmt =
 let ksprintf k fmt =
   let oc = BatBuffer.output_buffer (Buffer.create 42) in
   kfprintf (fun oc -> k (BatInnerIO.close_out oc)) oc fmt
+#endif

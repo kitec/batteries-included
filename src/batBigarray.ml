@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 module A = struct include BatArray include BatArray.Labels end
@@ -475,3 +476,4 @@ module A = struct include BatArray include BatArray.Labels end
   iterijk (fun i j k elt -> assert_equal (value_index i j k) elt) a2;
   iterijk (fun _ _ _ elt -> assert_equal 0 elt) a3
 *)
+#endif

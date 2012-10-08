@@ -17,10 +17,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
-#include "src/config_incl.ml"
  * See http://www.itu.dk/~sestoft/mosmllib/Substring.html for documentation
  *
  *)
+#include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 type t = string * int * int (* string, offset, length *)
 
@@ -269,3 +270,4 @@ let split_on_comma str = split_on_char ',' str;;
 let split_on_slash str = split_on_char '/' str;;
 
 let print oc ss = iter (fun c -> BatIO.write oc c) ss
+#endif

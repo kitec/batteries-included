@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 module BaseNativeint = struct
@@ -80,3 +81,4 @@ let min_num, max_num = min_int, max_int
 
 let print out t = BatPrintf.fprintf out "%nx" t
 let t_printer _paren out t = print out t
+#endif

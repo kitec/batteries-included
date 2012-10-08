@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Tools for reading the documentation from the toplevel
 
@@ -57,3 +58,4 @@ val man           : string -> unit
 (** [man "something"] opens the help about subject ["something"].
 *)
 
+#endif

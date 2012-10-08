@@ -38,6 +38,8 @@
 
 (* You can contact the authour by sending email to *)
 (* yori@users.sourceforge.net *)
+#include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 module UChar : sig
   type t
@@ -669,3 +671,4 @@ module Text : sig
     (** Prints a rope to the given out_channel *)
 
 end
+#endif

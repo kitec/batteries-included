@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Functions for the option type.
 
@@ -155,3 +156,4 @@ module Infix : sig
   (** Like {!default}, with the arguments reversed.
       [None |? 10] returns [10], while [Some "foo" |? "bar"] returns ["foo"]. *)
 end
+#endif

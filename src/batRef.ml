@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 type 'a t = 'a ref
@@ -111,3 +112,4 @@ let oget_exn r = match !r with None -> raise Not_found | Some x -> x
 
 let ord o x y = o !x !y
 let eq e x y = e !x !y
+#endif

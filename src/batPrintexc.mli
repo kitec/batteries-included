@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 (** Facilities for printing exceptions.
@@ -89,3 +90,4 @@ val register_printer: (exn -> string option) -> unit
 
 val print : _ BatInnerIO.output -> exn -> unit
 (** Print an exception.  The stdlib [print] function is now named [!pass].*)
+#endif

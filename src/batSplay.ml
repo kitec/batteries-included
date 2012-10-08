@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 module List = struct include List include BatList end
 module Enum = BatEnum
@@ -563,3 +564,4 @@ struct
       | None -> raise Not_found
       | Some v -> v, Map tr
 end
+#endif

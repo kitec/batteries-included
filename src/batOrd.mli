@@ -1,4 +1,5 @@
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 type order = Lt | Eq | Gt
 (** An algebraic datatype for ordering.
@@ -142,3 +143,4 @@ module Incubator : sig
     -> x land 0xf)] and use cmp_bot4 as the desired integer
     comparator. *)
 end
+#endif

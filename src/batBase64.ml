@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 exception Invalid_char
 exception Invalid_table
@@ -147,3 +148,4 @@ let str_decode ?(tbl=inv_chars) s =
   try ignore (str_decode ~tbl:(Array.make 2000 1) "mlk"); false \
     with Invalid_table -> true
 *)
+#endif

@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 
@@ -264,3 +265,4 @@ module StreamLabels : sig
   val merge : f:(bool -> 'a -> bool) -> 'a t * 'a t -> 'a t
   val switch : f:('a -> bool) -> 'a t -> 'a t * 'a t
 end
+#endif

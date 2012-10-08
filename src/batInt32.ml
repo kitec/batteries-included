@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 open BatNumber
@@ -125,3 +126,4 @@ let min_num, max_num = min_int, max_int
 let print out t = BatInnerIO.nwrite out (to_string t)
 let xprint out t = BatPrintf.fprintf out "%lx" t
 let t_printer _paren out t = print out t
+#endif

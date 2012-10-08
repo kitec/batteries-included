@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 let (|>) x f = f x
 let tap f x = f x; x
@@ -92,3 +93,4 @@ let lru_cache ~gen ~cap =
   s = 12 && !runs = 5
 
  *)
+#endif

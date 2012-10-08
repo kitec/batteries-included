@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 exception Global_not_initialized of string
@@ -47,3 +48,4 @@ let isdef (r, _) =
 
 let get (r,_) = !r
 (*BISECT-IGNORE-END*)
+#endif

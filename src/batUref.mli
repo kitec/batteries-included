@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Unifiable references using destructive union-find *)
 
@@ -59,3 +60,4 @@ val uref_printer : 'a BatValuePrinter.t -> 'a uref BatValuePrinter.t
 
 val t_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
   (** See {!BatValuePrinter}. *)
+#endif

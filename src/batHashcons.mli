@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** Hash consing of data structures *)
 
@@ -90,3 +91,5 @@ module H : sig
     (** [hc1 ho k] corresponds to the hashcode of the [k]th
         constructor applied to the hashed object [ho]. *)
 end
+
+#endif

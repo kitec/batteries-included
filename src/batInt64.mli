@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 (** 64-bit integers.
@@ -256,3 +257,4 @@ val print: 'a BatInnerIO.output -> t -> unit
 val xprint: 'a BatInnerIO.output -> t -> unit
 (** prints as hex string *)
 val t_printer : t BatValuePrinter.t
+#endif

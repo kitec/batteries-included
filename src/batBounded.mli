@@ -6,6 +6,8 @@
 
     @since 2.0
 *)
+#include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 type 'a bound_t = [ `o of 'a | `c of 'a | `u]
 (** [`o]pen or [`c]losed or [`u]nbounded bounds *)
@@ -121,4 +123,4 @@ module Make : functor (M : BoundedType) ->
     with type t = private M.t
 (** Functor to build an implementation of a bounded type given the bounded
     values definition [M] *)
-
+#endif

@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 type 'a node_t = {
@@ -378,3 +379,4 @@ let filter f node = (*TODO : make faster*)
 
 let filter_map f node = (*TODO : make faster*)
   of_enum (BatEnum.filter_map f (enum node))
+#endif

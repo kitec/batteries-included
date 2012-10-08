@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 include Marshal
@@ -42,3 +43,4 @@ let to_channel out v flags =
   BatInnerIO.nwrite out (to_string v flags)
 
 let from_channel = input
+#endif

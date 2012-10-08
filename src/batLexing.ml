@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 
 open BatIO
@@ -27,3 +28,4 @@ let from_input inp =
   from_function (fun s n -> try input inp s 0 n with No_more_input -> 0)
 
 let from_channel = from_input
+#endif

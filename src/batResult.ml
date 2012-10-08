@@ -1,4 +1,5 @@
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 type ('a, 'b) t = ('a, 'b) BatPervasives.result =
  | Ok  of 'a
@@ -50,3 +51,4 @@ end
 module Infix = struct
   let (>>=) = Monad.bind
 end
+#endif

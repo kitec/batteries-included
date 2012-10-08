@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 type 'a t = bool -> unit BatInnerIO.output -> 'a -> unit
 
@@ -160,3 +161,4 @@ let print_tuple10 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 _ out (x1, x2, x3, x4, x5, x6, 
   BatInnerIO.nwrite out ", ";
   p10 false out x10;
   BatInnerIO.write out ')'
+#endif

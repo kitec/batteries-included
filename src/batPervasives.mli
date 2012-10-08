@@ -21,6 +21,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
+#if not BATTERIES_JS
 
 (** {6 Additional functions.}
 
@@ -989,3 +990,4 @@ val lock: BatConcurrent.lock ref
    {!BatMutex}. If you're attempting to use Batteries with another
    concurrency model, set the lock appropriately.
 *)
+#endif
