@@ -19,8 +19,13 @@ ifeq ($(uname_S),Darwin)
   BATTERIES_NATIVE ?= yes
   BATTERIES_NATIVE_SHLIB ?= no
 else
+ifeq ($(uname_S),Js)
+  BATTERIES_NATIVE ?= no
+  BATTERIES_NATIVE_SHLIB ?= no
+else
   BATTERIES_NATIVE ?= yes
   BATTERIES_NATIVE_SHLIB ?= $(BATTERIES_NATIVE)
+endif
 endif
 
 # Directory where to find qtest

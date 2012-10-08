@@ -13,7 +13,9 @@ let packs = "bigarray,num,str"
 let doc_intro = "build/intro.text"
 let mkconf = "build/mkconf.byte"
 let pa_llist = "src/syntax/pa_llist/pa_llist.cmo"
+let pa_optcomp = "build/optcomp/pa_optcomp.cmo"
 let compiler_libs = if Sys.ocaml_version.[0] = '4' then [A"-I"; A"+compiler-libs"] else []
+let dirs = [A"-I"; A"."]
 (* removes the trailing newlines in the stdout of s *)
 let run_and_read s =
   let res = run_and_read s in
@@ -93,6 +95,7 @@ let _ = dispatch begin function
 
   | After_rules ->
 
+    dep ["pa_optcomp"] ["src/config_incl.ml"];
     for n = 1 to 30 do
       List.iter (fun symbol ->
         flag ["ocaml"; "compile"; Printf.sprintf "warn_%s%d" symbol n]
@@ -164,12 +167,21 @@ let _ = dispatch begin function
 
       ocaml_lib ~extern:true ~dir:bisect_dir "bisect";
 
+      (* Optcomp *)
+      flag ["ocaml"; "compile"; "pa_optcomp"] &
+	S[A"-ppopt"; P pa_optcomp];
+      flag ["ocaml"; "ocamldep"; "pa_optcomp"] &
+	S([A"-ppopt"; P pa_optcomp] @ dirs);
+      flag ["ocaml"; "doc"; "pa_optcomp"] &
+	S([A"-ppopt"; P pa_optcomp] @ dirs);
+      dep ["ocaml"; "ocamldep"; "pa_optcomp"] [pa_optcomp];
+
       ocaml_lib "src/batteries";
       ocaml_lib "src/batteriesThread";
 
-      flag ["ocaml"; "compile"; "compiler-libs"] & S compiler_libs;
-      flag ["ocaml"; "link"; "compiler-libs"] & S compiler_libs;
-      flag ["ocaml"; "ocamldep"; "compiler-libs"] & S compiler_libs;
+      flag ["ocaml"; "compile"; "compiler-libs"] & S (compiler_libs @ dirs);
+      flag ["ocaml"; "link"; "compiler-libs"] & S (compiler_libs @ dirs);
+      flag ["ocaml"; "ocamldep"; "compiler-libs"] & S (compiler_libs @ dirs);
 
 
       flag ["ocaml"; "link"; "linkall"] & S[A"-linkall"];
