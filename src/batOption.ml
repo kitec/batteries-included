@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 exception No_value
 
@@ -159,6 +158,7 @@ let of_enum = BatEnum.get
    let e = BatList.enum [1; 2; 3] in of_enum e = Some 1 && BatList.of_enum e = [2; 3]
 *)
 
+#if not BATTERIES_JS
 let print print_a out = function
   | None   -> BatInnerIO.nwrite out "None"
   | Some x -> BatPrintf.fprintf out "Some %a" print_a x
@@ -177,6 +177,7 @@ let t_printer a_printer paren out = function
 let maybe_printer a_printer paren out = function
   | None -> ()
   | Some x -> a_printer paren out x
+#endif
 
 module Monad =
 struct
@@ -200,4 +201,3 @@ struct
 end
 
 include Infix
-#endif

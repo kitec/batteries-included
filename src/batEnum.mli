@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 (**
     Enumeration over abstract collection of elements.
 
@@ -556,9 +555,11 @@ val merge : ('a -> 'a -> bool) -> 'a t -> 'a t -> 'a t
       the result.
   *)
 
+#if not BATTERIES_JS
 val uniq : 'a t -> 'a t
   (** [uniq e] returns a duplicate of [e] with repeated values
       omitted. (similar to unix's [uniq] command) *)
+#endif
 
 val switch : ('a -> bool) -> 'a t -> 'a t * 'a t
   (** [switch test enum] splits [enum] into two enums, where the first enum have
@@ -715,12 +716,14 @@ module Monad : sig
 end
 
 
+#if not BATTERIES_JS
 (** {6 Boilerplate code}*)
 
 val print :  ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b t -> unit
 (** Print and consume the contents of an enumeration.*)
 
 val t_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
+#endif
 
 val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
   (** [compare cmp a b] compares enumerations [a] and [b]
@@ -823,4 +826,3 @@ val slazy : (unit -> 'a t) -> 'a t
 
 
 (**/**)
-#endif

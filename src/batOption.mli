@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Functions for the option type.
 
@@ -136,6 +135,7 @@ end
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 (** {7 Printing}*)
 
 val print : ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b t -> unit
@@ -143,6 +143,7 @@ val print : ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b t
 val t_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
 
 val maybe_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
+#endif
 
 (** Operations on options, with labels.*)
 module Labels : sig
@@ -156,4 +157,3 @@ module Infix : sig
   (** Like {!default}, with the arguments reversed.
       [None |? 10] returns [10], while [Some "foo" |? "bar"] returns ["foo"]. *)
 end
-#endif

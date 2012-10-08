@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 module type Mappable = sig
   type 'a mappable
@@ -36,4 +35,3 @@ module type Monad = sig
   val bind : 'a m -> ('a -> 'b m) -> 'b m
   val return: 'a -> 'a m
 end
-#endif

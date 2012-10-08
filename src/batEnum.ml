@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** {6 Representation} *)
 
@@ -776,6 +775,7 @@ let while_do cont f e =
 
 let break test e = span (fun x -> not (test x)) e
 
+#if not BATTERIES_JS
 let uniq e =
   match peek e with
       None -> empty ()
@@ -785,6 +785,7 @@ let uniq e =
 	let result = filter not_last e in
 	push result first;
 	result
+#endif
 
 let dup t      = (t, t.clone())
 
@@ -1053,6 +1054,7 @@ let hard_count t =
       try while true do ignore (t.next()); incr length done; assert false
       with No_more_elements -> !length
 
+#if not BATTERIES_JS
 let print ?(first="") ?(last="") ?(sep=" ") print_a  out e =
   BatInnerIO.nwrite out first;
   match get e with
@@ -1070,6 +1072,7 @@ let print ?(first="") ?(last="") ?(sep=" ") print_a  out e =
 
 let t_printer a_printer _paren out e =
   print ~first:"[" ~sep:"; " ~last:"]" (a_printer false) out e
+#endif
 
 let compare cmp t u =
   let rec aux () =
@@ -1236,4 +1239,3 @@ module Incubator = struct
   end
 
 end
-#endif

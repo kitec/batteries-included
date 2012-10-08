@@ -1,5 +1,4 @@
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 type order = Lt | Eq | Gt
 
@@ -164,4 +163,3 @@ module Incubator = struct
   let comp_by proj = fun x y -> Pervasives.compare (proj x) (proj y)
   let ord_by proj = fun x y -> ord0 (Pervasives.compare (proj x) (proj y))
 end
-#endif

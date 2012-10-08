@@ -1,6 +1,5 @@
 (* open this to extend all Foo with BatFoo *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 module Legacy = struct
   include Pervasives
@@ -49,6 +48,7 @@ module Legacy = struct
   module Bigarray = Bigarray
 end
 
+#if not BATTERIES_JS
 (* stdlib modules *)
 (* Arg *)
 module Array = struct include Array include BatArray end
@@ -103,13 +103,17 @@ module BitSet = BatBitSet
 module Bit_set = BatBitSet
 module Dllist = BatDllist
 module DynArray = BatDynArray
+#endif
 module Enum = BatEnum
+#if not BATTERIES_JS
 module File = BatFile
 module Global = BatGlobal
 module IO = BatIO
 module LazyList = BatLazyList
 module MultiPMap = BatMultiPMap
+#endif
 module Option = BatOption
+#if not BATTERIES_JS
 (* REMOVED, Extlib only module OptParse = BatOptParse *)
 module RefList = BatRefList
 module Ref = BatRef
@@ -145,7 +149,9 @@ module Text = BatText
 module Concurrent = BatConcurrent
 
 (* Batteries Specific *)
+#endif
 module Interfaces = BatInterfaces
+#if not BATTERIES_JS
 module Number = BatNumber
 module Float = BatFloat
 module Int = BatInt
@@ -159,8 +165,10 @@ module Incubator = struct
   module Substring = BatSubstring
   module Bounded = BatBounded
 end
+#endif
 
 (* Pervasives last *)
 include Pervasives
+#if not BATTERIES_JS
 include BatPervasives
 #endif
