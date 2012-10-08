@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Tuples.
 
@@ -107,6 +106,7 @@ module Tuple2 : sig
   (** @raise Failure if enum does not contain at least 2
       elements. *)
 
+#if not BATTERIES_JS
   val print : ?first:string -> ?sep:string -> ?last:string
     -> ('o BatIO.output -> 'a -> unit) -> ('o BatIO.output -> 'b -> unit)
     -> 'o BatIO.output -> ('a * 'b) -> unit
@@ -114,6 +114,7 @@ module Tuple2 : sig
   val printn : ?first:string -> ?sep:string -> ?last:string
     -> ('o BatIO.output -> 'a -> unit)
     -> 'o BatIO.output -> ('a * 'a) -> unit
+#endif
 
   val compare : ?cmp1:('a -> 'a -> int) -> ?cmp2:('b -> 'b -> int) -> ('a * 'b) -> ('a * 'b) -> int
 
@@ -165,6 +166,7 @@ module Tuple3 : sig
     (** @raise Failure if enum does not contain at least 3
         elements. *)
 
+#if not BATTERIES_JS
   val print : ?first:string -> ?sep:string -> ?last:string
     -> ('o BatIO.output -> 'a -> unit) -> ('o BatIO.output -> 'b -> unit) -> ('o BatIO.output -> 'c -> unit)
     -> 'o BatIO.output -> ('a * 'b * 'c) -> unit
@@ -172,6 +174,7 @@ module Tuple3 : sig
   val printn : ?first:string -> ?sep:string -> ?last:string
     -> ('o BatIO.output -> 'a -> unit)
     -> 'o BatIO.output -> ('a * 'a * 'a) -> unit
+#endif
 
   val compare : ?cmp1:('a -> 'a -> int) -> ?cmp2:('b -> 'b -> int) -> ?cmp3:('c -> 'c -> int) -> ('a * 'b * 'c) -> ('a * 'b * 'c) -> int
 
@@ -235,6 +238,7 @@ module Tuple4 : sig
     (** @raise Failure if enum does not contain at least 4
         elements. *)
 
+#if not BATTERIES_JS
   val print : ?first:string -> ?sep:string -> ?last:string
     -> ('o BatIO.output -> 'a -> unit) -> ('o BatIO.output -> 'b -> unit) -> ('o BatIO.output -> 'c -> unit) -> ('o BatIO.output -> 'd -> unit)
     -> 'o BatIO.output -> ('a * 'b * 'c * 'd) -> unit
@@ -242,6 +246,7 @@ module Tuple4 : sig
   val printn : ?first:string -> ?sep:string -> ?last:string
     -> ('o BatIO.output -> 'a -> unit)
     -> 'o BatIO.output -> ('a * 'a * 'a * 'a) -> unit
+#endif
 
   val compare : ?cmp1:('a -> 'a -> int) -> ?cmp2:('b -> 'b -> int) -> ?cmp3:('c -> 'c -> int) -> ?cmp4:('d -> 'd -> int) -> ('a * 'b * 'c * 'd) -> ('a * 'b * 'c * 'd) -> int
 
@@ -324,6 +329,7 @@ module Tuple5 : sig
     (** @raise Failure if enum does not contain at least 5
         elements. *)
 
+#if not BATTERIES_JS
   val print : ?first:string -> ?sep:string -> ?last:string
     -> ('o BatIO.output -> 'a -> unit) -> ('o BatIO.output -> 'b -> unit) -> ('o BatIO.output -> 'c -> unit) -> ('o BatIO.output -> 'd -> unit) -> ('o BatIO.output -> 'e -> unit)
     -> 'o BatIO.output -> ('a * 'b * 'c * 'd * 'e) -> unit
@@ -331,6 +337,7 @@ module Tuple5 : sig
   val printn : ?first:string -> ?sep:string -> ?last:string
     -> ('o BatIO.output -> 'a -> unit)
     -> 'o BatIO.output -> ('a * 'a * 'a * 'a * 'a) -> unit
+#endif
 
   val compare : ?cmp1:('a -> 'a -> int) -> ?cmp2:('b -> 'b -> int) -> ?cmp3:('c -> 'c -> int) -> ?cmp4:('d -> 'd -> int) -> ?cmp5:('e -> 'e -> int) -> ('a * 'b * 'c * 'd * 'e) -> ('a * 'b * 'c * 'd * 'e) -> int
 
@@ -350,4 +357,3 @@ module Tuple5 : sig
   module Comp (T1 : Comp) (T2 : Comp) (T3 : Comp) (T4 : Comp) (T5 : Comp)
     : Comp with type t = T1.t * T2.t * T3.t * T4.t * T5.t
 end
-#endif

@@ -152,11 +152,13 @@ module Result = BatResult
 module Return = BatReturn
 #if not BATTERIES_JS
 module Seq = BatSeq
+#endif
 module Tuple = BatTuple
 module Tuple2 = BatTuple.Tuple2
 module Tuple3 = BatTuple.Tuple3
 module Tuple4 = BatTuple.Tuple4
 module Tuple5 = BatTuple.Tuple5
+#if not BATTERIES_JS
 module ValuePrinter = BatValuePrinter
 module Vect = BatVect
 module ISet = BatISet
