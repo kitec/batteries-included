@@ -3,12 +3,15 @@
 
 module Legacy = struct
   include Pervasives
+#if not BATTERIES_JS
   module Arg = Arg
   module Array = Array
   module ArrayLabels = ArrayLabels
   module Buffer = Buffer
   module Callback = Callback
+#endif
   module Char = Char
+#if not BATTERIES_JS
   module Complex = Complex
   module Digest = Digest
   module Filename = Filename
@@ -20,9 +23,11 @@ module Legacy = struct
   module Int64 = Int64
   module Lazy = Lazy
   module Lexing = Lexing
+#endif
   module List = List
   module ListLabels = ListLabels
   module Map = Map
+#if not BATTERIES_JS
   module Marshal = Marshal
   module MoreLabels = MoreLabels
   module Nativeint = Nativeint
@@ -38,14 +43,19 @@ module Legacy = struct
   module Stack = Stack
   module StdLabels = StdLabels
   module Stream = Stream
+#endif
   module String = String
   module StringLabels = StringLabels
+#if not BATTERIES_JS
   module Sys = Sys
   module Weak = Weak
+#endif
+#if not BATTERIES_JS
   module Unix = Unix
   module Num = Num
   module Big_int = Big_int
   module Bigarray = Bigarray
+#endif
 end
 
 #if not BATTERIES_JS
@@ -55,7 +65,9 @@ module Array = struct include Array include BatArray end
 (* ArrayLabels *)
 module Buffer = BatBuffer
 (* Callback *)
+#endif
 module Char = BatChar
+#if not BATTERIES_JS
 module Complex = BatComplex
 module Digest = BatDigest
 (* Filename *)
@@ -67,9 +79,11 @@ module Int32 = BatInt32
 module Int64 = BatInt64
 (* Lazy *)
 module Lexing = BatLexing
+#endif
 module List = BatList
 (* ListLabels *)
 module Map = BatMap
+#if not BATTERIES_JS
 module Marshal = BatMarshal
 (* MoreLabels *)
 module Nativeint = BatNativeint
@@ -84,7 +98,9 @@ module Set = BatSet
 (* Sort - Deprecated *)
 module Stack = BatStack
 module Stream = struct include Stream include BatStream end
+#endif
 module String = struct include String include BatString end
+#if not BATTERIES_JS
 (* StringLabels *)
 module Sys = BatSys
 (* Weak *)
@@ -132,7 +148,9 @@ module ParserCo = BatParserCo
 module PathGen = BatPathGen
 module Print = BatPrint
 module Result = BatResult
+#endif
 module Return = BatReturn
+#if not BATTERIES_JS
 module Seq = BatSeq
 module Tuple = BatTuple
 module Tuple2 = BatTuple.Tuple2

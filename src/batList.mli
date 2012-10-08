@@ -21,7 +21,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Additional and modified functions for lists.
 
@@ -580,6 +579,7 @@ val transpose : 'a list list -> 'a list list
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 (** {7 Printing}*)
 
 val print : ?first:string -> ?last:string -> ?sep:string -> ('a
@@ -587,6 +587,7 @@ BatInnerIO.output -> 'b -> unit) ->  'a BatInnerIO.output -> 'b list -> unit
 (**Print the contents of a list*)
 
 val t_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
+#endif
 
 open BatOrd
 val eq : 'a eq -> 'a list eq
@@ -755,4 +756,3 @@ end
 
 val ( @ ) : 'a list -> 'a list -> 'a list
 (** Tail recursive [List.append]. *)
-#endif

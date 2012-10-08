@@ -20,7 +20,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 open String
 
@@ -409,6 +408,7 @@ let to_float s = float_of_string s
    try ignore (to_float ""); false with Failure _ -> true
 *)
 
+#if not BATTERIES_JS
 let enum s =
   let l = length s in
   let rec make i =
@@ -478,6 +478,7 @@ let of_backwards e =
    "foo" |> enum |> of_backwards = "oof"
    "foo" |> backwards |> of_backwards = "foo"
 *)
+#endif
 
 let map f s =
   let len = length s in
@@ -735,6 +736,7 @@ struct
   let compare = icompare
 end
 
+#if not BATTERIES_JS
 let numeric_compare s1 s2 =
   let e1 = BatEnum.group BatChar.is_digit (enum s1) in
   let e2 = BatEnum.group BatChar.is_digit (enum s2) in
@@ -783,6 +785,7 @@ let t_printer _paren out x =
   BatInnerIO.write out '"'
 
 let unquoted_printer _paren out x = print out x
+#endif
 
 (*$T
   BatIO.to_string print "\n" = "\n"
@@ -804,7 +807,9 @@ let quote s = Printf.sprintf "%S" s
    quote "\n" = "\"\\n\""
 *)
 
+#if not BATTERIES_JS
 let print_quoted out s = BatInnerIO.nwrite out (quote s)
+#endif
 
 module Exceptionless =
 struct
@@ -872,10 +877,12 @@ type 'a t = string
 let make          = make
 let is_empty      = is_empty
 let init          = init
+#if not BATTERIES_JS
 let enum          = enum
 let of_enum       = of_enum
 let backwards     = backwards
 let of_backwards  = of_backwards
+#endif
 
 let of_int        = of_int
 let of_float      = of_float
@@ -939,10 +946,12 @@ let of_list       = of_list
 let to_list       = to_list
 
 let quote         = quote
+#if not BATTERIES_JS
 let print         = print
 let println       = println
 let print_quoted  = print_quoted
 let t_printer     = t_printer
+#endif
 
 external of_string : string -> _ t                = "%identity"
 external to_string : [`Read | `Write] t -> string = "%identity"
@@ -977,4 +986,3 @@ struct
 end (* String.Cap.Exceptionless *)
 
 end (* String.Cap *)
-#endif

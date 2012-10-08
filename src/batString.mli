@@ -21,7 +21,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 
 
@@ -62,6 +61,7 @@ val init : int -> (int -> char) -> string
       Example: [String.init 256 char_of_int]
 *)
 
+#if not BATTERIES_JS
 (** {6 Conversions}*)
 val enum : string -> char BatEnum.t
   (** Returns an enumeration of the characters of a string.
@@ -94,6 +94,7 @@ val of_backwards : char BatEnum.t -> string
       [ "foo" |> String.backwards |> String.of_backwards = "foo" ]
       [ let rev s = String.enum s |> String.of_backwards ]
 *)
+#endif
 
 
 val of_list : char list -> string
@@ -519,6 +520,7 @@ module IString : BatInterfaces.OrderedType with type t = t
 *)
 
 
+#if not BATTERIES_JS
 val numeric_compare: t -> t -> int
 (** Compare two strings, sorting "abc32def" before "abc210abc".
 
@@ -566,6 +568,7 @@ val print_quoted: 'a BatInnerIO.output -> string -> unit
 val t_printer : t BatValuePrinter.t
 
 val unquoted_printer : t BatValuePrinter.t
+#endif
 
 (** Exceptionless counterparts for error-raising operations *)
 module Exceptionless :
@@ -688,6 +691,7 @@ val make : int -> char -> _ t
 val init : int -> (int -> char) -> _ t
 
 (** {6 Conversions}*)
+#if not BATTERIES_JS
 val enum : [> `Read] t -> char BatEnum.t
 
 val of_enum : char BatEnum.t -> _ t
@@ -695,6 +699,7 @@ val of_enum : char BatEnum.t -> _ t
 val backwards : [> `Read] t -> char BatEnum.t
 
 val of_backwards : char BatEnum.t -> _ t
+#endif
 
 val of_list : char list -> _ t
 
@@ -828,6 +833,7 @@ val compare: [> `Read] t -> [> `Read] t -> int
 val icompare: [> `Read] t -> [> `Read] t -> int
 
 
+#if not BATTERIES_JS
 (** {7 Printing}*)
 
 val print: 'a BatInnerIO.output -> [> `Read] t -> unit
@@ -837,6 +843,7 @@ val println: 'a BatInnerIO.output -> [> `Read] t -> unit
 val print_quoted: 'a BatInnerIO.output -> [> `Read] t -> unit
 
 val t_printer : [> `Read] t BatValuePrinter.t
+#endif
 
 (**/**)
 
@@ -882,4 +889,3 @@ sig
 end (* String.Cap.Exceptionless *)
 
 end
-#endif

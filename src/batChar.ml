@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (*BISECT-IGNORE-BEGIN*)
 include Char
@@ -96,6 +95,7 @@ module Infix = struct
   let (--) = (--)
 end
 
+#if not BATTERIES_JS
 let print out t = BatInnerIO.write out t
 let t_printer _paren out t =
   BatInnerIO.write out '\'';
@@ -110,6 +110,7 @@ let t_printer _paren out t =
   BatIO.string_of_t_printer t_printer '\000' = "'\\000'"
   BatIO.string_of_t_printer t_printer 'a' = "'a'"
 *)
+#endif
 
 (*BISECT-IGNORE-BEGIN*)
 let ord (x:char) y =
@@ -129,4 +130,3 @@ module Incubator = struct
   module Ord = BatOrd.Ord(Comp)
   module Eq = BatOrd.EqComp(Comp)
 end
-#endif

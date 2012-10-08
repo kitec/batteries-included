@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Association tables over ordered types.
 
@@ -276,12 +275,14 @@ sig
 
     (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
     (** {7 Printing}*)
 
     val print :  ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
       ('a BatInnerIO.output -> key -> unit) ->
       ('a BatInnerIO.output -> 'c -> unit) ->
       'a BatInnerIO.output -> 'c t -> unit
+#endif
 
     (** Output signature of the functor {!Map.Make}. *)
 
@@ -338,8 +339,10 @@ sig
 module IStringMap : S with type key = String.t
 (** A map on strings. Comparison of strings ignores case (i.e. "foo" = "Foo")*)
 
+#if not BATTERIES_JS
 module NumStringMap : S with type key = String.t
 (** A map on strings. Strings are handled as prefix + number (i.e. "abc23" < "abc123", "abc012" = "abc12")*)
+#endif
 
 (*
 
@@ -599,12 +602,14 @@ val bindings : ('key, 'a) t -> ('key * 'a) list
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 (** {7 Printing}*)
 
 val print :  ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
   ('a BatInnerIO.output -> 'b -> unit) ->
   ('a BatInnerIO.output -> 'c -> unit) ->
   'a BatInnerIO.output -> ('b, 'c) t -> unit
+#endif
 
 
 
@@ -876,12 +881,13 @@ module PMap : sig
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 (** {7 Printing}*)
 
   val print :  ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
     ('a BatInnerIO.output -> 'b -> unit) ->
     ('a BatInnerIO.output -> 'c -> unit) ->
     'a BatInnerIO.output -> ('b, 'c) t -> unit
+#endif
 
 end
-#endif
