@@ -1,3 +1,4 @@
+#include "src/config_incl.ml"
 module Base64 = BatBase64
 module BitSet = BatBitSet
 module Dllist = BatDllist

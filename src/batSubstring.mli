@@ -1,4 +1,5 @@
 (*TODO: What is this module? Is it meant for public use?*)
+#include "src/config_incl.ml"
 
 type t
 (**

@@ -15,6 +15,7 @@
 (*  GNU Library General Public License for more details.               *)
 (*                                                                     *)
 (***********************************************************************)
+#include "src/config_incl.ml"
 
 
 (* weak stack, for ordering purpose *)

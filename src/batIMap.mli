@@ -3,6 +3,7 @@
 (* Modified by Edgar Friendly <thelema314@gmail.com> *)
 
 (** DIET Maps from integers, packed using ranges *)
+#include "src/config_incl.ml"
 
 (* Note: Lost covariance with use of record for keeping eq *)
 type 'a t (*= (int * int * 'a) BatAvlTree.tree*)

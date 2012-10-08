@@ -1,4 +1,5 @@
 (* open this to extend all Foo with BatFoo *)
+#include "src/config_incl.ml"
 
 module Legacy = struct
   include Pervasives

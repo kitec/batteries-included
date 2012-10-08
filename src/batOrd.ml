@@ -1,3 +1,5 @@
+#include "src/config_incl.ml"
+
 type order = Lt | Eq | Gt
 
 type 'a comp = 'a -> 'a -> int

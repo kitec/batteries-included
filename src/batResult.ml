@@ -1,3 +1,4 @@
+#include "src/config_incl.ml"
 
 type ('a, 'b) t = ('a, 'b) BatPervasives.result =
  | Ok  of 'a

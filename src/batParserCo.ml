@@ -1,3 +1,5 @@
+#include "src/config_incl.ml"
+
 open BatList
 open BatString
 open List

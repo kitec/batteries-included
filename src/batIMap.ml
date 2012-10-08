@@ -1,5 +1,6 @@
 (* Copyright 2003 Yamagata Yoriyuki. distributed with LGPL *)
 (* Modified by Edgar Friendly <thelema314@gmail.com> *)
+#include "src/config_incl.ml"
 
 module Core = struct
 

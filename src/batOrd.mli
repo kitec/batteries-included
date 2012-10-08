@@ -1,3 +1,4 @@
+#include "src/config_incl.ml"
 
 type order = Lt | Eq | Gt
 (** An algebraic datatype for ordering.

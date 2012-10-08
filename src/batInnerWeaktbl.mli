@@ -19,6 +19,7 @@
 (** Weak hash table library for OCaml, with an interface compatible with
     the standard Hashtbl module.
 *)
+#include "src/config_incl.ml"
 
 
 (** {6 Generic interface} *)

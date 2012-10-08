@@ -1,3 +1,5 @@
+#include "src/config_incl.ml"
+
 module Mutex = BatMutex
 module RMutex = BatRMutex
 

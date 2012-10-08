@@ -17,6 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc.
  *)
+#include "src/config_incl.ml"
 
 (**
    Operations on [unit].

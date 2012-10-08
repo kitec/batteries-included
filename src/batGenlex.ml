@@ -1,3 +1,4 @@
+#include "src/config_incl.ml"
 open BatPervasives
 open BatParserCo
 open BatCharParser

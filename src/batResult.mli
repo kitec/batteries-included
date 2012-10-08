@@ -1,4 +1,5 @@
 (**  Monadic results of computations that can raise exceptions *)
+#include "src/config_incl.ml"
 
 (** The type of a result.  A result is either [Ok x] carrying the
     normal return value [x] or is [Bad e] carrying some indication of an
