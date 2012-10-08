@@ -18,11 +18,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
+#if not BATTERIES_JS
 open BatIO
+#endif
 open ListLabels
+#if not BATTERIES_JS
 open Unix
+#endif
 
 (* Moved from batPervasives to break dep cycle *)
 let finally handler f x =
@@ -80,6 +83,7 @@ type open_out_flag =
   | `nonblock (**Open in non-blocking mode                                  *) ]
 
 
+#if not BATTERIES_JS
 (**
    Convert a [open_in_flag list] into a low-level [open_flag list]
 *)

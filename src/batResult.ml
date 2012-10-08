@@ -1,5 +1,4 @@
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 type ('a, 'b) t = ('a, 'b) BatPervasives.result =
  | Ok  of 'a
@@ -33,9 +32,11 @@ let is_exn e = function Bad exn -> exn = e | Ok _ -> false
 
 let get = function Ok x -> x | Bad e -> raise e
 
+#if not BATTERIES_JS
 let print print_val oc = function
   | Ok x -> BatPrintf.fprintf oc "Ok(%a)" print_val x
   | Bad e -> BatPrintf.fprintf oc "Bad(%a)" BatPrintexc.print e
+#endif
 
 
 module Monad = struct
@@ -51,4 +52,3 @@ end
 module Infix = struct
   let (>>=) = Monad.bind
 end
-#endif

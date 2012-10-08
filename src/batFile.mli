@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (**
    File manipulation.
@@ -27,10 +26,13 @@
 *)
 
 
+#if not BATTERIES_JS
 open BatInnerIO
+#endif
 
 (** {6 Utilities} *)
 
+#if not BATTERIES_JS
 val lines_of : string -> string BatEnum.t
 (** [line_of name] reads the contents of file [name] as an enumeration of lines.
     The file is automatically closed once the last line has been reached or the
@@ -47,6 +49,7 @@ val size_of_big: string -> Int64.t
 
     This function is provided as the size of a file larger than 1 Gb cannot
     be represented with an [int] on a 32-bit machine.*)
+#endif
 
 (** {6 File permissions}
 
@@ -106,11 +109,13 @@ val unix_perm : int -> permission
    for more details.
    @raise Invalid_argument if given number outside the [[0, 0o777]] range *)
 
+#if not BATTERIES_JS
 val set_permissions: string -> permission -> unit
 (** Set the permissions on a file.*)
 
 val chmod: string -> permission -> unit
 (** As {!set_permissions}*)
+#endif
 
 (** {6 Opening a file for reading} *)
 
@@ -123,6 +128,7 @@ type open_in_flag =
   | `nonblock (**Open in non-blocking mode                                  *)
   | `mmap     (**Open in memory-mapped mode (experimental)*)                 ]
 
+#if not BATTERIES_JS
 val open_in : ?mode:(open_in_flag list) -> ?perm:permission -> string -> input
 (** [open_in file_name] opens the file named [file_name] for reading.
 
@@ -136,6 +142,7 @@ val with_file_in : ?mode:(open_in_flag list) -> ?perm:permission -> string -> (i
 (** [with_file_in file_name f] opens the file named [file_name] for reading,
     invokes [f] to process the contents of that file then, once [f] has returned
     or triggered an exception, closes the file before proceeding. *)
+#endif
 
 (** {6 Opening a file for writing} *)
 
@@ -153,6 +160,7 @@ type open_out_flag =
         [[`create; `trunc]]. *)
 
 
+#if not BATTERIES_JS
 val open_out : ?mode:(open_out_flag list) -> ?perm:permission -> string -> unit output
   (** [open_out file_name] opens the file named [file_name] for writing.
 
@@ -204,8 +212,8 @@ val with_temporary_out: ?mode:(open_temporary_out_flag list) -> ?prefix:string -
     @return The name of the file and the [output] for writing in it.
 
     Naming conventions for files are platform-dependent.*)
+#endif
 
 (**/**)
 val finally : (unit -> unit) -> ('a -> 'b) -> 'a -> 'b
 (**/**)
-#endif

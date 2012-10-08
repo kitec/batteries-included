@@ -1,6 +1,5 @@
 (**  Monadic results of computations that can raise exceptions *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** The type of a result.  A result is either [Ok x] carrying the
     normal return value [x] or is [Bad e] carrying some indication of an
@@ -98,6 +97,7 @@ module Infix : sig
   val ( >>= ): ('a, 'b) t -> ('a -> ('c, 'b) t) -> ('c, 'b) t
 end
 
+#if not BATTERIES_JS
 (** Print a result as Ok(x) or Bad(exn) *)
 val print : ('b BatInnerIO.output -> 'a -> unit) -> 'b BatInnerIO.output -> ('a, exn) t -> unit
 #endif

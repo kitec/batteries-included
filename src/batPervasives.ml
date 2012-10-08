@@ -21,12 +21,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 
 open Pervasives
 open BatEnum
 
+#if not BATTERIES_JS
 let input_lines ch =
   BatEnum.from (fun () ->
     try input_line ch with End_of_file -> raise BatEnum.No_more_elements)
@@ -93,11 +93,13 @@ let print_bool = function
 let prerr_bool = function
   | true -> prerr_string "true"
   | false -> prerr_string "false"
+#endif
 
 let string_of_char c = String.make 1 c
 
 external identity : 'a -> 'a = "%identity"
 
+#if not BATTERIES_JS
 let rec dump r =
   if Obj.is_int r then
     string_of_int (Obj.magic r : int)
@@ -177,6 +179,7 @@ let rec dump r =
 let dump v = dump (Obj.repr v)
 
 let print_any oc v = BatIO.nwrite oc (dump v)
+#endif
 
 let finally = BatFile.finally
 
@@ -187,11 +190,13 @@ let forever f x = ignore (while true do f x done)
 
 let ignore_exceptions f x = try ignore (f x) with _ -> ()
 
+#if not BATTERIES_JS
 (* unique int generation from batPervasives *)
 let unique_value  = ref 0
 let lock          = ref BatConcurrent.nolock
 let unique ()     =
   BatConcurrent.sync !lock BatRef.post_incr unique_value
+#endif
 
 (*$Q unique
    Q.unit (fun () -> unique () <> unique ())
@@ -236,6 +241,7 @@ let const x _ = x
 
 let tap f x = f x; x
 
+#if not BATTERIES_JS
 let invisible_args = ref 1
 (* the number or arguments to ignore at the beginning of Sys.argv,
 usually because program-name is put in argv.(0) *)
@@ -303,6 +309,7 @@ let input_value       = BatMarshal.input
 
 let print_all inp     = BatIO.copy inp BatIO.stdout
 let prerr_all inp     = BatIO.copy inp BatIO.stderr
+#endif
 
 include BatList.Infix
 
@@ -321,7 +328,9 @@ let map               = map
 let filter            = filter
 let filter_map        = filter_map
 let concat            = concat
+#if not BATTERIES_JS
 let print             = print
+#endif
 let get               = get
 let iter              = iter
 let scanl             = scanl
@@ -342,6 +351,7 @@ let ( |? ) = BatOption.Infix.( |? )
 let lowercase = String.lowercase
 let uppercase = String.uppercase
 
+#if not BATTERIES_JS
 (** {6 Directives} *)
 
 type printer_flags = {

@@ -121,8 +121,8 @@ module Dllist = BatDllist
 module DynArray = BatDynArray
 #endif
 module Enum = BatEnum
-#if not BATTERIES_JS
 module File = BatFile
+#if not BATTERIES_JS
 module Global = BatGlobal
 module IO = BatIO
 module LazyList = BatLazyList
@@ -147,8 +147,8 @@ module MultiMap = BatMultiMap
 module ParserCo = BatParserCo
 module PathGen = BatPathGen
 module Print = BatPrint
-module Result = BatResult
 #endif
+module Result = BatResult
 module Return = BatReturn
 #if not BATTERIES_JS
 module Seq = BatSeq
@@ -189,6 +189,4 @@ end
 
 (* Pervasives last *)
 include Pervasives
-#if not BATTERIES_JS
 include BatPervasives
-#endif
