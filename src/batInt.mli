@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 
 (**
@@ -194,6 +193,7 @@ module Compare : BatNumber.Compare with type bat__compare_t = t
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 (** {7 Printing}*)
 
 val print: 'a BatInnerIO.output -> int -> unit
@@ -203,6 +203,7 @@ val xprint: 'a BatInnerIO.output -> int -> unit
     (*    val bprint: 'a BatInnerIO.output -> t -> unit
     (** prints as binary string *) *)
 val t_printer : t BatValuePrinter.t
+#endif
 
 (** {7 Compare} *)
 
@@ -365,7 +366,9 @@ module Safe_int : sig
 
   (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
   val print: 'a BatInnerIO.output -> t -> unit
+#endif
 
   val compare: t -> t -> int
   (** The comparison function for integers, with the same specification as
@@ -375,4 +378,3 @@ module Safe_int : sig
   val equal : t -> t -> bool
   val ord : t -> t -> BatOrd.order
 end
-#endif

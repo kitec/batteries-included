@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 
 open BatNumber
@@ -122,9 +121,11 @@ module BaseInt = struct
 
   let ( ** ) a b = pow a b
 
+#if not BATTERIES_JS
   let print out t = BatInnerIO.nwrite out (string_of_int t)
   let xprint out t = BatPrintf.fprintf out "%X" t
   let t_printer _paren out t = print out t
+#endif
 
   let ( -- )  x y = BatEnum.seq x (add one) ((>=) y)
   let ( --- ) x y =
@@ -309,4 +310,3 @@ module SafeInt = struct
   module Numeric = struct include Numeric(BaseSafeInt) end
 end
 *)
-#endif

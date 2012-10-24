@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 
 type 'a t = 'a array
@@ -482,6 +481,7 @@ let compare cmp a b =
    compare (fun x y -> -(Pervasives.compare x y)) [|2;1|] [|1;2|] = -1
 *)
 
+#if not BATTERIES_JS
 let print ?(first="[|") ?(last="|]") ?(sep="; ") print_a  out t =
   match length t with
     | 0 ->
@@ -509,6 +509,7 @@ let t_printer a_printer (_paren: bool) out x = print (a_printer false) out x
   BatIO.string_of_t_printer (t_printer BatInt.t_printer) \
     [|-1;-3;0|] = "[|-1; -3; 0|]"
 *)
+#endif
 
 let reduce f a =
   if Array.length a = 0 then
@@ -721,7 +722,9 @@ struct
   let stable_sort  = stable_sort
   let fast_sort    = fast_sort
   let compare      = compare
+#if not BATTERIES_JS
   let print        = print
+#endif
   let ord          = ord
   let eq           = eq
   external unsafe_get : ('a, [> `Read]) t -> int -> 'a = "%array_unsafe_get"
@@ -819,4 +822,3 @@ struct
   end
 end
 (*BISECT-IGNORE-END*)
-#endif

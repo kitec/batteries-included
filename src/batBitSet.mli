@@ -20,7 +20,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Efficient bit sets.
 
@@ -160,11 +159,13 @@ val sym_diff : t -> t -> t
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 val print: 'a BatInnerIO.output -> t -> unit
 (* Print the given BitSet to the given output channel.  This
    function prints a BitSet as a boolean vector, and pads to a multiple
    of 8 bits with zeros.  Thus, the bitset containing only 1 and 3 is
    printed as ["01010000"].  *)
+#endif
 
 val enum : t -> int BatEnum.t
 (** [enum s] returns an enumeration of bits which are set
@@ -199,4 +200,3 @@ val capacity : t -> int
 
 
 *)
-#endif

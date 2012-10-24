@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 
 type 'a t = 'a ref
@@ -76,6 +75,7 @@ let protect r v body =
  *)
 
 
+#if not BATTERIES_JS
 external ref : 'a -> 'a ref = "%makemutable"
 (** Return a fresh reference containing the given value. *)
 
@@ -94,6 +94,7 @@ external get : 'a ref -> 'a = "%field0"
     (** As [ ! ]*)
 
 let print print_a out r = print_a out !r
+#endif
 
 let toggle r = r := not !r
 
@@ -112,4 +113,3 @@ let oget_exn r = match !r with None -> raise Not_found | Some x -> x
 
 let ord o x y = o !x !y
 let eq e x y = e !x !y
-#endif

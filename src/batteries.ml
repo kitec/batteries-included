@@ -5,8 +5,10 @@ module Legacy = struct
   include Pervasives
 #if not BATTERIES_JS
   module Arg = Arg
+#endif
   module Array = Array
   module ArrayLabels = ArrayLabels
+#if not BATTERIES_JS
   module Buffer = Buffer
   module Callback = Callback
 #endif
@@ -58,10 +60,10 @@ module Legacy = struct
 #endif
 end
 
-#if not BATTERIES_JS
 (* stdlib modules *)
 (* Arg *)
 module Array = struct include Array include BatArray end
+#if not BATTERIES_JS
 (* ArrayLabels *)
 module Buffer = BatBuffer
 (* Callback *)
@@ -115,8 +117,10 @@ module Bigarray = BatBigarray
 
 (* Extlib modules not replacing stdlib *)
 module Base64 = BatBase64
+#endif
 module BitSet = BatBitSet
 module Bit_set = BatBitSet
+#if not BATTERIES_JS
 module Dllist = BatDllist
 module DynArray = BatDynArray
 #endif
@@ -132,7 +136,9 @@ module Option = BatOption
 #if not BATTERIES_JS
 (* REMOVED, Extlib only module OptParse = BatOptParse *)
 module RefList = BatRefList
+#endif
 module Ref = BatRef
+#if not BATTERIES_JS
 (*module Std = REMOVED - use BatPervasives *)
 
 (* Batteries specific modules *)
@@ -171,10 +177,12 @@ module Concurrent = BatConcurrent
 (* Batteries Specific *)
 #endif
 module Interfaces = BatInterfaces
-#if not BATTERIES_JS
 module Number = BatNumber
+#if not BATTERIES_JS
 module Float = BatFloat
+#endif
 module Int = BatInt
+#if not BATTERIES_JS
 module Bool = BatBool
 module Unit = BatUnit
 (*module Int63 = BatInt63*)

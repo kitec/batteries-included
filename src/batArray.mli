@@ -20,7 +20,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** {6 Additional and modified functions for arrays}
 
@@ -259,6 +258,7 @@ val insert : 'a array -> 'a -> int -> 'a array
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 val print : ?first:string -> ?last:string -> ?sep:string -> ('a BatIO.output -> 'b -> unit) ->  'a BatIO.output -> 'b t -> unit
 (** Print the contents of an array, with [~first] preceeding the first
     item (default: "[|"), [~last] following the last item (default:
@@ -269,6 +269,7 @@ val print : ?first:string -> ?last:string -> ?sep:string -> ('a BatIO.output -> 
  *)
 
 val t_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
+#endif
 
 val compare : 'a BatOrd.comp -> 'a array BatOrd.comp
 (** [compare c] generates the lexicographical order on arrays induced
@@ -474,7 +475,9 @@ sig
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
   val print : ?first:string -> ?last:string -> ?sep:string -> ('a BatIO.output -> 'b -> unit) ->  'a BatIO.output -> ('b, [>`Read]) t -> unit
+#endif
 
   val compare : 'a BatOrd.comp -> ('a, [> `Read]) t BatOrd.comp
   val ord : 'a BatOrd.ord -> ('a, [> `Read]) t BatOrd.ord
@@ -546,4 +549,3 @@ end
 (* for tests *)
 val is_sorted_by : ('a -> 'b) -> 'a array -> bool
 (**/**)
-#endif

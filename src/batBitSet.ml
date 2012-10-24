@@ -20,10 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA	02111-1307	USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 type t = string ref
 
+#if not BATTERIES_JS
 let print_array = 
   let buf = Buffer.create 8 in
   let print_bchar c = 
@@ -43,6 +43,7 @@ let print out t =
     BatInnerIO.nwrite out 
       (Array.unsafe_get print_array (Char.code (String.unsafe_get !t i)))
   done
+#endif
 
 let capacity t = (String.length !t) * 8
 
@@ -337,4 +338,3 @@ let diff a b =
 
 let sym_diff a b =
   biop_with_copy differentiate_sym a b
-#endif

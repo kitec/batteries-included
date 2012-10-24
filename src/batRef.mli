@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Operations on references.
 
@@ -36,6 +35,7 @@
 type 'a t = 'a ref
     (** The type of references.*)
 
+#if not BATTERIES_JS
 external ref : 'a -> 'a ref = "%makemutable"
     (** Return a fresh reference containing the given value. *)
 
@@ -52,6 +52,7 @@ external set : 'a ref -> 'a -> unit = "%setfield0"
 
 external get : 'a ref -> 'a = "%field0"
     (** As [ ! ]*)
+#endif
 
 val copy: 'a ref -> 'a ref
   (** [copy r] returns a new reference with the same initial
@@ -116,7 +117,9 @@ val oget_exn : 'a option ref -> 'a
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 val print: ('b BatInnerIO.output -> 'a -> unit) -> 'b BatInnerIO.output -> 'a t -> unit
+#endif
 
 (** Given a printing function for the value in the ref, produce a
     printing function for the ref.
@@ -133,4 +136,3 @@ val ord : 'a BatOrd.ord -> 'a ref BatOrd.ord
 *)
 
 val eq : 'a BatOrd.eq -> 'a ref BatOrd.eq
-#endif
