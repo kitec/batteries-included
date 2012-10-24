@@ -100,6 +100,8 @@ external ( - ) : t -> t -> t = "%subfloat"
 external ( * ) : t -> t -> t = "%mulfloat"
 external ( / ) : t -> t -> t = "%divfloat"
 external ( ** ) : t -> t -> t = "caml_power_float" "pow" "float"
+val min : float -> float -> float
+val max : float -> float -> float
 
 (* Available only in `Compare` submodule
 val ( <> ) : t -> t -> bool
@@ -315,40 +317,43 @@ external modf : float -> float * float = "caml_modf_float"
       (** [modf f] returns the pair of the fractional and integral
 	  part of [f]. *)
 
-      (** Classes of floating point numbers*)
-    type fpkind = Pervasives.fpclass =
-	FP_normal           (** Normal number, none of the below *)
-      | FP_subnormal        (** Number very close to 0.0, has reduced precision *)
-      | FP_zero             (** Number is 0.0 or -0.0 *)
-      | FP_infinite         (** Number is positive or negative infinity *)
-      | FP_nan              (** Not a number: result of an undefined operation *)
-	  (** The five classes of floating-point numbers, as determined by
-	      the {!classify} function. *)
+    (** Classes of floating point numbers*)
+type fpkind =
+    Pervasives.fpclass =
+  | FP_normal           (** Normal number, none of the below *)
+  | FP_subnormal        (** Number very close to 0.0, has reduced precision *)
+  | FP_zero             (** Number is 0.0 or -0.0 *)
+  | FP_infinite         (** Number is positive or negative infinity *)
+  | FP_nan              (** Not a number: result of an undefined operation *)
+(** The five classes of floating-point numbers, as determined by
+    the {!classify} function. *)
 
-    external classify : float -> fpkind = "caml_classify_float"
-	(** Return the class of the given floating-point number:
-	    normal, subnormal, zero, infinite, or not a number. *)
+external classify : float -> fpkind = "caml_classify_float"
+(** Return the class of the given floating-point number:
+    normal, subnormal, zero, infinite, or not a number. *)
 
-    val approx_equal : ?epsilon:float -> float -> float -> bool
-    (** Test whether two floats are approximately equal (i.e. within
-	epsilon of each other).  [epsilon] defaults to 1e-5. *)
+val approx_equal : ?epsilon:float -> float -> float -> bool
+(** Test whether two floats are approximately equal (i.e. within
+    epsilon of each other).  [epsilon] defaults to 1e-5. *)
 
-    (** {6 Submodules grouping all infix operators} *)
+(** {6 Submodules grouping all infix operators} *)
 
-    module Infix : sig
-      include BatNumber.Infix with type bat__infix_t = t
-      val (=~) : ?epsilon:float -> float -> float -> bool
-    (** Approximate comparison of two floats, as [approx_equal].
-	[epsilon] defaults to 1e-5. *)
+module Infix : sig
+  include BatNumber.Infix with type bat__infix_t = t
+  val (=~) : ?epsilon:float -> float -> float -> bool
+(** Approximate comparison of two floats, as [approx_equal].
+    [epsilon] defaults to 1e-5. *)
+end
 
-    end
-    module Compare : BatNumber.Compare with type bat__compare_t = t
+module Compare : BatNumber.Compare with type bat__compare_t = t
 
-    (** {6 Boilerplate code}*)
+include (BatNumber.RefOps with type bat__refops_t = t)
 
-    (** {7 Printing}*)
-    val print: 'a BatInnerIO.output -> t -> unit
-    val t_printer : t BatValuePrinter.t
+(** {6 Boilerplate code}*)
+
+(** {7 Printing}*)
+val print: 'a BatInnerIO.output -> t -> unit
+val t_printer : t BatValuePrinter.t
 
 
 
