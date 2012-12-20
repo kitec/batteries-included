@@ -1,5 +1,5 @@
 (*
- * ExtGC - Extended GC operations
+ * BatGC - Extended GC operations
  * Copyright (C) 1996 Damien Doligez
  *               2008 David Teller, LIFO, Universite d'Orleans
  *
@@ -239,7 +239,7 @@ val finalise : ('a -> unit) -> 'a -> unit
    - [ let f = fun x -> ... ;; let v = ... in Gc.finalise f v ]
 
 
-   The [f] function can use all features of O'Caml, including
+   The [f] function can use all features of OCaml, including
    assignments that make the value reachable again.  It can also
    loop forever (in this case, the other
    finalisation functions will not be called during the execution of f,

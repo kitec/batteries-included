@@ -1,5 +1,5 @@
 (*
- * ExtHashtbl - extra functions over hashtables.
+ * BatHashtbl - extra functions over hashtables.
  * Copyright (C) 2003 Nicolas Cannasse
  *               2009 David Teller, LIFO, Universite d'Orleans
  *
@@ -127,9 +127,9 @@ val find_option : ('a,'b) Hashtbl.t -> 'a -> 'b option
 val mem : ('a, 'b) t -> 'a -> bool
 (** [Hashtbl.mem tbl x] checks if [x] is bound in [tbl]. *)
 
-(*val exists : ('a,'b) t -> 'a -> bool*)
+(*val exists : ('a,'b) t -> 'a -> bool
   (** [exists h k] returns true is at least one item with key [k] is
-      found in the hashtable. *)
+      found in the hashtable. *)*)
 
 (**{6 Traversing}
 
@@ -479,9 +479,9 @@ val find_option : ('a, 'b, [>`Read]) t -> 'a -> 'b option
 
 val mem : ('a, 'b, [>`Read]) t -> 'a -> bool
 
-(*val exists : ('a,'b) t -> 'a -> bool*)
+(*val exists : ('a,'b) t -> 'a -> bool
   (** [exists h k] returns true is at least one item with key [k] is
-      found in the hashtable. *)
+      found in the hashtable. *)*)
 
 (**{6 Traversing}*)
 val iter : ('a -> 'b -> unit) -> ('a, 'b, [>`Read]) t -> unit

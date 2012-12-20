@@ -1,5 +1,5 @@
 (*
- * ExtNativeint - Extended native ints
+ * BatNativeint - Extended native ints
  * Copyright (C) 2005 Xavier Leroy
  *               2007 Bluestorm <bluestorm dot dylc on-the-server gmail dot com>
  *               2008 David Teller
@@ -76,7 +76,7 @@ external mul : nativeint -> nativeint -> nativeint = "%nativeint_mul"
 (** Multiplication. *)
 
 external div : nativeint -> nativeint -> nativeint = "%nativeint_div"
-(** Integer division.  Raise [Division_by_zero] if the second
+(** Integer division. @raise Division_by_zero if the second
    argument is zero.  This division rounds the real quotient of
    its arguments towards zero, as specified for {!Pervasives.(/)}. *)
 
@@ -209,12 +209,16 @@ val to_string : nativeint -> string
 
 
 
-val compare: t -> t -> int
+val compare : t -> t -> int
   (** The comparison function for native integers, with the same specification as
       {!Pervasives.compare}.  Along with the type [t], this function [compare]
       allows the module [Nativeint] to be passed as argument to the functors
       {!Set.Make} and {!Map.Make}. *)
 
+val equal : t -> t -> bool
+(** Equality function for 64-bit integers, useful for {!HashedType}. *)
+
+val ord : t -> t -> BatOrd.order
 
 val modulo : nativeint -> nativeint -> nativeint
 val pow : nativeint -> nativeint -> nativeint
@@ -246,8 +250,7 @@ module Compare : BatNumber.Compare with type bat__compare_t = t
 
 (** {7 Printing}*)
 
-val print : 'a BatIO.output -> t -> unit
-val t_printer : t BatValuePrinter.t
+val print : (t,_) BatIO.printer
 
 (**/**)
 

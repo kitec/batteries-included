@@ -1,5 +1,5 @@
 (*
- * ExtSet - Extended operations on sets
+ * BatSet - Extended operations on sets
  * Copyright (C) 1996 Xavier Leroy
  *               2009 David Rajchenbach-Teller, LIFO, Universite d'Orleans
  *
@@ -515,7 +515,7 @@ struct
   end
 end
 
-module PSet = struct
+module PSet = struct (*$< PSet *)
 
   type 'a t = {
     cmp : 'a -> 'a -> int;
@@ -527,6 +527,13 @@ module PSet = struct
 
   let empty    = { cmp = compare; set = Concrete.empty }
   let create cmp  = { cmp = cmp; set = Concrete.empty }
+  let get_cmp {cmp} = cmp
+
+(*$T get_cmp
+  get_cmp (create Int.compare) == Int.compare
+*)
+
+
   let singleton ?(cmp = compare) x = { cmp = cmp; set = Concrete.singleton x }
   let is_empty s = Concrete.is_empty s.set
   let mem x s = Concrete.mem s.cmp x s.set
@@ -573,7 +580,7 @@ module PSet = struct
   let equal s1 s2 = Concrete.equal s1.cmp s1.set s2.set
   let subset s1 s2 = Concrete.subset s1.cmp s1.set s2.set
   let disjoint s1 s2 = Concrete.disjoint s1.cmp s1.set s2.set
-end
+end (*$>*)
 
 type 'a t = 'a Concrete.set
 

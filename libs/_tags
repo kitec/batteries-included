@@ -1,3 +1,0 @@
-true: debug
-<**/*.{ml,mli}>: syntax_camlp4o, pkg_camlp4
-<**/*.{ml,mli}>: pa_optcomp

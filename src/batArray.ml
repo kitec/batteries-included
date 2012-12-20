@@ -1,5 +1,5 @@
 (*
- * ExtArray - additional and modified functions for arrays.
+ * BatArray - additional and modified functions for arrays.
  * Copyright (C) 2005 Richard W.M. Jones (rich @ annexia.org)
  *               2009 David Rajchenbach-Teller, LIFO, Universite d'Orleans
  *
@@ -25,7 +25,7 @@ type 'a t = 'a array
 type 'a enumerable = 'a t
 type 'a mappable = 'a t
 
-open Array
+include Array
 
 let map = map
 
@@ -55,6 +55,18 @@ let fold_lefti f x a =
 (*$T fold_lefti
    fold_lefti (fun a i x -> a + i * x) 1 [|2;4;5|] = 1 + 0 + 4 + 10
    fold_lefti (fun a i x -> a + i * x) 1 [||] = 1
+*)
+
+let fold_righti f a x =
+  let r = ref x in
+  for i = length a - 1 downto 0 do
+    r := f i (unsafe_get a i) !r
+  done;
+  !r
+
+(*$T fold_righti
+   fold_righti (fun i x a -> a + i * x) [|2;4;5|] 1 = 1 + 0 + 4 + 10
+   fold_righti (fun i x a -> a + i * x) [||] 1 = 1
 *)
 
 let rev_in_place xs =
@@ -351,7 +363,7 @@ let filter_map p xs =
   (Q.pair (Q.array Q.small_int) (Q.fun1 Q.small_int (Q.option Q.int))) \
   (fun (a, f) -> \
     let a' = filter (fun elt -> f elt <> None) a in \
-    let a' = map (f |- BatOption.get) a' in \
+    let a' = map (f %> BatOption.get) a' in \
     let a = filter_map f a in \
     a = a' \
   )
@@ -504,11 +516,6 @@ let print ?(first="[|") ?(last="|]") ?(sep="; ") print_a  out t =
     [||] = "[]"
 *)
 
-let t_printer a_printer (_paren: bool) out x = print (a_printer false) out x
-(*$T t_printer
-  BatIO.string_of_t_printer (t_printer BatInt.t_printer) \
-    [|-1;-3;0|] = "[|-1; -3; 0|]"
-*)
 #endif
 
 let reduce f a =

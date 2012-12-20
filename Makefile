@@ -4,6 +4,7 @@
 NAME = batteries
 
 VERSION := $(shell grep "^Version:" _oasis | cut -c 15-)
+OCAML_MAJOR_VERSION := $(firstword $(subst ., , $(shell ocamlfind ocamlc -version)))
 uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 # Define variables and export them for mkconf.ml
@@ -33,18 +34,13 @@ QTESTDIR ?= qtest
 
 INSTALL_FILES = _build/META _build/src/*.cma \
 	battop.ml _build/src/*.cmi _build/src/*.mli \
-	_build/src/batteriesHelp.cmo \
-	_build/src/syntax/pa_comprehension/pa_comprehension.cmo \
-	_build/src/syntax/pa_strings/pa_strings.cma \
-	_build/src/syntax/pa_llist/pa_llist.cmo \
-	_build/libs/*.cmi _build/libs/*.mli \
+	_build/src/batteriesHelp.cmo _build/src/batteriesConfig.cmo _build/src/batteriesPrint.cmo \
 	ocamlinit build/ocaml
 OPT_INSTALL_FILES = _build/src/*.cmx _build/src/*.a _build/src/*.cmxa \
-	_build/src/*.cmxs _build/src/*.lib _build/libs/*.cmx
+	_build/src/*.cmxs _build/src/*.lib
 
 # What to build
-TARGETS = syntax.otarget
-TARGETS += src/batteries.cma
+TARGETS  = src/batteries.cma
 TARGETS += src/batteriesHelp.cmo
 TARGETS += src/batteriesThread.cma
 TARGETS += META
@@ -75,7 +71,7 @@ endif
 
 .PHONY: all clean doc install uninstall reinstall test qtest qtest-clean camfail camfailunk coverage man
 
-all: 
+all: prefilter
 	@echo "Build mode:" $(MODE)
 	$(OCAMLBUILD) $(OCAMLBUILDFLAGS) $(TARGETS)
 
@@ -84,7 +80,7 @@ all-notest:
 	$(OCAMLBUILD) $(OCAMLBUILDFLAGS) $(TARGETS)
 
 clean:
-	@${RM} src/batteriesConfig.ml batteries.odocl bench.log
+	@${RM} src/batteriesConfig.ml src/batUnix.mli batteries.odocl bench.log
 	@${RM} -r man/
 	@$(OCAMLBUILD) -clean
 	@git clean -xfd
@@ -93,7 +89,7 @@ clean:
 batteries.odocl: src/batteries.mllib src/batteriesThread.mllib
 	cat $^ > $@
 
-doc: batteries.odocl
+doc: prefilter batteries.odocl
 	$(OCAMLBUILD) batteries.docdir/index.html
 
 man: all batteries.odocl
@@ -101,16 +97,10 @@ man: all batteries.odocl
 	ocamlfind ocamldoc -package threads.posix -sort -man -hide-warnings -d man -I _build/libs -I _build/src libs/uniclib.mli src/*.mli
 
 install: all uninstall_packages
-	ocamlfind install estring \
-		libs/estring/META \
-		_build/libs/estring/*.cmo \
-		_build/libs/estring/*.cmi \
-		_build/libs/estring/*.mli
 	ocamlfind install $(NAME) $(INSTALL_FILES) \
 		-optional $(OPT_INSTALL_FILES)
 
 uninstall_packages:
-	ocamlfind remove estring
 	ocamlfind remove $(NAME)
 
 uninstall: uninstall_packages
@@ -118,10 +108,6 @@ uninstall: uninstall_packages
 
 install-doc: doc
 	mkdir -p $(DOCROOT)
-	cp -r doc/batteries/* $(DOCROOT)
-	# deal with symlink that will break
-	${RM} $(DOCROOT)/html/batteries_large.png
-	cp -f doc/batteries_large.png $(DOCROOT)/html
 	mkdir -p $(DOCROOT)/html/api
 	cp _build/batteries.docdir/* $(DOCROOT)/html/api
 	cp LICENSE README.md FAQ $(DOCROOT)
@@ -132,6 +118,24 @@ install-man: man
 reinstall:
 	$(MAKE) uninstall
 	$(MAKE) install
+
+###############################################################################
+#	Pre-Processing of Source Code
+###############################################################################
+
+prefilter: src/batUnix.mli src/batPervasives.mli src/batInnerPervasives.ml
+
+# Ocaml 4.00 can benefit strongly from some pre-processing to expose
+# slightly different interfaces
+.SUFFIXES: .mli .mliv .ml .mlv
+
+# Look for lines starting with ##Vx##, and delete just the tag or the
+# whole line depending whether the x matches the ocaml major version
+.mliv.mli:
+	sed -e 's/^##V$(OCAML_MAJOR_VERSION)##//' -e '/^##V.##/d' $< > $@
+
+.mlv.ml:
+	sed -e 's/^##V$(OCAML_MAJOR_VERSION)##//' -e '/^##V.##/d' $< > $@
 
 ###############################################################################
 #	BUILDING AND RUNNING UNIT TESTS
@@ -157,7 +161,7 @@ _build/testsuite/main.native: $(TESTDEPS) $(wildcard testsuite/*.ml)
 
 # extract all qtest unit tests into a single ml file
 $(QTESTDIR)/all_tests.ml: $(TESTABLE)
-	qtest -o $@ --shuffle --preamble-file qtest_preamble.ml extract $(TESTABLE)
+	qtest -o $@ --shuffle --preamble-file qtest/qtest_preamble.ml extract $(TESTABLE)
 
 _build/$(QTESTDIR)/all_tests.byte: $(QTESTDIR)/all_tests.ml
 	$(OCAMLBUILD) $(OCAMLBUILDFLAGS) -cflags -warn-error,+26 -use-ocamlfind -pkg oUnit,QTest2Lib $(QTESTDIR)/all_tests.byte
@@ -174,13 +178,13 @@ qtest-clean:
 	@${RM} $(QTESTDIR)/all_tests.ml
 	@${MAKE} _build/$(QTESTDIR)/all_tests.$(EXT)
 
-qtest: qtest-clean
+qtest: prefilter qtest-clean
 	@_build/$(QTESTDIR)/all_tests.$(EXT)
 
 ### run all unit tests
 ##############################################
 
-test-byte: _build/testsuite/main.byte _build/$(QTESTDIR)/all_tests.byte
+test-byte: prefilter _build/testsuite/main.byte _build/$(QTESTDIR)/all_tests.byte
 	@_build/testsuite/main.byte
 	@echo "" # newline after "OK"
 	@_build/$(QTESTDIR)/all_tests.byte

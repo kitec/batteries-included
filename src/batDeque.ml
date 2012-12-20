@@ -47,7 +47,7 @@ let cons x q =
 
 (*$Q cons
   (Q.list Q.pos_int) ~count:10 \
-    (fun l -> List.fold_left (flip cons) empty l |> to_list = List.rev l)
+    (fun l -> List.fold_left (fun q x -> cons x q) empty l |> to_list = List.rev l)
 *)
 
 let snoc q x =
@@ -255,7 +255,4 @@ let print ?(first="[") ?(last="]") ?(sep="; ") elepr out dq =
     BatIO.to_string (print ~first:"<" ~last:">" ~sep:"," Int.print) (of_list l) \
     = BatIO.to_string (List.print ~first:"<" ~last:">" ~sep:"," Int.print) l)
 *)
-
-let t_printer elepr _paren out x = print (elepr false) out x
-let dq_printer = t_printer
 #endif

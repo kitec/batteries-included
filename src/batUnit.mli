@@ -1,5 +1,5 @@
 (*
- * ExtUnit - Operations on Unit
+ * BatUnit - Operations on Unit
  * Copyright (C) 2008 David Teller, LIFO, Universite d'Orleans
  *
  * This library is free software; you can redistribute it and/or
@@ -45,6 +45,12 @@ val compare : t -> t -> int
 (** Compare two units.
 
     Always returns 0.*)
+
+val ord : t -> t -> BatOrd.order
+(** Always returns [BatOrd.Eq] *)
+
+val equal : t -> t -> bool
+(** Always returns true. *)
 
 (** {6 Boilerplate code}*)
 

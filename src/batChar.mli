@@ -1,5 +1,5 @@
 (*
- * ExtChar - Additional character operations
+ * BatChar - Additional character operations
  * Copyright (C) 1996 Xavier Leroy
  *               2008 David Teller
  *
@@ -35,13 +35,13 @@ external code : char -> int = "%identity"
 
 val chr : int -> char
 (** Return the character with the given ASCII code.
-   Raise [Invalid_argument "Char.chr"] if the argument is
+   @raise Invalid_argument if the argument is
    outside the range 0--255. *)
 
 val escaped : char -> string
 (** Return a string representing the given character,
    with special characters escaped following the lexical conventions
-   of Objective Caml. *)
+   of OCaml. *)
 
 val lowercase : char -> char
 (** Convert the given character to its equivalent lowercase character. *)
@@ -105,7 +105,7 @@ val is_newline : char -> bool
 
 val of_digit : int -> char
 (** Return the character representing a given digit.
-    Raise [Invalid_argument] if the
+    @raise Invalid_argument if the
     argument is outside the range 0--9*)
 
 val enum: unit -> char BatEnum.t
@@ -132,7 +132,6 @@ end
 
 #if not BATTERIES_JS
 val print: 'a BatInnerIO.output -> Char.t -> unit
-val t_printer : char BatValuePrinter.t
 #endif
 
 val compare: t -> t -> int

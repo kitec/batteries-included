@@ -1,5 +1,5 @@
 (*
- * ExtInt64 - Extended 64-bit integers
+ * BatInt64 - Extended 64-bit integers
  * Copyright (C) 2005 Damien Doligez
  *               2007 Bluestorm <bluestorm dot dylc on-the-server gmail dot com>
  *               2008 David Teller
@@ -74,15 +74,16 @@ external mul : int64 -> int64 -> int64 = "%int64_mul"
 (** Multiplication. *)
 
 external div : int64 -> int64 -> int64 = "%int64_div"
-(** Integer division.  Raise [Division_by_zero] if the second
-    argument is zero.  This division rounds the real quotient of
-    its arguments towards zero, as specified for {!Pervasives.(/)}. *)
+(** Integer division.
+    This division rounds the real quotient of
+    its arguments towards zero, as specified for {!Pervasives.(/)}.
+    @raise Division_by_zero if the second argument is zero. *)
 
 external rem : int64 -> int64 -> int64 = "%int64_mod"
 (** Integer remainder.  If [y] is not zero, the result
     of [Int64.rem x y] satisfies the following property:
     [x = Int64.add (Int64.mul (Int64.div x y) y) (Int64.rem x y)].
-    If [y = 0], [Int64.rem x y] raises [Division_by_zero]. *)
+    @raise Division_by_zero if the second argument is zero. *)
 
 val succ : int64 -> int64
 (** Successor.  [Int64.succ x] is [Int64.add x Int64.one]. *)
@@ -207,11 +208,16 @@ external float_of_bits : int64 -> float = "caml_int64_float_of_bits"
 
 
 
-val compare: t -> t -> int
+val compare : t -> t -> int
 (** The comparison function for 64-bit integers, with the same specification as
     {!Pervasives.compare}.  Along with the type [t], this function [compare]
     allows the module [Int64] to be passed as argument to the functors
     {!Set.Make} and {!Map.Make}. *)
+
+val equal : t -> t -> bool
+(** Equality function for 64-bit integers, useful for {!HashedType}. *)
+
+val ord : t -> t -> BatOrd.order
 
 (** {6 Submodules grouping all infix operators} *)
 
@@ -254,7 +260,7 @@ val operations : t BatNumber.numeric
 (** {7 Printing}*)
 val print: 'a BatInnerIO.output -> t -> unit
 (** prints as decimal string *)
-val xprint: 'a BatInnerIO.output -> t -> unit
+
+val print_hex: 'a BatInnerIO.output -> t -> unit
 (** prints as hex string *)
-val t_printer : t BatValuePrinter.t
 #endif

@@ -23,7 +23,7 @@
 #if not BATTERIES_JS
 
 
-open Stream
+include Stream
 
 type 'a enumerable = 'a t
 type 'a mappable = 'a t

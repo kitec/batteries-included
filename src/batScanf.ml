@@ -1,5 +1,5 @@
 (*
- * ExtScanf - Extended Scanf module
+ * BatScanf - Extended Scanf module
  * Copyright (C) 2009 David Rajchenbach-Teller, LIFO, Universite d'Orleans
  *
  * This library is free software; you can redistribute it and/or
@@ -40,8 +40,6 @@ type ('a, 'b, 'c, 'd) scanner =
   ('a, Scanning.scanbuf, 'b, 'c, 'a -> 'd, 'd) format6 -> 'c
 
 
-exception Scan_failure of string
-
 open Scanf
 let fscanf = fscanf
 let sscanf = sscanf
@@ -51,4 +49,5 @@ let bscanf = bscanf
 let bscanf_format = bscanf_format
 let sscanf_format = sscanf_format
 let format_from_string = format_from_string
+exception Scan_failure = Scan_failure
 #endif

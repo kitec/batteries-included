@@ -1,5 +1,5 @@
 (*
- * ExtFloat - Extended floats
+ * BatFloat - Extended floats
  * Copyright (C) 2007 Bluestorm <bluestorm dot dylc on-the-server gmail dot com>
  *               2009 David Rajchenbach-Teller, LIFO, Universite d'Orleans
  *
@@ -25,7 +25,7 @@
 
 (**Operations on floating-point numbers.
 
-   Caml's floating-point numbers follow the IEEE 754 standard, using
+   OCaml's floating-point numbers follow the IEEE 754 standard, using
    double precision (64 bits) numbers. Floating-point operations never
    raise an exception on overflow, underflow, division by zero,
    etc. Instead, special IEEE numbers are returned as appropriate,
@@ -209,7 +209,7 @@ val round_to_string : ?digits:int -> float -> string
 
 (** [root x n] calculates the nth root of x.
 
-    @raises Invalid_argument if n is negative or if the result would
+    @raise Invalid_argument if n is negative or if the result would
     be imaginary *)
 val root: float -> int -> float
 
@@ -352,10 +352,7 @@ include (BatNumber.RefOps with type bat__refops_t = t)
 (** {6 Boilerplate code}*)
 
 (** {7 Printing}*)
-val print: 'a BatInnerIO.output -> t -> unit
-val t_printer : t BatValuePrinter.t
-
-
+val print: (t, _) BatIO.printer
 
 (**Operations on floating-point numbers, with exceptions raised in
    case of error.
@@ -366,7 +363,7 @@ val t_printer : t BatValuePrinter.t
    [infinity] or [neg_infinity], operations raise exception {!Number.Overflow}.
    In case of [nan], operations raise exception {!Number.NaN}.
 
-   Caml's floating-point numbers follow the IEEE 754 standard, using
+   OCaml's floating-point numbers follow the IEEE 754 standard, using
    double precision (64 bits) numbers. Floating-point operations never
    raise an exception on overflow, underflow, division by zero,
    etc. Instead, special IEEE numbers are returned as appropriate,
@@ -560,6 +557,5 @@ module Safe_float :
 
     (** {7 Printing}*)
     val print: 'a BatInnerIO.output -> t -> unit
-    val t_printer : t BatValuePrinter.t
 end
 #endif

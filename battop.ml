@@ -31,9 +31,6 @@
    This file is loaded by the magic line in the ocamlinit file.
 *)
 
-(* Set the below to false to disable use of syntax extensions in toplevel *)
-let ext_syntax = true;;
-
 
 (* END CONFIGURATION *)
 
@@ -47,12 +44,16 @@ let ext_syntax = true;;
 if !Sys.interactive then (*Only initialize help and display welcome if we're in interactive mode.*)
 begin
   BatteriesHelp.init ();
-  print_endline "      _________________________";
-  print_endline "    [| +   | |   Batteries   - |";
-  print_endline "     |_____|_|_________________|";
-  print_endline "      _________________________";
-  print_endline "     | -  Type '#help;;' | | + |]";
-  print_endline "     |___________________|_|___|";
+  let ver = BatteriesConfig.version in
+  let vlen = String.length ver in
+  let pad = String.make vlen '_' in
+  let pad2 = String.make vlen ' ' in
+  print_endline ("      ___________________"^ pad  ^"_______");
+  print_endline ("    [| +   | |   Batteries " ^ ver ^ "  - |");
+  print_endline ("     |_____|_|___________"^ pad  ^"______|");
+  print_endline ("      ___________________"^ pad  ^"_______");
+  print_endline ("     | -  Type '#help;;' "^ pad2 ^"| | + |]");
+  print_endline ("     |___________________"^ pad  ^"|_|___|");
   print_newline ();
   print_newline ();
   flush_all ()
@@ -78,15 +79,3 @@ open Batteries;;
 #install_printer BatteriesPrint.string_enum;;
 #install_printer BatteriesPrint.rope_enum;;
 #install_printer BatteriesPrint.char_enum;;
-
-
-if ext_syntax then begin
-  if !Sys.interactive then
-    print_endline "Loading syntax extensions...";
-  Topfind.standard_syntax();
-  Topfind.load_deeply ["dynlink"; "camlp4"; "batteries.pa_string.syntax";
-   		       "batteries.pa_comprehension.syntax"];
-end else
-  if !Sys.interactive then
-    print_endline "Batteries Syntax extensions disabled.";
-;;

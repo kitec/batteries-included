@@ -114,6 +114,8 @@ type ('a, 'b) printer = 'b output -> 'a -> unit
 (** The type of a printing function to print a ['a] to an output that
     produces ['b] as result. *)
 
+type 'a f_printer = Format.formatter -> 'a -> unit
+
 exception No_more_input
 (** This exception is raised when reading on an input with the [read] or
     [nread] functions while there is no available token to read. *)
@@ -183,8 +185,8 @@ val nread : input -> int -> string
 
 val really_nread : input -> int -> string
 (** [really_nread i n] reads a string of exactly [n] characters
-  from the input. Raises [No_more_input] if at least [n] characters are
-  not available. Raises [Invalid_argument] if [n] < 0.
+  from the input. @raise No_more_input if at least [n] characters are
+  not available. @raise Invalid_argument if [n] < 0.
 
     Example: [let read_md5 ch = really_nread ch 32]
 *)
@@ -209,8 +211,8 @@ val really_input : input -> string -> int -> int -> int
   (** [really_input i s p l] reads exactly [l] characters from the
       given input, storing them in the string [s], starting at
       position [p]. For consistency with {!BatIO.input} it returns
-      [l]. Raises [No_more_input] if at [l] characters are not
-      available. Raises [Invalid_argument] if [p] and [l] do not
+      [l]. @raise No_more_input if at [l] characters are not
+      available. @raise Invalid_argument if [p] and [l] do not
       designate a valid substring of [s].
 
       Example: [let _ = really_input stdin b 0 3]
@@ -248,7 +250,7 @@ val output : 'a output -> string -> int -> int -> int
 val really_output : 'a output -> string -> int -> int -> int
 (** [really_output o s p l] writes exactly [l] characters from string [s] onto
   the the output, starting with the character at offset [p]. For consistency with
-  {!BatIO.output} it returns [l]. Raises [Invalid_argument] if [p] and [l] do not
+  {!BatIO.output} it returns [l]. @raise Invalid_argument if [p] and [l] do not
   designate a valid substring of [s].
 
     This function is useful for networking situations where the output
@@ -336,7 +338,7 @@ val tab_out : ?tab:char -> int -> 'a output -> unit output
 
       [tab_out n out] produces a new output for writing into [out], in
       which every new line starts with [n] spaces.
-      Raises [Invalid_argument] if [n] < 0.
+      @raise Invalid_argument if [n] < 0.
 
       Closing [tab_out n out] does not close [out]. Rather,
       closing [out] closes [tab_out n out].
@@ -409,8 +411,8 @@ val read_i16 : input -> int
 (** Read a signed 16-bit word. *)
 
 val read_i32 : input -> int
-  (** Read a signed 32-bit integer. Raise [Overflow] if the
-      read integer cannot be represented as a Caml 31-bit integer. *)
+  (** Read a signed 32-bit integer. @raise Overflow if the
+      read integer cannot be represented as an OCaml 31-bit integer. *)
 
 val read_real_i32 : input -> int32
 (** Read a signed 32-bit integer as an OCaml int32. *)
@@ -491,8 +493,8 @@ sig
 	  (** Read a signed 16-bit word. *)
 
 	val read_i32 : input -> int
-	  (** Read a signed 32-bit integer. Raise [Overflow] if the
-	      read integer cannot be represented as a Caml 31-bit integer. *)
+	  (** Read a signed 32-bit integer. @raise Overflow if the
+	      read integer cannot be represented as an OCaml 31-bit integer. *)
 
 	val read_real_i32 : input -> int32
 	  (** Read a signed 32-bit integer as an OCaml int32. *)
@@ -537,7 +539,7 @@ sig
 	val i32s_of : input -> int BatEnum.t
 	(** Read an enumeration of signed 32-bit integers.
 
-	    @raise Overflow if the read integer cannot be represented as a Caml
+	    @raise Overflow if the read integer cannot be represented as an OCaml
 	    31-bit integer. *)
 
 	val real_i32s_of : input -> int32 BatEnum.t
@@ -818,8 +820,8 @@ val i16s_of : input -> int BatEnum.t
 (** Read an enumartion of signed 16-bit words. *)
 
 val i32s_of : input -> int BatEnum.t
-(** Read an enumeration of signed 32-bit integers. Raise [Overflow] if the
-  read integer cannot be represented as a Caml 31-bit integer. *)
+(** Read an enumeration of signed 32-bit integers. @raise Overflow if the
+  read integer cannot be represented as an OCaml 31-bit integer. *)
 
 val real_i32s_of : input -> int32 BatEnum.t
 (** Read an enumeration of signed 32-bit integers as OCaml [int32]s. *)
@@ -912,12 +914,9 @@ val lock_factory: (unit -> BatConcurrent.lock) ref
      if you're using a version of Batteries compiled in threaded mode,
      this uses {!BatMutex}.  *)
 
-val to_string : (string output -> 'a -> unit) -> 'a -> string
+val to_string : ('a, string) printer -> 'a -> string
 
-val string_of_t_printer : (bool -> unit BatInnerIO.output -> 'a -> unit) -> 'a -> string
-(** [string_of_t_printer printer elt] prints the element into the output string *)
-
-val to_format: ('a BatInnerIO.output -> 'b -> unit) -> Format.formatter -> 'b -> unit
+val to_f_printer: ('a, _) printer -> 'a f_printer
 
 (**/**)
 val comb : ('a output * 'a output) -> 'a output
@@ -943,14 +942,14 @@ module Incubator : sig
       ?sep:string ->
       ?indent:int ->
       (Format.formatter -> 'a -> 'b) -> Format.formatter -> 'a array -> unit
-    (** Print the contents of an array, with [first] preceeding the first item 
+    (** Print the contents of an array, with [first] preceeding the first item
         (default: ["\[|"]), [last] following the last item (default: ["|\]"])
         and [sep] separating items (default: ["; "]). A printing function must
         be provided to print the items in the array. The [flush] parameter
         (default: [false]) should be set to [true] for the outer-most printing
         call.  Setting inner calls to [true] - for example, for nested values -
         prevent indentation from working properly.
-        
+
         Example:
           [pp ~flush:true Format.pp_print_int Format.std_formatter \[|1; 2; 3|\]]
     *)
@@ -964,14 +963,14 @@ module Incubator : sig
       ?sep:string ->
       ?indent:int ->
       (Format.formatter -> 'a -> 'b) -> Format.formatter -> 'a BatEnum.t -> unit
-    (** Print the contents of an enum, with [first] preceeding the first item 
+    (** Print the contents of an enum, with [first] preceeding the first item
         (default: [""]), [last] following the last item (default: [""])
         and [sep] separating items (default: [" "]). A printing function must
         be provided to print the items in the enum. The [flush] parameter
         (default: [false]) should be set to [true] for the outer-most printing
         call.  Setting inner calls to [true] - for example, for nested values -
         prevent indentation from working properly.
-        
+
         Example:
           [pp ~flush:true Format.pp_print_int Format.std_formatter (1 -- 3)] *)
   end
@@ -984,18 +983,17 @@ module Incubator : sig
       ?sep:string ->
       ?indent:int ->
       (Format.formatter -> 'a -> 'b) -> Format.formatter -> 'a list -> unit
-    (** Print the contents of a list, with [first] preceeding the first item 
+    (** Print the contents of a list, with [first] preceeding the first item
         (default: ["\["]), [last] following the last item (default: ["\]"])
         and [sep] separating items (default: ["; "]). A printing function must
         be provided to print the items in the list. The [flush] parameter
         (default: [false]) should be set to [true] for the outer-most printing
         call.  Setting inner calls to [true] - for example, for nested values -
         prevent indentation from working properly.
-        
+
         Example:
           [pp ~flush:true Format.pp_print_int Format.std_formatter \[1; 2; 3\]]
     *)
   end
 end
-
 #endif

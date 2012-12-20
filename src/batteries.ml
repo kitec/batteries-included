@@ -57,12 +57,13 @@ module Legacy = struct
   module Num = Num
   module Big_int = Big_int
   module Bigarray = Bigarray
+  module Str = Str
 #endif
 end
 
 (* stdlib modules *)
 (* Arg *)
-module Array = struct include Array include BatArray end
+module Array = BatArray
 #if not BATTERIES_JS
 (* ArrayLabels *)
 module Buffer = BatBuffer
@@ -99,19 +100,20 @@ module Scanf = BatScanf
 module Set = BatSet
 (* Sort - Deprecated *)
 module Stack = BatStack
-module Stream = struct include Stream include BatStream end
+module Stream = BatStream
 #endif
-module String = struct include String include BatString end
+module String = BatString
 #if not BATTERIES_JS
 (* StringLabels *)
 module Sys = BatSys
 (* Weak *)
 
-module Unix = struct include Unix include BatUnix end
+module Unix = BatUnix
 
 (*module Str = struct include Str include BatStr end*)
 
-module Big_int = struct include Big_int include BatBig_int end
+module Big_int = BatBig_int
+module Num = BatNum
 
 module Bigarray = BatBigarray
 
@@ -151,8 +153,6 @@ module FingerTree = BatFingerTree
 module Logger = BatLogger
 module MultiMap = BatMultiMap
 module ParserCo = BatParserCo
-module PathGen = BatPathGen
-module Print = BatPrint
 #endif
 module Result = BatResult
 module Return = BatReturn
@@ -171,6 +171,8 @@ module ISet = BatISet
 module IMap = BatIMap
 module Splay = BatSplay
 module Uref = BatUref
+module UChar = BatUChar
+module UTF8 = BatUTF8
 module Text = BatText
 module Concurrent = BatConcurrent
 
@@ -192,6 +194,7 @@ module Incubator = struct
   module Log = BatLog
   module Substring = BatSubstring
   module Bounded = BatBounded
+  module PathGen = BatPathGen
 end
 #endif
 

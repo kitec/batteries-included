@@ -1,5 +1,5 @@
 (*
- * ExtMap - Additional map operations
+ * BatMap - Additional map operations
  * Copyright (C) 1996 Xavier Leroy
  *               2009 David Rajchenbach-Teller, LIFO, Universite d'Orleans
  *
@@ -853,7 +853,7 @@ module PMap : sig
 
 
 
-(** Infix operators over a {!BatPMap} *)
+(** Infix operators over a {!PMap} *)
   module Infix : sig
     val (-->) : ('a, 'b) t -> 'a -> 'b
   (** [map-->key] returns the current binding of [key] in [map],
@@ -889,5 +889,8 @@ module PMap : sig
     ('a BatInnerIO.output -> 'c -> unit) ->
     'a BatInnerIO.output -> ('b, 'c) t -> unit
 #endif
+
+  (** get the comparison function used for a polymorphic map *)
+  val get_cmp : ('a, 'b) t -> ('a -> 'a -> int)
 
 end

@@ -1,5 +1,5 @@
 (*
- * ExtString - Additional functions for string manipulations.
+ * BatString - Additional functions for string manipulations.
  * Copyright (C) 2003 Nicolas Cannasse
  *               2008 David Teller
  *               2008 Edgar Friendly
@@ -21,7 +21,7 @@
  *)
 #include "src/config_incl.ml"
 
-open String
+include String
 
 let compare = String.compare
 (*$T compare
@@ -408,7 +408,6 @@ let to_float s = float_of_string s
    try ignore (to_float ""); false with Failure _ -> true
 *)
 
-#if not BATTERIES_JS
 let enum s =
   let l = length s in
   let rec make i =
@@ -478,7 +477,6 @@ let of_backwards e =
    "foo" |> enum |> of_backwards = "oof"
    "foo" |> backwards |> of_backwards = "foo"
 *)
-#endif
 
 let map f s =
   let len = length s in
@@ -490,7 +488,7 @@ let map f s =
 (*$T map
    map Char.uppercase "Five" = "FIVE"
    map Char.uppercase "" = ""
-   map (String.of_char |- failwith) "" = ""
+   map (String.of_char %> failwith) "" = ""
 *)
 
 let filter_map f s =
@@ -779,20 +777,11 @@ end
 let print = BatInnerIO.nwrite
 let println out s = BatInnerIO.nwrite out s; BatInnerIO.write out '\n'
 
-let t_printer _paren out x =
-  BatInnerIO.write out '"';
-  print out (escaped x);
-  BatInnerIO.write out '"'
-
-let unquoted_printer _paren out x = print out x
 #endif
-
 (*$T
   BatIO.to_string print "\n" = "\n"
   BatIO.to_string println "\n" = "\n\n"
   BatIO.to_string print_quoted "\n" = "\"\\n\""
-  BatIO.string_of_t_printer t_printer "\n" = "\"\\n\""
-  BatIO.string_of_t_printer unquoted_printer "\n" = "\n"
   quote "\n" = "\"\\n\""
 *)
 
@@ -950,7 +939,6 @@ let quote         = quote
 let print         = print
 let println       = println
 let print_quoted  = print_quoted
-let t_printer     = t_printer
 #endif
 
 external of_string : string -> _ t                = "%identity"

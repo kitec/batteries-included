@@ -1,5 +1,5 @@
 (*
- * ExtInt64 - Extended 64-bit integers
+ * BatInt64 - Extended 64-bit integers
  * Copyright (C) 2007 Bluestorm <bluestorm dot dylc on-the-server gmail dot com>
  *               2008 David Teller
  *
@@ -62,6 +62,5 @@ external format : string -> int64 -> string = "caml_int64_format"
 
 
 let print out t = BatInnerIO.nwrite out (to_string t)
-let xprint out t = BatPrintf.fprintf out "%Lx" t
-let t_printer _paren out t = print out t
+let print_hex out t = BatPrintf.fprintf out "%Lx" t
 #endif

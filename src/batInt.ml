@@ -1,5 +1,5 @@
 (*
- * ExtInt - Extended integers
+ * BatInt - Extended integers
  * Copyright (C) 2007 Bluestorm <bluestorm dot dylc on-the-server gmail dot com>
  *               2008 David Teller
  *
@@ -76,7 +76,7 @@ module BaseInt = struct
     (pow (-2) 3) (-8)
     (pow 0 0)    1
   *)
-      
+
 
   let min_num, max_num = min_int, max_int
 
@@ -123,8 +123,7 @@ module BaseInt = struct
 
 #if not BATTERIES_JS
   let print out t = BatInnerIO.nwrite out (string_of_int t)
-  let xprint out t = BatPrintf.fprintf out "%X" t
-  let t_printer _paren out t = print out t
+  let print_hex out t = BatPrintf.fprintf out "%X" t
 #endif
 
   let ( -- )  x y = BatEnum.seq x (add one) ((>=) y)

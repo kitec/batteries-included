@@ -1019,6 +1019,12 @@ module PMap = struct (*$< PMap *)
       }
 
   let create cmp = { cmp = cmp; map = Concrete.empty }
+  let get_cmp {cmp} = cmp
+
+(*$T get_cmp
+  get_cmp (create Int.compare) == Int.compare
+*)
+
   let empty = { cmp = Pervasives.compare; map = Concrete.empty }
   let get_cmp {cmp; _} = cmp
   let is_empty x = x.map = Concrete.Empty

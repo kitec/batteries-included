@@ -107,7 +107,7 @@ val make : int -> 'a -> 'a t
 
 val init : int -> (int -> 'a) -> 'a t
   (** [init n f] returns the sequence returning the results of [f 0],
-      [f 1].... [f (n-1)]. Raise [Invalid_argument] if [n < 0]. *)
+      [f 1].... [f (n-1)]. @raise Invalid_argument if [n < 0]. *)
 
 (** {6 Iterators} *)
 
@@ -241,8 +241,6 @@ val combine : 'a t -> 'b t -> ('a * 'b) t
 
 val print : ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) ->  'a BatInnerIO.output -> 'b t -> unit
   (**Print the contents of a sequence*)
-
-val t_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
 
 module Infix : sig
   (** Infix operators matching those provided by {!BatEnum.Infix} *)

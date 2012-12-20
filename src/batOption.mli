@@ -40,8 +40,8 @@ val may : ('a -> unit) -> 'a option -> unit
 val map : ('a -> 'b) -> 'a option -> 'b option
 (** [map f (Some x)] returns [Some (f x)] and [map f None] returns [None]. *)
 
-val bind : ('a -> 'b option) -> 'a option -> 'b option
-(** [bind f (Some x)] returns [f x] and [bind f None] returns [None].
+val bind : 'a option -> ('a -> 'b option) -> 'b option
+(** [bind (Some x) f] returns [f x] and [bind None f] returns [None].
 
 @example "Our functions return option types. Compose them to propagate [None]."
 {[
@@ -88,7 +88,7 @@ val is_some : 'a option -> bool
 
 val get : 'a option -> 'a
 (** [get (Some x)] returns [x].
-    @raises Invalid_argument on [get None]. *)
+    @raise Invalid_argument on [get None]. *)
 
 val get_exn : 'a option -> exn -> 'a
 (** [get_exn (Some x) e] returns [x] and [get_exn None e] raises [e]. *)
@@ -139,10 +139,6 @@ end
 (** {7 Printing}*)
 
 val print : ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b t -> unit
-
-val t_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
-
-val maybe_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
 #endif
 
 (** Operations on options, with labels.*)

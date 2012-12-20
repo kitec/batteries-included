@@ -24,7 +24,7 @@
 
 (** Dynamic arrays.
 
-    A dynamic array is equivalent to a OCaml array that will resize itself
+    A dynamic array is equivalent to an OCaml array that will resize itself
     when elements are added or removed, except that floats are boxed and
     that no initialization element is required.
 
@@ -322,7 +322,6 @@ val unsafe_set : 'a t -> int -> 'a -> unit
 (** {7 Printing}*)
 
 val print :  ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b t -> unit
-val t_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
 
 (**/**)
 val invariants : _ t -> unit

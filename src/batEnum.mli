@@ -166,7 +166,8 @@ val fold2i : (int -> 'a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 val find : ('a -> bool) -> 'a t -> 'a
   (** [find f e] returns the first element [x] of [e] such that [f x] returns
       [true], consuming the enumeration up to and including the
-      found element, or, raises [Not_found] if no such element exists
+      found element.
+      @raise Not_found if no such element exists
       in the enumeration, consuming the whole enumeration in the search.
 
       Since [find] (eagerly) consumes a prefix of the enumeration, it
@@ -176,7 +177,8 @@ val find : ('a -> bool) -> 'a t -> 'a
 val find_map : ('a -> 'b option) -> 'a t -> 'b
 (** [find_map f e] finds the first element [x] of [e] such that [f x] returns
     [Some r], then returns r. It consumes the enumeration up to and including
-    the found element, or raises [Not_found] if no such element exists in the
+    the found element.
+    @raise Not_found if no such element exists in the
     enumeration, consuming the whole enumeration in the search.
 
     Since [find_map] (eagerly) consumes a prefix of the enumeration, it can be
@@ -201,7 +203,7 @@ val get : 'a t -> 'a option
 
 val get_exn : 'a t -> 'a
   (** [get_exn e] returns the first element of [e].
-      @raises No_more_elements if [e] is empty.
+      @raise No_more_elements if [e] is empty.
       @since 2.0 *)
 
 val push : 'a t -> 'a -> unit
@@ -234,7 +236,7 @@ val skip: int -> 'a t -> 'a t
     then returns [e].
 
     This function has the same behavior as [drop] but is often easier to
-    compose with, e.g., [skip 5 |- take 3] is a new function which skips
+    compose with, e.g., [skip 5 %> take 3] is a new function which skips
     5 elements and then returns the next 3 elements.*)
 
 val take_while : ('a -> bool) -> 'a t -> 'a t
@@ -428,7 +430,7 @@ val from_loop: 'b -> ('b -> ('a * 'b)) -> 'a t
   (**[from_loop data next] creates a (possibly infinite) enumeration from
      the successive results of applying [next] to [data], then to the
      result, etc. The list ends whenever the function raises
-     {!BatEnum.No_more_elements}*)
+     {!BatEnum.No_more_elements}.*)
 
 val seq : 'a -> ('a -> 'a) -> ('a -> bool) -> 'a t
   (** [seq init step cond] creates a sequence of data, which starts
@@ -721,8 +723,6 @@ end
 
 val print :  ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b t -> unit
 (** Print and consume the contents of an enumeration.*)
-
-val t_printer : 'a BatValuePrinter.t -> 'a t BatValuePrinter.t
 #endif
 
 val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
@@ -740,6 +740,9 @@ val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
       where [x] is the first element of [a] and [y] is the first
       element of [b]
   *)
+
+val ord : ('a -> 'a -> BatOrd.order) -> 'a t -> 'a t -> BatOrd.order
+(** Same as [compare] but returning a {!BatOrd.order} instead of an interger. *)
 
 val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
 (** [equal eq a b] returns [true] when [a] and [b] contain

@@ -1,5 +1,5 @@
 (*
- * ExtSys - additional and modified functions for System
+ * BatSys - additional and modified functions for System
  * Copyright (C) 1996 Xavier Leroy
  * Copyright (C) 2009 David Teller, LIFO, Universite d'Orleans
  *
@@ -47,7 +47,7 @@ external file_exists : string -> bool = "caml_sys_file_exists"
 external is_directory : string -> bool = "caml_sys_is_directory"
 (** Returns [true] if the given name refers to a directory,
     [false] if it refers to another kind of file.
-    Raise [Sys_error] if no file exists with the given name.
+    @raise Sys_error if no file exists with the given name.
     @since 3.10.0
 *)
 
@@ -62,7 +62,7 @@ external rename : string -> string -> unit = "caml_sys_rename"
 
 external getenv : string -> string = "caml_sys_getenv"
 (** Return the value associated to a variable in the process
-   environment. Raise [Not_found] if the variable is unbound. *)
+   environment. @raise Not_found if the variable is unbound. *)
 
 external command : string -> int = "caml_sys_system_command"
 (** Execute the given shell command and return its exit code. *)
@@ -92,17 +92,17 @@ val interactive : bool ref
    the interactive toplevel system [ocaml]. *)
 
 val os_type : string
-(** Operating system currently executing the Caml program. One of
+(** Operating system currently executing the OCaml program. One of
 -  ["Unix"] (for all Unix versions, including Linux and Mac OS X),
 -  ["Win32"] (for MS-Windows, OCaml compiled with MSVC++ or Mingw),
 -  ["Cygwin"] (for MS-Windows, OCaml compiled with Cygwin). *)
 
 val word_size : int
-(** Size of one word on the machine currently executing the Caml
+(** Size of one word on the machine currently executing the OCaml
    program, in bits: 32 or 64. *)
 
 val big_endian : bool
-(** Whether the machine currently executing the Caml program is big-endian.
+(** Whether the machine currently executing the OCaml program is big-endian.
     @since 4.00.0 *)
 
 val max_string_length : int
@@ -132,9 +132,9 @@ external signal :
   int -> signal_behavior -> signal_behavior = "caml_install_signal_handler"
 (** Set the behavior of the system on receipt of a given signal.  The
    first argument is the signal number.  Return the behavior
-   previously associated with the signal. If the signal number is
-   invalid (or not available on your system), an [Invalid_argument]
-   exception is raised. *)
+   previously associated with the signal.
+   @raise Invalid_argument If the signal number is
+   invalid (or not available on your system). *)
 
 val set_signal : int -> signal_behavior -> unit
 (** Same as {!Sys.signal} but return value is ignored. *)
@@ -213,14 +213,14 @@ exception Break
 
 val catch_break : bool -> unit
 (** [catch_break] governs whether interactive interrupt (ctrl-C)
-   terminates the program or raises the [Break] exception.
+   terminates the program or raises [Break].
    Call [catch_break true] to enable raising [Break],
    and [catch_break false] to let the system
    terminate the program on user interrupt. *)
 
 
 val ocaml_version : string;;
-(** [ocaml_version] is the version of Objective Caml.
+(** [ocaml_version] is the version of OCaml.
     It is a string of the form ["major.minor[.patchlevel][+additional-info]"],
     where [major], [minor], and [patchlevel] are integers, and
     [additional-info] is an arbitrary string. The [[.patchlevel]] and

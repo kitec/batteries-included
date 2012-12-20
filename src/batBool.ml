@@ -1,5 +1,5 @@
 (*
- * ExtBool - Extended booleans
+ * BatBool - Extended booleans
  * Copyright (C) 2007 Bluestorm <bluestorm dot dylc on-the-server gmail dot com>
  *               2008 David Teller
  *
@@ -60,6 +60,10 @@ module BaseBool = struct
   (*BISECT-IGNORE-END*)
 
   let compare = compare
+
+  let equal = (=)
+
+  let ord = BatOrd.ord compare
 
   let of_int = function
     | 0 -> false
@@ -127,11 +131,8 @@ type bounded = t
 let min_num, max_num = false, true
 
 let print out t = BatInnerIO.nwrite out (to_string t)
-let t_printer _paren out t = print out t
 (*$T
   BatIO.to_string print true = "true"
   BatIO.to_string print false = "false"
-  BatIO.string_of_t_printer t_printer true = "true"
-  BatIO.string_of_t_printer t_printer false = "false"
 *)
 #endif

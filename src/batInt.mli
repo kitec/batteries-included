@@ -1,5 +1,5 @@
 (*
- * ExtInt - Extended operations on integers
+ * BatInt - Extended operations on integers
  * Copyright (C) 2008 Gabriel Scherer
  *               2008 David Teller
  *
@@ -69,19 +69,20 @@ external ( * ) : int -> int -> int = "%mulint"
 (** Multiplication. *)
 
 external div : int -> int -> int = "%divint"
-(** Integer division.  Raise [Division_by_zero] if the second
-    argument is zero.  This division rounds the real quotient of
-    its arguments towards zero, as specified for {!Pervasives.(/)}. *)
+(** Integer division.
+    This division rounds the real quotient of
+    its arguments towards zero, as specified for {!Pervasives.(/)}.
+    @raise Division_by_zero if the second argument is zero. *)
 external ( / ) : int -> int -> int = "%divint"
-(** Integer division.  Raise [Division_by_zero] if the second
-    argument is zero.  This division rounds the real quotient of
-    its arguments towards zero, as specified for {!Pervasives.(/)}. *)
+(** Integer division.  This division rounds the real quotient of
+    its arguments towards zero, as specified for {!Pervasives.(/)}.
+    @raise Division_by_zero if the second argument is zero. *)
 
 external rem : int -> int -> int = "%modint"
 (** Integer remainder.  If [y] is not zero, the result
     of [Int.rem x y] satisfies the following property:
     [x = Int.add (Int.mul (Int.div x y) y) (Int.rem x y)].
-    If [y = 0], [Int.rem x y] raises [Division_by_zero]. *)
+    @raise Division_by_zero if the second argument is zero. *)
 
 external modulo : int -> int -> int = "%modint"
 (** [modulo a b] computes the remainder of the integer
@@ -95,7 +96,6 @@ external modulo : int -> int -> int = "%modint"
 
 val pow  : int -> int -> int
 (** [pow a b] computes a{^b}.
-
     @raise Invalid_argument when [b] is negative. *)
 val ( ** ) : int -> int -> int
 (** [a ** b] computes a{^b}*)
@@ -137,7 +137,7 @@ val of_string : string -> int
     The string is read in decimal (by default) or in hexadecimal,
     octal or binary if the string begins with [0x], [0o] or [0b]
     respectively.
-    Raise [Invalid_argument] if the given string is not
+    @raise Invalid_argument if the given string is not
     a valid representation of an integer, or if the integer represented
     exceeds the range of integers representable in type [int]. *)
 
@@ -179,8 +179,8 @@ val ( -- ) : t -> t -> t BatEnum.t
 val ( --- ) : t -> t -> t BatEnum.t
 (** Enumerate an interval.
 
-    [5 -- 10] is the enumeration 5,6,7,8,9,10.
-    [10 -- 5] is the enumeration 10,9,8,7,6,5.*)
+    [5 --- 10] is the enumeration 5,6,7,8,9,10.
+    [10 --- 5] is the enumeration 10,9,8,7,6,5.*)
 
 
 external of_int : int -> int = "%identity"
@@ -198,11 +198,12 @@ module Compare : BatNumber.Compare with type bat__compare_t = t
 
 val print: 'a BatInnerIO.output -> int -> unit
 (** prints as decimal string *)
-val xprint: 'a BatInnerIO.output -> int -> unit
-    (** prints as hex string *)
-    (*    val bprint: 'a BatInnerIO.output -> t -> unit
-    (** prints as binary string *) *)
-val t_printer : t BatValuePrinter.t
+
+val print_hex: 'a BatInnerIO.output -> int -> unit
+(** prints as hex string *)
+
+(*    val bprint: 'a BatInnerIO.output -> t -> unit
+(** prints as binary string *) *)
 #endif
 
 (** {7 Compare} *)
@@ -213,8 +214,10 @@ val compare: t -> t -> int
     allows the module [Int] to be passed as argument to the functors
     {!Set.Make} and {!Map.Make}. *)
 
-val equal : int -> int -> bool
-val ord : int -> int -> BatOrd.order
+val equal : t -> t -> bool
+(** Equality function for integers, useful for {!HashedType}. *)
+
+val ord : t -> t -> BatOrd.order
 
 (**
     Safe operations on integers.
@@ -265,19 +268,20 @@ module Safe_int : sig
   (** Multiplication. *)
 
   external div : t -> t -> t = "%divint"
-  (** Integer division.  Raise [Division_by_zero] if the second
-      argument is zero.  This division rounds the real quotient of
-      its arguments towards zero, as specified for {!Pervasives.(/)}. *)
+  (** Integer division.
+      This division rounds the real quotient of
+      its arguments towards zero, as specified for {!Pervasives.(/)}.
+      @raise Division_by_zero if the second argument is zero. *)
   external ( / ) : t -> t -> t = "%divint"
-  (** Integer division.  Raise [Division_by_zero] if the second
-      argument is zero.  This division rounds the real quotient of
-      its arguments towards zero, as specified for {!Pervasives.(/)}. *)
+  (** Integer division. This division rounds the real quotient of
+      its arguments towards zero, as specified for {!Pervasives.(/)}.
+      @raise Division_by_zero if the second argument is zero. *)
 
   external rem : t -> t -> t = "%modint"
   (** Integer remainder.  If [y] is not zero, the result
       of [Int.rem x y] satisfies the following property:
       [x = Int.add (Int.mul (Int.div x y) y) (Int.rem x y)].
-      If [y = 0], [Int.rem x y] raises [Division_by_zero]. *)
+      @raise Division_by_zero if the second argument is zero. *)
 
   external modulo : t -> t -> t = "%modint"
   (** [modulo a b] computes the remainder of the integer
@@ -291,7 +295,6 @@ module Safe_int : sig
 
   val pow  : t -> t -> t
   (** [pow a b] computes a{^b}.
-
       @raise Invalid_argument when [b] is negative. *)
 
   val ( ** ) : t -> t -> t
@@ -345,7 +348,7 @@ module Safe_int : sig
       The string is read in decimal (by default) or in hexadecimal,
       octal or binary if the string begins with [0x], [0o] or [0b]
       respectively.
-      Raise [Invalid_argument] if the given string is not
+      @raise Invalid_argument if the given string is not
       a valid representation of an integer, or if the integer represented
       exceeds the range of integers representable in type [int]. *)
 
@@ -370,11 +373,14 @@ module Safe_int : sig
   val print: 'a BatInnerIO.output -> t -> unit
 #endif
 
-  val compare: t -> t -> int
+  val compare : t -> t -> int
   (** The comparison function for integers, with the same specification as
       {!Pervasives.compare}.  Along with the type [t], this function [compare]
       allows the module [Int] to be passed as argument to the functors
       {!Set.Make} and {!Map.Make}. *)
+
   val equal : t -> t -> bool
+  (** Equality function for integers, useful for {!HashedType}. *)
+
   val ord : t -> t -> BatOrd.order
 end

@@ -40,16 +40,6 @@ let map f = function
   map succ (Some 3) = (Some 4)
 *)
 
-
-let bind f = function
-  | None -> None
-  | Some v -> f v
-(*$T bind
-  bind (fun s -> Some s) None = None
-  bind (fun s -> Some s) (Some ()) = Some ()
-*)
-
-
 let apply = function
   | None -> (fun x -> x)
   | Some f -> f
@@ -59,7 +49,7 @@ let apply = function
 *)
 
 
-let filter f = function 
+let filter f = function
   | Some x when f x -> Some x
   | _ -> None
 (*$T filter
@@ -163,17 +153,6 @@ let print print_a out = function
   | None   -> BatInnerIO.nwrite out "None"
   | Some x -> BatPrintf.fprintf out "Some %a" print_a x
 
-let t_printer a_printer paren out = function
-  | Some x ->
-      if paren then
-        BatIO.write out '(';
-      BatIO.nwrite out "Some ";
-      a_printer true out x;
-      if paren then
-        BatIO.write out ')';
-  | None ->
-      BatIO.nwrite out "None"
-
 let maybe_printer a_printer paren out = function
   | None -> ()
   | Some x -> a_printer paren out x
@@ -187,6 +166,12 @@ struct
     | None -> None
     | Some x -> f x
 end
+
+let bind = Monad.bind
+(*$T bind
+  bind None (fun s -> Some s) = None
+  bind (Some ()) (fun s -> Some s) = Some ()
+*)
 
 module Labels =
 struct

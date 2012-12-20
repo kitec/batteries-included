@@ -1,5 +1,5 @@
 (*
- * ExtInt32 - Extended Big integers
+ * BatInt32 - Extended Big integers
  * Copyright (C) 2007 Bluestorm <bluestorm dot dylc on-the-server gmail dot com>
  *               2008 David Teller
  *
@@ -21,14 +21,14 @@
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
-let big_int_base_default_symbols = 
+let big_int_base_default_symbols =
   let s = String.create (10 + 26*2) in
   let set off c k = s.[k] <- char_of_int (k - off + (int_of_char c)) in
   for k = 0 to String.length s - 1 do
    if k < 10 then set  0 '0' k else if k < 36 then set 10 'a' k else set 36 'A' k
   done; s
 
-   
+
 let to_string_in_custom_base
       symbols (* vector of digit symbols 0,1,...,a,b,... *)
       b       (* base, int > 1 and <= number of defined symbols *)
@@ -77,7 +77,7 @@ let to_string_in_base b n =
 let to_string_in_binary = to_string_in_base 2
 let to_string_in_octal  = to_string_in_base 8
 let to_string_in_hexa   = to_string_in_base 16
-  
+
 (*$= to_string_in_base & ~printer:identity
   (to_string_in_base 16 (big_int_of_int 9485))    "250d"
   (to_string_in_base 16 (big_int_of_int (-9485))) "-250d"
@@ -131,6 +131,8 @@ module BaseBig_int = struct
   let of_int    = big_int_of_int
 
   let compare   = compare_big_int
+  let ord       = BatOrd.ord compare
+  let equal a b = compare a b = 0
 
   let of_float f =
     try of_string (Printf.sprintf "%.0f" f)

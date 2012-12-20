@@ -1,5 +1,5 @@
 (*
- * ExtInt32 - Extended 32-bit integers
+ * BatInt32 - Extended 32-bit integers
  * Copyright (C) 1996 Xavier Leroy
  *               2007 Bluestorm <bluestorm dot dylc on-the-server gmail dot com>
  *               2008 David Teller
@@ -72,15 +72,16 @@ external mul : int32 -> int32 -> int32 = "%int32_mul"
 (** Multiplication. *)
 
 external div : int32 -> int32 -> int32 = "%int32_div"
-(** Integer division.  Raise [Division_by_zero] if the second
-    argument is zero.  This division rounds the real quotient of
-    its arguments towards zero, as specified for {!Pervasives.(/)}. *)
+(** Integer division.
+    This division rounds the real quotient of
+    its arguments towards zero, as specified for {!Pervasives.(/)}.
+    @raise Division_by_zero if the second argument is zero. *)
 
 external rem : int32 -> int32 -> int32 = "%int32_mod"
 (** Integer remainder.  If [y] is not zero, the result
     of [Int32.rem x y] satisfies the following property:
     [x = Int32.add (Int32.mul (Int32.div x y) y) (Int32.rem x y)].
-    If [y = 0], [Int32.rem x y] raises [Division_by_zero]. *)
+    @raise Division_by_zero if the second argument is zero. *)
 
 
 val modulo : int32 -> int32 -> int32
@@ -226,11 +227,16 @@ val unpack_big : string -> int -> int32
 (** [unpack str off] reads 4 bytes from string [str] starting at
     offset [off] as a big-endian int32 *)
 
-val compare: t -> t -> int
+val compare : t -> t -> int
 (** The comparison function for 32-bit integers, with the same specification as
     {!Pervasives.compare}.  Along with the type [t], this function [compare]
     allows the module [Int32] to be passed as argument to the functors
     {!Set.Make} and {!Map.Make}. *)
+
+val equal : t -> t -> bool
+(** Equality function for 32-bit integers, useful for {!HashedType}. *)
+
+val ord : t -> t -> BatOrd.order
 
 (**/**)
 
@@ -272,8 +278,6 @@ module Compare : BatNumber.Compare with type bat__compare_t = t
 val print: 'a BatInnerIO.output -> t -> unit
     (** prints as decimal string *)
 
-val xprint: 'a BatInnerIO.output -> t -> unit
+val print_hex: 'a BatInnerIO.output -> t -> unit
     (** prints as hex string *)
-
-val t_printer : t BatValuePrinter.t
 #endif

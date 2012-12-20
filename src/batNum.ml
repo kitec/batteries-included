@@ -1,5 +1,5 @@
 (*
- * ExtNum - Operations on arbitrary-precision numbers
+ * BatNum - Operations on arbitrary-precision numbers
  * Copyright (C) 2008 Gabriel Scherer
  *               2008 David Teller
  *
@@ -38,6 +38,8 @@ module BaseNum = struct
   let modulo     = mod_num
   let pow        = power_num
   let compare    = compare_num
+  let order      = BatOrd.ord compare
+  let equal      = BatOrd.eq_comp compare
   let of_int     = num_of_int
   let to_int     = int_of_num
   let to_float   = float_of_num
@@ -64,10 +66,15 @@ module BaseNum = struct
       with Not_found -> of_int (BatInt.of_float f)
 end
 
-module Infix = struct
-  include BatNumber.MakeInfix (BaseNum)
+module TaggedInfix = struct
   let (=/), (</), (>/), (<=/), (>=/), (<>/) = Num.((=/), (</), (>/), (<=/), (>=/), (<>/))
   let (+/), (-/), ( */ ), (//), ( **/ ) = Num.((+/), (-/), ( */ ), (//), ( **/ ))
+end
+
+module Infix = struct
+  (* infix operators without / suffix: +-*/ *)
+  include BatNumber.MakeInfix (BaseNum)
+  include TaggedInfix
 end
 
 include (BatNumber.MakeNumeric(BaseNum): BatNumber.Numeric with type t = Num.num and module Infix := Infix)

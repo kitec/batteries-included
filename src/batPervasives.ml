@@ -1,5 +1,5 @@
 (*
- * ExtPervasives - Additional functions
+ * BatPervasives - Additional functions
  * Copyright (C) 1996 Xavier Leroy
  *               2003 Nicolas Cannasse
  *               2007 Zheng Li
@@ -97,8 +97,6 @@ let prerr_bool = function
 
 let string_of_char c = String.make 1 c
 
-external identity : 'a -> 'a = "%identity"
-
 #if not BATTERIES_JS
 let rec dump r =
   if Obj.is_int r then
@@ -181,65 +179,7 @@ let dump v = dump (Obj.repr v)
 let print_any oc v = BatIO.nwrite oc (dump v)
 #endif
 
-let finally = BatFile.finally
-
-let with_dispose ~dispose f x =
-  finally (fun () -> dispose x) f x
-
-let forever f x = ignore (while true do f x done)
-
-let ignore_exceptions f x = try ignore (f x) with _ -> ()
-
-#if not BATTERIES_JS
-(* unique int generation from batPervasives *)
-let unique_value  = ref 0
-let lock          = ref BatConcurrent.nolock
-let unique ()     =
-  BatConcurrent.sync !lock BatRef.post_incr unique_value
-#endif
-
-(*$Q unique
-   Q.unit (fun () -> unique () <> unique ())
- *)
-
-type ('a, 'b) result =
-  | Ok  of 'a
-  | Bad of 'b
-
-(* Ideas taken from Nicholas Pouillard's my_std.ml in ocamlbuild/ *)
-let ignore_ok = function
-    Ok _ -> ()
-  | Bad ex -> raise ex
-
-let ok = function
-    Ok v -> v
-  | Bad ex -> raise ex
-
-let wrap f x = try Ok (f x) with ex -> Bad ex
-
-(** {6 Operators}*)
-
-let ( |> ) x f = f x
-
-let ( <| ) f x = f x
-
-let ( |- ) f g x = g (f x)
-
-let ( -| ) f g x = f (g x)
-
-let flip f x y = f y x
-
-let ( *** ) f g = fun (x,y) -> (f x, g y)
-
-let ( &&& ) f g = fun x -> (f x, g x)
-
-let curry f x y = f (x,y)
-
-let uncurry f (x,y) = f x y
-
-let const x _ = x
-
-let tap f x = f x; x
+include BatInnerPervasives
 
 #if not BATTERIES_JS
 let invisible_args = ref 1
@@ -338,235 +278,14 @@ include Infix
 
 (** {6 Operators}*)
 
-let ( **> )        = ( <| )
 let undefined ?(message="Undefined") = failwith message
 
 let verify x ex = if x then () else raise ex
 let verify_arg x s = if x then () else invalid_arg s
 
-let ( |? ) = BatOption.Infix.( |? )
-
-(** {6 String operations}*)
-
-let lowercase = String.lowercase
-let uppercase = String.uppercase
-
-#if not BATTERIES_JS
-(** {6 Directives} *)
-
-type printer_flags = {
-  pf_width : int option;
-  pf_frac_digits : int option;
-  pf_padding_char : char;
-  pf_justify : [ `right | `left ];
-  pf_positive_prefix : char option;
-}
-
-let default_printer_flags = {
-  pf_justify = `right;
-  pf_width = None;
-  pf_frac_digits = None;
-  pf_padding_char = ' ';
-  pf_positive_prefix = None;
-}
-
-let printer_a k f x = k (fun oc -> f oc x)
-let printer_t k f = k (fun oc -> f oc)
-let printer_B k x = k (fun oc -> BatIO.nwrite oc (string_of_bool x))
-let printer_c k x = k (fun oc -> BatIO.write oc x)
-let printer_C k x = k (fun oc ->
-		       BatIO.write oc '\'';
-		       BatIO.nwrite oc (Char.escaped x);
-		       BatIO.write oc '\'')
-
-let printer_s ?(flags=default_printer_flags) k x =
-  match flags.pf_width with
-  | None ->
-     k (fun oc -> BatIO.nwrite oc x)
-  | Some n ->
-     let len = String.length x in
-     if len >= n then
-       k (fun oc -> BatIO.nwrite oc x)
-     else
-       match flags.pf_justify with
-       | `right ->
-	  k (fun oc ->
-	     for i = len + 1 to n do
-	       BatIO.write oc flags.pf_padding_char
-	     done;
-	     BatIO.nwrite oc x)
-       | `left ->
-	  k (fun oc ->
-	     BatIO.nwrite oc x;
-	     for i = len + 1 to n do
-	       BatIO.write oc flags.pf_padding_char
-	     done)
-
-let printer_sc ?(flags=default_printer_flags) k x =
-  match flags.pf_width with
-  | None ->
-     k (fun oc -> BatString.Cap.print oc x)
-  | Some n ->
-     let len = BatString.Cap.length x in
-     if len >= n then
-       k (fun oc -> BatString.Cap.print oc x)
-     else
-       match flags.pf_justify with
-       | `right ->
-	  k (fun oc ->
-	     for i = len + 1 to n do
-	       BatIO.write oc flags.pf_padding_char
-	     done;
-	     BatString.Cap.print oc x)
-       | `left ->
-	  k (fun oc ->
-	     BatString.Cap.print oc x;
-	     for i = len + 1 to n do
-	       BatIO.write oc flags.pf_padding_char
-	     done)
-
-let printer_S ?flags k x =
-  printer_s ?flags k (BatString.quote x)
-
-let printer_Sc ?flags k x =
-  printer_s ?flags k (BatString.Cap.quote x)
-
-open BatNumber
-
-let digits mk_digit base op n =
-  let rec aux acc n =
-    if op.compare n op.zero = 0 then
-      acc
-    else
-      aux (mk_digit (op.to_int (op.modulo n base)) :: acc) (op.div n base)
-  in
-  if op.compare n op.zero = 0 then
-    ['0']
-  else
-    aux [] n
-
-let printer_unum mk_digit base op ?flags k x =
-  printer_s ?flags k (BatString.implode (digits mk_digit base op x))
-
-let printer_snum mk_digit base op ?(flags=default_printer_flags) k x =
-  let l = digits mk_digit base op x in
-  let l =
-    if op.compare x op.zero < 0 then
-      '-' :: l
-    else
-      match flags.pf_positive_prefix with
-      | None ->
-	 l
-      | Some c ->
-	 c :: l
-  in
-  printer_s ~flags k (BatString.implode l)
-
-let dec_digit x =
-  char_of_int (int_of_char '0' + x)
-
-let oct_digit = dec_digit
-
-let lhex_digit x =
-  if x < 10 then
-    dec_digit x
-  else
-    char_of_int (int_of_char 'a' + x - 10)
-
-let uhex_digit x =
-  if x < 10 then
-    dec_digit x
-  else
-    char_of_int (int_of_char 'A' + x - 10)
-
-let printer_d ?flags k x = printer_snum dec_digit 10 BatInt.operations ?flags k x
-let printer_i ?flags k x = printer_snum dec_digit 10 BatInt.operations ?flags k x
-let printer_u ?flags k x = printer_unum dec_digit 10 BatInt.operations ?flags k x
-let printer_x ?flags k x = printer_unum lhex_digit 16 BatInt.operations ?flags k x
-let printer_X ?flags k x = printer_unum uhex_digit 16 BatInt.operations ?flags k x
-let printer_o ?flags k x = printer_unum oct_digit 8 BatInt.operations ?flags k x
-
-let printer_ld ?flags k x = printer_snum dec_digit 10l BatInt32.operations ?flags k x
-let printer_li ?flags k x = printer_snum dec_digit 10l BatInt32.operations ?flags k x
-let printer_lu ?flags k x = printer_unum dec_digit 10l BatInt32.operations ?flags k x
-let printer_lx ?flags k x = printer_unum lhex_digit 16l BatInt32.operations ?flags k x
-let printer_lX ?flags k x = printer_unum uhex_digit 16l BatInt32.operations ?flags k x
-let printer_lo ?flags k x = printer_unum oct_digit 8l BatInt32.operations ?flags k x
-
-let printer_Ld ?flags k x = printer_snum dec_digit 10L BatInt64.operations ?flags k x
-let printer_Li ?flags k x = printer_snum dec_digit 10L BatInt64.operations ?flags k x
-let printer_Lu ?flags k x = printer_unum dec_digit 10L BatInt64.operations ?flags k x
-let printer_Lx ?flags k x = printer_unum lhex_digit 16L BatInt64.operations ?flags k x
-let printer_LX ?flags k x = printer_unum uhex_digit 16L BatInt64.operations ?flags k x
-let printer_Lo ?flags k x = printer_unum oct_digit 8L BatInt64.operations ?flags k x
-
-let printer_nd ?flags k x = printer_snum dec_digit 10n BatNativeint.operations ?flags k x
-let printer_ni ?flags k x = printer_snum dec_digit 10n BatNativeint.operations ?flags k x
-let printer_nu ?flags k x = printer_unum dec_digit 10n BatNativeint.operations ?flags k x
-let printer_nx ?flags k x = printer_unum lhex_digit 16n BatNativeint.operations ?flags k x
-let printer_nX ?flags k x = printer_unum uhex_digit 16n BatNativeint.operations ?flags k x
-let printer_no ?flags k x = printer_unum oct_digit 8n BatNativeint.operations ?flags k x
-
-let printer_f ?flags k x =
-  k (fun oc -> BatIO.nwrite oc
-				(match flags with
-				 | None | Some {pf_width=None; pf_frac_digits=None} ->
-					   Printf.sprintf "%f" x
-				 | Some {pf_width=Some w; pf_frac_digits=None} ->
-				    Printf.sprintf "%*f" w x
-				 | Some {pf_width=None; pf_frac_digits=Some f} ->
-				    Printf.sprintf "%.*f" f x
-				 | Some {pf_width=Some w; pf_frac_digits=Some f} ->
-				    Printf.sprintf "%*.*f" w f x
-				)
-    )
-let printer_F ?flags k x =
-  k (fun oc -> BatIO.nwrite oc
-				(match flags with
-				 | None | Some {pf_width=None; pf_frac_digits=None} ->
-					   Printf.sprintf "%F" x
-				 | Some {pf_width=Some w; pf_frac_digits=None} ->
-				    Printf.sprintf "%*F" w x
-				 | Some {pf_width=None; pf_frac_digits=Some f} ->
-				    Printf.sprintf "%.*F" f x
-				 | Some {pf_width=Some w; pf_frac_digits=Some f} ->
-				    Printf.sprintf "%*.*F" w f x
-				)
-    )
-
-let printer_format k fmt = fmt.BatPrint.printer fmt.BatPrint.pattern k
-
-(*  let printer_text k x = k (fun oc -> Ulib.Text.print oc x)*)
-let printer_obj k x = k x#print
-let printer_exn k x = k (fun oc -> BatPrintexc.print oc x)
-
-let printer_int  = printer_i
-let printer_uint = printer_u
-let printer_hex  = printer_x
-let printer_HEX  = printer_X
-let printer_oct  = printer_o
-
-(** {6 Value printers} *)
-
-let bool_printer = BatBool.t_printer
-let int_printer = BatInt.t_printer
-let int32_printer = BatInt32.t_printer
-let int64_printer = BatInt64.t_printer
-let char_printer = BatChar.t_printer
-let nativeint_printer = BatNativeint.t_printer
-let float_printer = BatFloat.t_printer
-let string_printer = BatString.t_printer
-let list_printer = BatList.t_printer
-let array_printer = BatArray.t_printer
-let option_printer = BatOption.t_printer
-let maybe_printer = BatOption.maybe_printer
-let exn_printer paren out x =
-  if paren then BatIO.write out '(';
-  BatPrintexc.print out x;
-  if paren then BatIO.write out ')'
-
 (** {6 Clean-up}*)
 
+#if not BATTERIES_JS
 let _ = at_exit close_all; (*Called second*)
 	at_exit flush_all  (*Called first*)
 #endif

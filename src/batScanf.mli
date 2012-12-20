@@ -1,5 +1,5 @@
 (*
- * ExtScanf - Extended Scanf module
+ * BatScanf - Extended Scanf module
  * Copyright (C) 1996 Pierre Weis
  *               2009 David Rajchenbach-Teller, LIFO, Universite d'Orleans
  *
@@ -77,16 +77,16 @@
 
 (** {7 Formatted input as a functional feature} *)
 
-(** The Caml scanning facility is reminiscent of the corresponding C feature.
+(** The OCaml scanning facility is reminiscent of the corresponding C feature.
     However, it is also largely different, simpler, and yet more powerful:
     the formatted input functions are higher-order functionals and the
     parameter passing mechanism is just the regular function application not
     the variable assigment based mechanism which is typical for formatted
-    input in imperative languages; the Caml format strings also feature
+    input in imperative languages; the OCaml format strings also feature
     useful additions to easily define complex tokens; as expected within a
     functional programming language, the formatted input functions also
     support polymorphism, in particular arbitrary interaction with
-    polymorphic user-defined scanners.  Furthermore, the Caml formatted input
+    polymorphic user-defined scanners.  Furthermore, the OCaml formatted input
     facility is fully type-checked at compile time. *)
 
 (** {6 Scanning buffers} *)
@@ -251,18 +251,18 @@ val bscanf : Scanning.scanbuf -> ('a, 'b, 'c, 'd) scanner;;
       Hence, this conversion always succeeds: it returns an empty
       string, if the bounding condition holds when the scan begins.
     - [S]: reads a delimited string argument (delimiters and special
-      escaped characters follow the lexical conventions of Caml).
+      escaped characters follow the lexical conventions of OCaml).
     - [c]: reads a single character. To test the current input character
       without reading it, specify a null field width, i.e. use
-      specification [%0c]. Raise [Invalid_argument], if the field width
+      specification [%0c]. @raise Invalid_argument, if the field width
       specification is greater than 1.
     - [C]: reads a single delimited character (delimiters and special
-      escaped characters follow the lexical conventions of Caml).
+      escaped characters follow the lexical conventions of OCaml).
     - [f], [e], [E], [g], [G]: reads an optionally signed
       floating-point number in decimal notation, in the style [dddd.ddd
       e/E+-dd].
     - [F]: reads a floating point number according to the lexical
-      conventions of Caml (hence the decimal point is mandatory if the
+      conventions of OCaml (hence the decimal point is mandatory if the
       exponent part is not mentioned).
     - [B]: reads a boolean argument ([true] or [false]).
     - [b]: reads a boolean argument (for backward compatibility; do not use
@@ -327,7 +327,7 @@ val bscanf : Scanning.scanbuf -> ('a, 'b, 'c, 'd) scanner;;
       nothing to read in the input: it simply returns [""].
 
     - in addition to the relevant digits, ['_'] characters may appear
-    inside numbers (this is reminiscent to the usual Caml lexical
+    inside numbers (this is reminiscent to the usual OCaml lexical
     conventions). If stricter scanning is desired, use the range
     conversion facility instead of the number conversions.
 
@@ -366,14 +366,14 @@ val bscanf : Scanning.scanbuf -> ('a, 'b, 'c, 'd) scanner;;
 (** Scanners may raise the following exceptions when the input cannot be read
     according to the format string:
 
-    - Raise [Scanf.Scan_failure] if the input does not match the format.
+    - @raise Scanf.Scan_failure if the input does not match the format.
 
-    - Raise [Failure] if a conversion to a number is not possible.
+    - @raise Failure if a conversion to a number is not possible.
 
-    - Raise [End_of_file] if the end of input is encountered while some more
+    - @raise End_of_file if the end of input is encountered while some more
       characters are needed to read the current conversion specification.
 
-    - Raise [Invalid_argument] if the format string is invalid.
+    - @raise Invalid_argument if the format string is invalid.
 
     Note:
 
@@ -420,7 +420,7 @@ val bscanf_format :
 (** [bscanf_format ib fmt f] reads a format string token from the scannning
     buffer [ib], according to the given format string [fmt], and applies [f] to
     the resulting format string value.
-    Raise [Scan_failure] if the format string value read does not have the
+    @raise Scan_failure if the format string value read does not have the
     same type as [fmt]. *)
 
 val sscanf_format :
@@ -433,7 +433,6 @@ val format_from_string :
     ('a, 'b, 'c, 'd, 'e, 'f) format6 -> ('a, 'b, 'c, 'd, 'e, 'f) format6;;
 (** [format_from_string s fmt] converts a string argument to a format string,
     according to the given format string [fmt].
-    Raise [Scan_failure] if [s], considered as a format string, does not
+    @raise Scan_failure if [s], considered as a format string, does not
     have the same type as [fmt]. *)
-
 #endif

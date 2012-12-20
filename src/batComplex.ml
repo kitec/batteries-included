@@ -1,5 +1,5 @@
 (*
- * ExtComplex - Extended Complex Numbers
+ * BatComplex - Extended Complex Numbers
  * Copyright (C) 2007 Bluestorm <bluestorm dot dylc on-the-server gmail dot com>
  *               2008 David Teller
  *
@@ -45,6 +45,8 @@ module BaseComplex = struct
     match compare t1.re t2.re with
     | 0 -> compare t1.im t2.im
     | c -> c
+
+  let ord = BatOrd.ord compare
 
   let equal t1 t2 =
     t1.re = t2.re && t1.im = t2.im

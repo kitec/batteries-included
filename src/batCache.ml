@@ -20,8 +20,7 @@
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
-let (|>) x f = f x
-let tap f x = f x; x
+open BatInnerPervasives
 
 type ('a,'b) manual_cache = {
   get : 'a -> 'b;

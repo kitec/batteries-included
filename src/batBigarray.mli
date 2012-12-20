@@ -1,5 +1,5 @@
 (*
- * ExtBigarray - additional and modified functions for big arrays.
+ * BatBigarray - additional and modified functions for big arrays.
  * Copyright (C) 2000 Michel Serrano
  *               2000 Xavier Leroy
  *               2008 David Teller, LIFO, Universite d'Orleans
@@ -30,13 +30,13 @@
    This module implements multi-dimensional arrays of integers and
    floating-point numbers, thereafter referred to as ``big arrays''.
    The implementation allows efficient sharing of large numerical
-   arrays between Caml code and C or Fortran numerical libraries.
+   arrays between OCaml code and C or Fortran numerical libraries.
 
    Concerning the naming conventions, users of this module are encouraged
    to do [open Bigarray] in their source, then refer to array types and
    operations via short dot notation, e.g. [Array1.t] or [Array2.sub].
 
-   Big arrays support all the Caml ad-hoc polymorphic operations:
+   Big arrays support all the OCaml ad-hoc polymorphic operations:
    - comparisons ([=], [<>], [<=], etc, as well as {!Pervasives.compare});
    - hashing (module [Hash]);
    - and structured input-output ({!Pervasives.output_value}
@@ -68,7 +68,7 @@
    ({!Bigarray.int8_signed_elt} or {!Bigarray.int8_unsigned_elt}),
 - 16-bit integers (signed or unsigned)
    ({!Bigarray.int16_signed_elt} or {!Bigarray.int16_unsigned_elt}),
-- Caml integers (signed, 31 bits on 32-bit architectures,
+- OCaml integers (signed, 31 bits on 32-bit architectures,
    63 bits on 64-bit architectures) ({!Bigarray.int_elt}),
 - 32-bit signed integer ({!Bigarray.int32_elt}),
 - 64-bit signed integers ({!Bigarray.int64_elt}),
@@ -93,20 +93,20 @@ type int64_elt = Bigarray.int64_elt
 type nativeint_elt = Bigarray.nativeint_elt
 
 type ('a, 'b) kind = ('a,'b) Bigarray.kind
-(** To each element kind is associated a Caml type, which is
-   the type of Caml values that can be stored in the big array
+(** To each element kind is associated an OCaml type, which is
+   the type of OCaml values that can be stored in the big array
    or read back from it.  This type is not necessarily the same
    as the type of the array elements proper: for instance,
    a big array whose elements are of kind [float32_elt] contains
    32-bit single precision floats, but reading or writing one of
-   its elements from Caml uses the Caml type [float], which is
+   its elements from OCaml uses the OCaml type [float], which is
    64-bit double precision floats.
 
    The abstract type [('a, 'b) kind] captures this association
-   of a Caml type ['a] for values read or written in the big array,
+   of an OCaml type ['a] for values read or written in the big array,
    and of an element kind ['b] which represents the actual contents
    of the big array.  The following predefined values of type
-   [kind] list all possible associations of Caml types with
+   [kind] list all possible associations of OCaml types with
    element kinds: *)
 
 val float32 : (float, float32_elt) kind
@@ -148,12 +148,12 @@ val nativeint : (nativeint, nativeint_elt) kind
 val char : (char, int8_unsigned_elt) kind
 (** As shown by the types of the values above,
    big arrays of kind [float32_elt] and [float64_elt] are
-   accessed using the Caml type [float].  Big arrays of complex kinds
-   [complex32_elt], [complex64_elt] are accessed with the Caml type
+   accessed using the OCaml type [float].  Big arrays of complex kinds
+   [complex32_elt], [complex64_elt] are accessed with the OCaml type
    {!Complex.t}.  Big arrays of
-   integer kinds are accessed using the smallest Caml integer
+   integer kinds are accessed using the smallest OCaml integer
    type large enough to represent the array elements:
-   [int] for 8- and 16-bit integer bigarrays, as well as Caml-integer
+   [int] for 8- and 16-bit integer bigarrays, as well as OCaml-integer
    bigarrays; [int32] for 32-bit integer bigarrays; [int64]
    for 64-bit integer bigarrays; and [nativeint] for
    platform-native integer bigarrays.  Finally, big arrays of
@@ -217,7 +217,7 @@ module Genarray :
 
 	  The three type parameters to [Genarray.t] identify the array element
 	  kind and layout, as follows:
-	  - the first parameter, ['a], is the Caml type for accessing array
+	  - the first parameter, ['a], is the OCaml type for accessing array
 	  elements ([float], [int], [int32], [int64], [nativeint]);
 	  - the second parameter, ['b], is the actual kind of array elements
 	  ([float32_elt], [float64_elt], [int8_signed_elt], [int8_unsigned_elt],
@@ -228,7 +228,7 @@ module Genarray :
 	  For instance, [(float, float32_elt, fortran_layout) Genarray.t]
 	  is the type of generic big arrays containing 32-bit floats
 	  in Fortran layout; reads and writes in this array use the
-	  Caml type [float]. *)
+	  OCaml type [float]. *)
 
   external create: ('a, 'b) kind -> 'c layout -> int array -> ('a, 'b, 'c) t
     = "caml_ba_create"
@@ -249,7 +249,7 @@ module Genarray :
 	  Big arrays returned by [Genarray.create] are not initialized:
 	  the initial values of array elements is unspecified.
 
-	  [Genarray.create] raises [Invalid_arg] if the number of dimensions
+	  @raise Invalid_argument if the number of dimensions
 	  is not in the range 1 to 16 inclusive, or if one of the dimensions
 	  is negative. *)
 
@@ -265,7 +265,7 @@ module Genarray :
 	big array [a].  The first dimension corresponds to [n = 0];
 	the second dimension corresponds to [n = 1]; the last dimension,
 	to [n = Genarray.num_dims a - 1].
-	Raise [Invalid_arg] if [n] is less than 0 or greater or equal than
+	@raise Invalid_argument if [n] is less than 0 or greater or equal than
 	[Genarray.num_dims a]. *)
 
   external kind: ('a, 'b, 'c) t -> ('a, 'b) kind = "caml_ba_kind"
@@ -284,7 +284,7 @@ module Genarray :
 	and strictly less than the corresponding dimensions of [a].
 	If [a] has Fortran layout, the coordinates must be greater or equal
 	than 1 and less or equal than the corresponding dimensions of [a].
-	Raise [Invalid_arg] if the array [a] does not have exactly [N]
+	@raise Invalid_argument if the array [a] does not have exactly [N]
 	dimensions, or if the coordinates are outside the array bounds.
 
 	If [N > 3], alternate syntax is provided: you can write
@@ -302,7 +302,7 @@ module Genarray :
 
 	The array [a] must have exactly [N] dimensions, and all coordinates
 	must lie inside the array bounds, as described for [Genarray.get];
-	otherwise, [Invalid_arg] is raised.
+	@raise Invalid_argument otherwise.
 
 	If [N > 3], alternate syntax is provided: you can write
 	[a.{i1, i2, ..., iN} <- v] instead of
@@ -326,7 +326,7 @@ module Genarray :
 	array [a].
 
 	[Genarray.sub_left] applies only to big arrays in C layout.
-	Raise [Invalid_arg] if [ofs] and [len] do not designate
+	@raise Invalid_argument if [ofs] and [len] do not designate
 	a valid sub-array of [a], that is, if [ofs < 0], or [len < 0],
 	or [ofs + len > Genarray.nth_dim a 0]. *)
 
@@ -346,7 +346,7 @@ module Genarray :
 	array [a].
 
 	[Genarray.sub_right] applies only to big arrays in Fortran layout.
-	Raise [Invalid_arg] if [ofs] and [len] do not designate
+	@raise Invalid_argument if [ofs] and [len] do not designate
 	a valid sub-array of [a], that is, if [ofs < 1], or [len < 0],
 	or [ofs + len > Genarray.nth_dim a (Genarray.num_dims a - 1)]. *)
 
@@ -365,7 +365,7 @@ module Genarray :
 	the original array share the same storage space.
 
 	[Genarray.slice_left] applies only to big arrays in C layout.
-	Raise [Invalid_arg] if [M >= N], or if [[|i1; ... ; iM|]]
+	@raise Invalid_argument if [M >= N], or if [[|i1; ... ; iM|]]
 	is outside the bounds of [a]. *)
 
   external slice_right:
@@ -383,7 +383,7 @@ module Genarray :
 	the original array share the same storage space.
 
 	[Genarray.slice_right] applies only to big arrays in Fortran layout.
-	Raise [Invalid_arg] if [M >= N], or if [[|i1; ... ; iM|]]
+	@raise Invalid_argument if [M >= N], or if [[|i1; ... ; iM|]]
 	is outside the bounds of [a]. *)
 
   external blit: ('a, 'b, 'c) t -> ('a, 'b, 'c) t -> unit
@@ -433,7 +433,7 @@ module Genarray :
 	[-1].  [Genarray.map_file] then determines the major dimension
 	from the size of the file.  The file must contain an integral
 	number of sub-arrays as determined by the non-major dimensions,
-	otherwise [Failure] is raised.
+	@raise Failure otherwise.
 
 	If all dimensions of the big array are given, the file size is
 	matched against the size of the big array.  If the file is larger
@@ -493,7 +493,7 @@ module Genarray :
 module Array1 : sig
   type ('a, 'b, 'c) t = ('a, 'b, 'c) Bigarray.Array1. t
   (** The type of one-dimensional big arrays whose elements have
-     Caml type ['a], representation kind ['b], and memory layout ['c]. *)
+     OCaml type ['a], representation kind ['b], and memory layout ['c]. *)
 
   val create: ('a, 'b) kind -> 'c layout -> int -> ('a, 'b, 'c) t
   (** [Array1.create kind layout dim] returns a new bigarray of
@@ -517,14 +517,15 @@ module Array1 : sig
      [x] must be greater or equal than [0] and strictly less than
      [Array1.dim a] if [a] has C layout.  If [a] has Fortran layout,
      [x] must be greater or equal than [1] and less or equal than
-     [Array1.dim a].  Otherwise, [Invalid_arg] is raised. *)
+     [Array1.dim a].
+     @raise Invalid_argument otherwise. *)
 
   external set: ('a, 'b, 'c) t -> int -> 'a -> unit = "%caml_ba_set_1"
   (** [Array1.set a x v], also written [a.{x} <- v],
      stores the value [v] at index [x] in [a].
      [x] must be inside the bounds of [a] as described in
      {!Bigarray.Array1.get};
-     otherwise, [Invalid_arg] is raised. *)
+     @raise Invalid_argument otherwise. *)
 
   external sub: ('a, 'b, 'c) t -> int -> int -> ('a, 'b, 'c) t
       = "caml_ba_sub"
@@ -608,7 +609,7 @@ module Array2 :
   sig
   type ('a, 'b, 'c) t = ('a, 'b, 'c) Bigarray.Array2. t
   (** The type of two-dimensional big arrays whose elements have
-     Caml type ['a], representation kind ['b], and memory layout ['c]. *)
+     OCaml type ['a], representation kind ['b], and memory layout ['c]. *)
 
   val create: ('a, 'b) kind ->  'c layout -> int -> int -> ('a, 'b, 'c) t
   (** [Array2.create kind layout dim1 dim2] returns a new bigarray of
@@ -634,14 +635,14 @@ module Array2 :
      returns the element of [a] at coordinates ([x], [y]).
      [x] and [y] must be within the bounds
      of [a], as described for {!Bigarray.Genarray.get};
-     otherwise, [Invalid_arg] is raised. *)
+     @raise Invalid_argument otherwise. *)
 
   external set: ('a, 'b, 'c) t -> int -> int -> 'a -> unit = "%caml_ba_set_2"
   (** [Array2.set a x y v], or alternatively [a.{x,y} <- v],
      stores the value [v] at coordinates ([x], [y]) in [a].
      [x] and [y] must be within the bounds of [a],
      as described for {!Bigarray.Genarray.set};
-     otherwise, [Invalid_arg] is raised. *)
+     @raise Invalid_argument otherwise. *)
 
   external sub_left: ('a, 'b, c_layout) t -> int -> int -> ('a, 'b, c_layout) t
     = "caml_ba_sub"
@@ -747,7 +748,7 @@ module Array3 :
   sig
   type ('a, 'b, 'c) t = ('a, 'b, 'c) Bigarray.Array3. t
   (** The type of three-dimensional big arrays whose elements have
-     Caml type ['a], representation kind ['b], and memory layout ['c]. *)
+     OCaml type ['a], representation kind ['b], and memory layout ['c]. *)
 
   val create: ('a, 'b) kind -> 'c layout -> int -> int -> int -> ('a, 'b, 'c) t
   (** [Array3.create kind layout dim1 dim2 dim3] returns a new bigarray of
@@ -776,7 +777,7 @@ module Array3 :
      returns the element of [a] at coordinates ([x], [y], [z]).
      [x], [y] and [z] must be within the bounds of [a],
      as described for {!Bigarray.Genarray.get};
-     otherwise, [Invalid_arg] is raised. *)
+     @raise Invalid_argument otherwise. *)
 
   external set: ('a, 'b, 'c) t -> int -> int -> int -> 'a -> unit
     = "%caml_ba_set_3"
@@ -784,7 +785,7 @@ module Array3 :
      stores the value [v] at coordinates ([x], [y], [z]) in [a].
      [x], [y] and [z] must be within the bounds of [a],
      as described for {!Bigarray.Genarray.set};
-     otherwise, [Invalid_arg] is raised. *)
+     @raise Invalid_argument otherwise. *)
 
   external sub_left: ('a, 'b, c_layout) t -> int -> int -> ('a, 'b, c_layout) t
     = "caml_ba_sub"
@@ -920,17 +921,17 @@ external genarray_of_array3 :
 
 val array1_of_genarray : ('a, 'b, 'c) Genarray.t -> ('a, 'b, 'c) Array1.t
 (** Return the one-dimensional big array corresponding to the given
-   generic big array.  Raise [Invalid_arg] if the generic big array
+   generic big array.  @raise Invalid_argument if the generic big array
    does not have exactly one dimension. *)
 
 val array2_of_genarray : ('a, 'b, 'c) Genarray.t -> ('a, 'b, 'c) Array2.t
 (** Return the two-dimensional big array corresponding to the given
-   generic big array.  Raise [Invalid_arg] if the generic big array
+   generic big array.  @raise Invalid_argument if the generic big array
    does not have exactly two dimensions. *)
 
 val array3_of_genarray : ('a, 'b, 'c) Genarray.t -> ('a, 'b, 'c) Array3.t
 (** Return the three-dimensional big array corresponding to the given
-   generic big array.  Raise [Invalid_arg] if the generic big array
+   generic big array.  @raise Invalid_argument if the generic big array
    does not have exactly three dimensions. *)
 
 
@@ -950,7 +951,7 @@ val reshape : ('a, 'b, 'c) Genarray.t -> int array -> ('a, 'b, 'c) Genarray.t
    The returned big array must have exactly the same number of
    elements as the original big array [b].  That is, the product
    of the dimensions of [b] must be equal to [i1 * ... * iN].
-   Otherwise, [Invalid_arg] is raised. *)
+   @raise Invalid_argument otherwise. *)
 
 val reshape_1 : ('a, 'b, 'c) Genarray.t -> int -> ('a, 'b, 'c) Array1.t
 (** Specialized version of {!Bigarray.reshape} for reshaping to
@@ -964,6 +965,4 @@ val reshape_3 :
   ('a, 'b, 'c) Genarray.t -> int -> int -> int -> ('a, 'b, 'c) Array3.t
 (** Specialized version of {!Bigarray.reshape} for reshaping to
    three-dimensional arrays. *)
-
-
 #endif

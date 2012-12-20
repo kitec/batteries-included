@@ -1,5 +1,5 @@
 (*
- * ExtNum - Operations on arbitrary-precision numbers
+ * BatNum - Operations on arbitrary-precision numbers
  * Copyright (C) 1996 Valerie Menissier-Morain
  *               2008 Gabriel Scherer
  *               2008 David Teller
@@ -60,6 +60,8 @@ val modulo : num -> num -> num
 val pow    : num -> num -> num
 
 val compare   : num -> num -> int
+val ord       : num -> num -> BatOrd.order
+val equal     : num -> num -> bool
 val of_int    : int -> num
 val to_int    : num -> int
 val of_float  : float -> num
@@ -165,9 +167,23 @@ val print: 'a BatInnerIO.output -> t -> unit
 
 (** {6 Submodules grouping all infix operators} *)
 
+module TaggedInfix : sig
+  val ( =/ ) : num -> num -> bool
+  val ( </ ) : num -> num -> bool
+  val ( >/ ) : num -> num -> bool
+  val ( <=/ ) : num -> num -> bool
+  val ( >=/ ) : num -> num -> bool
+  val ( <>/ ) : num -> num -> bool
+
+  val ( +/ ) : num -> num -> num
+  val ( -/ ) : num -> num -> num
+  val ( */ ) : num -> num -> num
+  val ( // ) : num -> num -> num
+  val ( **/ ) : num -> num -> num
+end
+
 module Infix : sig
   include BatNumber.Infix with type bat__infix_t = t
-
   val ( =/ ) : num -> num -> bool
   val ( </ ) : num -> num -> bool
   val ( >/ ) : num -> num -> bool

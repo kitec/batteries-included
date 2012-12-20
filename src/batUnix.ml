@@ -1,5 +1,5 @@
 (*
- * ExtUnix - additional and modified functions for Unix and Unix-compatible systems.
+ * BatUnix - additional and modified functions for Unix and Unix-compatible systems.
  * Copyright (C) 1996 Xavier Leroy
  * Copyright (C) 2009 David Teller, LIFO, Universite d'Orleans
  *
@@ -22,7 +22,7 @@
 #if not BATTERIES_JS
 
 
-  open Unix
+  include Unix
   open BatInnerIO
 
 
@@ -39,10 +39,10 @@
      track low-level information on our [input]s/[output]s.
   *)
 
-  module Wrapped_in = BatInnerWeaktbl.Make(Input) (*input  -> in_channel *)
-  module Wrapped_out= BatInnerWeaktbl.Make(Output)(*output -> out_channel*)
-  let wrapped_in    = Wrapped_in.create 16
-  let wrapped_out   = Wrapped_out.create 16
+  module Wrapped_in  = BatInnerWeaktbl.Make(Input) (*input  -> in_channel *)
+  module Wrapped_out = BatInnerWeaktbl.Make(Output)(*output -> out_channel*)
+  let wrapped_in     = Wrapped_in.create 16
+  let wrapped_out    = Wrapped_out.create 16
 
   let input_add k v =
     BatConcurrent.sync !lock (Wrapped_in.add wrapped_in k) v
@@ -153,9 +153,6 @@
 (**
    {6 Network}
 *)
-
-  let ( <| ) f x = f x
-  let ( *** ) f g = fun (x,y) -> (f x, g y)
 
   let shutdown_connection cin =
     try shutdown_connection (input_get cin)

@@ -1,5 +1,5 @@
 (*
- * ExtPrintf - Extended Printf module
+ * BatPrintf - Extended Printf module
  * Copyright (C) 2008 David Teller
  *
  * This library is free software; you can redistribute it and/or
@@ -103,12 +103,12 @@ type ('a, 'b, 'c) t = ('a, 'b, 'c) Pervasives.format
      using uppercase letters.
    - [%o]: convert an integer argument to unsigned octal.
    - [%s]: insert a string argument.
-   - [%S]: insert a string argument in Caml syntax (double quotes, escapes).
+   - [%S]: insert a string argument in OCaml syntax (double quotes, escapes).
    - [%c]: insert a character argument.
-   - [%C]: insert a character argument in Caml syntax (single quotes, escapes).
+   - [%C]: insert a character argument in OCaml syntax (single quotes, escapes).
    - [%f]: convert a floating-point argument to decimal notation,
      in the style [dddd.ddd].
-   - [%F]: convert a floating-point argument to Caml syntax ([dddd.]
+   - [%F]: convert a floating-point argument to OCaml syntax ([dddd.]
      or [dddd.ddd] or [d.ddd e+-dd]).
    - [%e] or [%E]: convert a floating-point argument to decimal notation,
      in the style [d.ddd e+-dd] (mantissa and exponent).
@@ -328,7 +328,7 @@ val kprintf : (string -> 'a) -> ('b, unit, string, 'a) format4 -> 'b
 
 (**/**)
 
-(* For Caml system internal use only. Don't call directly. *)
+(* For OCaml system internal use only. Don't call directly. *)
 
 module CamlinternalPr : sig
 
