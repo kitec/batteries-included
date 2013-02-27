@@ -414,6 +414,27 @@ module Concrete = struct
     in
     loop map
 
+  let modify_opt x f cmp map =
+    let rec loop = function
+      | Node (l, k, v, r, h) ->
+        let c = cmp x k in
+        if c = 0 then
+          match f (Some v) with
+            | None -> merge l r
+            | Some v' -> Node (l, x, v', r, h)
+        else if c < 0 then
+          let nl = loop l in
+          bal nl k v r
+        else
+          let nr = loop r in
+          bal l k v nr
+      | Empty ->
+        match f None with
+          | None   -> raise Exit (* fast exit *)
+          | Some d -> Node (Empty, x, d, Empty, 1)
+    in
+    try loop map with Exit -> map
+
   let extract x cmp map =
     let rec loop = function
       | Node (l, k, v, r, _) ->
@@ -629,85 +650,47 @@ module type OrderedType = BatInterfaces.OrderedType
 module type S =
 sig
   type key
-
   type (+'a) t
-
   val empty: 'a t
-
   val is_empty: 'a t -> bool
-
   val cardinal: 'a t -> int
-
   val add: key -> 'a -> 'a t -> 'a t
-
   val find: key -> 'a t -> 'a
-
   val remove: key -> 'a t -> 'a t
-
   val modify: key -> ('a -> 'a) -> 'a t -> 'a t
-
   val modify_def: 'a -> key -> ('a -> 'a) -> 'a t -> 'a t
-
+  val modify_opt: key -> ('a option -> 'a option) -> 'a t -> 'a t
   val extract : key -> 'a t -> 'a * 'a t
-
   val pop : 'a t -> (key * 'a) * 'a t
-
   val mem: key -> 'a t -> bool
-
   val iter: (key -> 'a -> unit) -> 'a t -> unit
-
   val map: ('a -> 'b) -> 'a t -> 'b t
-
   val mapi: (key -> 'a -> 'b) -> 'a t -> 'b t
-
   val fold: (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
-
   val filterv: ('a -> bool) -> 'a t -> 'a t
-
   val filter: (key -> 'a -> bool) -> 'a t -> 'a t
-
   val filter_map: (key -> 'a -> 'b option) -> 'a t -> 'b t
-
   val compare: ('a -> 'a -> int) -> 'a t -> 'a t -> int
-
   val equal: ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
-
   val keys : _ t -> key BatEnum.t
-
   val values: 'a t -> 'a BatEnum.t
-
   val min_binding : 'a t -> (key * 'a)
-
   val max_binding : 'a t -> (key * 'a)
-
   val choose : 'a t -> (key * 'a)
-
   val split : key -> 'a t -> ('a t * 'a option * 'a t)
-
   val partition : (key -> 'a -> bool) -> 'a t -> 'a t * 'a t
-
   val singleton : key -> 'a -> 'a t
-
   val bindings : 'a t -> (key * 'a) list
-
   val enum  : 'a t -> (key * 'a) BatEnum.t
-
   val backwards  : 'a t -> (key * 'a) BatEnum.t
-
   val of_enum: (key * 'a) BatEnum.t -> 'a t
-
   val for_all: (key -> 'a -> bool) -> 'a t -> bool
-
   val exists: (key -> 'a -> bool) -> 'a t -> bool
-
   val merge:
     (key -> 'a option -> 'b option -> 'c option) -> 'a t -> 'b t -> 'c t
-
   (** {6 Boilerplate code}*)
-
-#if not BATTERIES_JS
   (** {7 Printing}*)
-
+#if not BATTERIES_JS
   val print :  ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
     ('a BatInnerIO.output -> key -> unit) ->
     ('a BatInnerIO.output -> 'c -> unit) ->
@@ -816,6 +799,9 @@ struct
   let modify_def v0 x f m =
     t_of_impl (Concrete.modify_def v0 x f Ord.compare (impl_of_t m))
 
+  let modify_opt x f m =
+    t_of_impl (Concrete.modify_opt x f Ord.compare (impl_of_t m))
+
   let extract k t =
     let (v, t') = Concrete.extract k Ord.compare (impl_of_t t) in
     (v, t_of_impl t')
@@ -856,13 +842,6 @@ struct
   end
 
 end
-
-module IStringMap = Make(BatString.IString)
-#if not BATTERIES_JS
-module NumStringMap = Make(BatString.NumString)
-#endif
-(*  module RopeMap    = Make(BatRope)
-    module IRopeMap   = Make(BatRope.IRope) *)
 
 
 (**
@@ -958,6 +937,16 @@ let add_carry x d m = Concrete.add_carry x d Pervasives.compare m
 let modify x f m = Concrete.modify x f Pervasives.compare m
 
 let modify_def v0 x f m = Concrete.modify_def v0 x f Pervasives.compare m
+
+let modify_opt x f m = Concrete.modify_opt x f Pervasives.compare m
+(*$T modify_opt
+  empty |> add 1 false |> \
+  modify_opt 1 (function Some false -> Some true | _ -> assert false) |> \
+  find 1
+  empty |> add 1 true |> \
+  modify_opt 1 (function Some true -> None | _ -> assert false) |> \
+  mem 1 |> not
+ *)
 
 let extract x m = Concrete.extract x Pervasives.compare m
 
@@ -1143,6 +1132,9 @@ module PMap = struct (*$< PMap *)
 
   let modify_def v0 x f m =
     { m with map = Concrete.modify_def v0 x f m.cmp m.map }
+
+  let modify_opt x f m =
+    { m with map = Concrete.modify_opt x f m.cmp m.map }
 
   let extract x m =
     let out, map' = Concrete.extract x m.cmp m.map in

@@ -33,12 +33,13 @@ tracker}.
 
 {!modules: BatBitSet BatCache BatDeque BatDllist BatDynArray BatEnum
 BatFingerTree BatGlobal BatHashcons BatHeap BatIMap BatISet
-BatLazyList BatMultiPMap BatRefList BatSeq BatSplay BatUref BatVect }
+BatLazyList BatMultiPMap BatRefList BatSeq BatSplay BatText BatUChar
+BatUref BatUTF8 BatVect}
 
 {6 New Modules in Batteries}
 
 {!modules: BatBase64 BatCharParser BatFile BatInterfaces BatIO BatLog
-BatLogger BatNumber BatOptParse BatParserCo 
+BatLogger BatNumber BatOptParse BatParserCo
 BatResult BatReturn }
 
 {6 Builtin Types as Modules}
@@ -48,7 +49,7 @@ BatNativeint BatOption BatRef BatTuple BatUnit }
 
 {6 Extensions to the Standard Library}
 
-These modules have base library equivalents.  When using [open Batteries], [BatFoo] will replace [Foo], so that the new functions are easily available without a [Bat] prefix on the module name.  As well, [BatPervasives] is opened into the global namespace.  Finally, the previous versions of replaced modules are available in the [Legacy] module, i.e. [Legacy.Unix] and [Legaxy.Pervasives].
+These modules have base library equivalents.  When using [open Batteries], [BatFoo] will replace [Foo], so that the new functions are easily available without a [Bat] prefix on the module name.  As well, [BatPervasives] is opened into the global namespace.  Finally, the previous versions of replaced modules are available in the [Legacy] module, i.e. [Legacy.Unix] and [Legacy.Pervasives].
 
 {!modules: BatArray BatBigarray BatBig_int BatBuffer BatComplex
 BatDigest BatFormat BatGc BatGenlex BatHashtbl BatLexing BatList

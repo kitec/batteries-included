@@ -746,6 +746,59 @@ let assq_inv e l =
   | _::t                  -> aux t
   in aux l
 
+let modify_opt a f l =
+  let rec aux p = function
+  | [] ->
+    (match f None with
+    | None   -> raise Exit
+    | Some v -> rev ((a,v)::p))
+  | (a',b)::t when a' = a ->
+    (match f (Some b) with
+    | None    -> rev_append p t
+    | Some b' -> rev_append ((a,b')::p) t)
+  | p'::t ->
+    aux (p'::p) t
+  in
+  try aux [] l with Exit -> l
+
+(*$= modify_opt & ~printer:(IO.to_string (List.print (fun fmt (a,b) -> Printf.fprintf fmt "%d,%d" a b)))
+  (* to modify a value *) \
+  (modify_opt 5 (function Some 1 -> Some 2 | _ -> assert false) [ 1,0 ; 5,1 ; 8,2 ]) \
+    [ 1,0 ; 5,2 ; 8,2 ]
+  (* to add a value *) \
+  (modify_opt 5 (function None -> Some 2 | _ -> assert false) [ 1,0 ; 8,2 ]) \
+    [ 1,0 ; 8,2 ; 5,2 ]
+  (* to remove a value *) \
+  (modify_opt 5 (function Some 1 -> None | _ -> assert false) [ 1,0 ; 5,1 ; 8,2 ]) \
+    [ 1,0 ; 8,2 ]
+ *)
+
+let modify a f l =
+  let f' = function
+    | None   -> raise Not_found
+    | Some b -> Some (f b)
+  in
+  modify_opt a f' l
+
+(*$= modify & ~printer:(IO.to_string (List.print (fun fmt (a,b) -> Printf.fprintf fmt "%d,%d" a b)))
+  (modify 5 succ [ 1,0 ; 5,1 ; 8,2 ]) [ 1,0 ; 5,2 ; 8,2 ]
+ *)
+(*$T modify
+  try ignore (modify 5 succ [ 1,0 ; 8,2 ]); false with Not_found -> true
+ *)
+
+let modify_def dfl a f l =
+  let f' = function
+    | None   -> Some (f dfl)
+    | Some b -> Some (f b)
+  in
+  modify_opt a f' l
+
+(*$= modify_def & ~printer:(IO.to_string (List.print (fun fmt (a,b) -> Printf.fprintf fmt "%d,%d" a b)))
+  (modify_def 0 5 succ [ 1,0 ; 5,1 ; 8,2 ]) [ 1,0 ; 5,2 ; 8,2 ]
+  (modify_def 0 5 succ [ 1,0 ; 8,2 ]) [ 1,0 ; 8,2 ; 5,1 ]
+ *)
+
 let sort_unique cmp lst =
   let sorted = List.sort cmp lst in
   let fold first rest = List.fold_left
@@ -789,13 +842,20 @@ let cartesian_product l1 l2 =
   cp [1;2;3] ['x';'y'] = [1,'x';1,'y';2,'x';2,'y';3,'x';3,'y']
  *)
 
-let rec n_cartesian_product = function [] -> assert false
-  | [l] -> List.map (fun i -> [i]) l
+let rec n_cartesian_product = function
+  | [] -> [[]]
   | h :: t ->
       let rest = n_cartesian_product t in
       List.concat (List.map (fun i -> List.map (fun r -> i :: r) rest) h)
 
-
+(*$T n_cartesian_product as ncp
+  ncp []               = [[]]
+  ncp [[]]             = []
+  ncp [[1]; [2]; [3]]  = [[1;2;3]]
+  ncp [[1;2;3]]        = [[1]; [2]; [3]]
+  ncp [[1;2;3]; []]    = []
+  ncp [[1;2;3]; [4;5]] = [[1;4]; [1;5]; [2;4]; [2;5]; [3;4]; [3;5]]
+ *)
 
 #if not BATTERIES_JS
 let print ?(first="[") ?(last="]") ?(sep="; ") print_a  out = function

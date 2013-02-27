@@ -35,6 +35,18 @@ let make len c = String.make len c, 0, len
 
 let create len = String.make len '\000', 0, len
 
+let equal (s1,o1,l1) (s2,o2,l2) = 
+  if l1 <> l2 then false
+  else BatReturn.label (fun label ->
+    for i = 0 to l1-1 do
+      if s1.[i+o1] <> s1.[i+o2] then BatReturn.return label false
+    done; true)
+(*$T equal
+   equal (of_string "abc") (of_string "abc") = true
+   equal (substring "aba" 0 1) (substring "aba" 2 1) = true
+   equal (substring "aba" 1 1) (substring "aba" 2 1) = false
+*)
+
 (*
 let of_chan chan =
   let tempsize = 16384 in
@@ -160,6 +172,12 @@ let rindex_from (str, off, len) i c =
 
 let rindex sus c = rindex_from sus (size sus - 1) c
 
+let contains ss c = try ignore (index ss c); true with Not_found -> false
+(*$T contains
+   contains (of_string "foobar") 'c' = false
+   contains (of_string "foobar") 'o' = true
+   contains (of_string "") 'Z' = false
+*)
 
 (** not implemented: collate *)
 
@@ -249,6 +267,9 @@ let iter f (str, off, len) =
     f str.[i];
   done
 
+let iteri f (str, off, len) =
+  for i = 0 to len-1 do f i str.[i+off] done
+
 let trim x = dropl BatChar.is_whitespace (dropr BatChar.is_whitespace x)
 
 let split_on_char c (str, off, len) =
@@ -268,6 +289,16 @@ let split_on_pipe str = split_on_char '|' str;;
 let split_on_dot str = split_on_char '.' str;;
 let split_on_comma str = split_on_char ',' str;;
 let split_on_slash str = split_on_char '/' str;;
+
+let rec enum (str, off, len) = 
+  let last_element = off + len - 1 in
+  let i = ref off in 
+  BatEnum.make
+      ~next:(fun () -> 
+        if !i > last_element then raise BatEnum.No_more_elements
+        else str.[BatRef.post_incr i] )
+      ~count:(fun () -> len - !i)
+      ~clone:(fun () -> enum (str, !i, len - !i))
 
 let print oc ss = iter (fun c -> BatIO.write oc c) ss
 #endif

@@ -603,9 +603,16 @@ let index_from r base item =
     let index_aux i c =
       if c = item then Return.return label i
     in
-    range_iteri index_aux ~base base (length r - base) r;
+    range_iteri index_aux base (length r - base) r;
     raise Not_found)
-
+(*$T index_from
+  index_from (of_string "batteries") 0 (BatUChar.of_char 't') = 2
+  index_from (of_string "batteries") 3 (BatUChar.of_char 't') = 3
+  Result.(catch (index_from (of_string "batteries") 4) (BatUChar.of_char 't') \
+            |> is_exn Not_found)
+  Result.(catch (index_from (of_string "batteries") 20) (BatUChar.of_char 't') \
+            |> is_exn Out_of_bounds)
+ *)
 
 let rindex r char =
   Return.with_label (fun label ->
@@ -664,32 +671,55 @@ let ends_with r suffix =
   in
   loop ()
 
-(** find [r2] within [r1] or raises Not_found *)
-let find_from r1 ofs r2 =
-  let matchlen = length r2 in
-  let r2_string = to_ustring r2 in
-  let check_at pos = r2_string = (to_ustring (sub r1 pos matchlen)) in
+(** find [sub] within [rop] or raises Not_found *)
+let find_from rop ofs sub_rop =
+  let len = length rop in
+  if ofs < 0 || ofs > len then raise Out_of_bounds;
+  let matchlen = length sub_rop in
+  let sub_rop = to_ustring sub_rop in
+  let check_at pos = sub_rop = (to_ustring (sub rop pos matchlen)) in
   (* TODO: inefficient *)
   Return.with_label (fun label ->
-    for i = ofs to length r1 - matchlen do
+    for i = ofs to len - matchlen do
       if check_at i then Return.return label i
     done;
     raise Not_found)
+(*$T find_from
+  find_from (of_string "foobarbaz") 4 (of_string "ba") = 6
+  find_from (of_string "foobarbaz") 7 (of_string "") = 7
+  Result.(catch (find_from (of_string "") 0) (of_string "a") |> is_exn Not_found)
+  let foo = of_string "foo" in Result.(catch (find_from foo 2) foo |> is_exn Not_found)
+  let foo = of_string "foo" in Result.(catch (find_from foo 3) foo |> is_exn Not_found)
+  let foo = of_string "foo" in Result.(catch (find_from foo 4) foo |> is_exn Out_of_bounds)
+  let foo = of_string "foo" in Result.(catch (find_from foo (-1)) foo |> is_exn Out_of_bounds)
+*)
 
-let find r1 r2 = find_from r1 0 r2
+let find rop sub = find_from rop 0 sub
 
-let rfind_from r1 suf r2 =
-  let matchlen = length r2 in
-  let r2_string = to_ustring r2 in
-  let check_at pos = r2_string = (to_ustring (sub r1 pos matchlen)) in
+let rfind_from rop suf sub_rop =
+  if suf + 1 < 0 || suf + 1 > length rop then raise Out_of_bounds;
+  let matchlen = length sub_rop in
+  let sub_rop = to_ustring sub_rop in
+  let check_at pos = sub_rop = (to_ustring (sub rop pos matchlen)) in
   (* TODO: inefficient *)
   Return.with_label (fun label ->
-    for i = suf - (length r1 + 1 ) downto 0 do
+    for i = suf - matchlen + 1 downto 0 do
       if check_at i then Return.return label i
     done;
     raise Not_found)
+(*$T rfind_from
+  rfind_from (of_string "foobarbaz") 5 (of_string "ba") = 3
+  rfind_from (of_string "foobarbaz") 7 (of_string "ba") = 6
+  rfind_from (of_string "foobarbaz") 6 (of_string "ba") = 3
+  rfind_from (of_string "foobarbaz") 7 (of_string "") = 8
+  Result.(catch (rfind_from (of_string "") 3) empty |> is_exn Out_of_bounds)
+  Result.(catch (rfind_from (of_string "") (-1)) (of_string "a") |> is_exn Not_found)
+  Result.(catch (rfind_from (of_string "foobarbaz") 2) (of_string "ba") |> is_exn Not_found)
+  Result.(catch (rfind_from (of_string "foo") 3) (of_string "foo") |> is_exn Out_of_bounds)
+  Result.(catch (rfind_from (of_string "foo") (-2)) (of_string "foo") |> is_exn Out_of_bounds)
+*)
 
-let rfind r1 r2 = rfind_from r1 (length r2 - 1) r2
+let rfind rop sub = rfind_from rop (length rop - 1) sub
 
 let exists r_str r_sub = try ignore(find r_str r_sub); true with Not_found -> false
 
@@ -772,10 +802,26 @@ let replace_chars f r = fold (fun acc s -> append_us acc (f s)) Empty r
 let split r sep =
   let i = find r sep in
   head r i, tail r (i+length sep)
+(*$T split
+  split (of_string "OCaml, the coolest FP language.") (of_char ' ') = \
+    (of_string "OCaml,", of_string "the coolest FP language.")
+  split (of_string "OCaml, the coolest FP language.") (of_char '.') = \
+    (of_string "OCaml, the coolest FP language", empty)
+  Result.(catch (split (of_string "OCaml, the coolest FP language.")) \
+		(of_char '!') |> is_exn Not_found)
+*)
 
 let rsplit (r:t) sep =
   let i = rfind r sep in
   head r i, tail r (i+length sep)
+(*$T rsplit
+  rsplit (of_string "OCaml, the coolest FP language.") (of_char ' ') = \
+    (of_string "OCaml, the coolest FP", of_string "language.")
+  rsplit (of_string "OCaml, the coolest FP language.") (of_char 'O') = \
+    (empty, of_string "Caml, the coolest FP language.")
+  Result.(catch (rsplit (of_string "OCaml, the coolest FP language.")) \
+		(of_char '!') |> is_exn Not_found)
+*)
 
 (** An implementation of [nsplit] in one pass.
 
@@ -787,22 +833,29 @@ let nsplit str sep =
   else let seplen = length sep in
        let rec aux acc ofs = match
   	   try Some(rfind_from str ofs sep)
-  	   with Invalid_rope -> None
+  	   with Not_found -> None
          with
 	   | Some idx ->
-  	     (* at this point, [idx] to [idx + seplen] contains the
+  	     (* at this point, [idx] to [idx + seplen - 1] contains the
   		separator, which is useless to us on the other hand,
   		[idx + seplen] to [ofs] contains what's just after the
   		separator, which is what we want*)
   	     let end_of_occurrence = idx + seplen in
   	     if end_of_occurrence >= ofs then
-	       aux acc idx (*We may be at the end of the string*)
+	       aux acc (idx - 1) (*We may be at the end of the string*)
   	     else
-	       aux ( sub str end_of_occurrence ( ofs - end_of_occurrence ) :: acc ) idx
-  	   | None -> (sub str 0 ofs)::acc
+	       aux ( sub str end_of_occurrence ( ofs - end_of_occurrence + 1) :: acc ) (idx - 1)
+  	   | None -> (sub str 0 (ofs + 1))::acc
        in
        aux [] (length str - 1 )
-
+(*$T nsplit
+  nsplit (of_string "OCaml, the coolest FP language.") (of_char ' ') = \
+    List.map of_string ["OCaml,"; "the"; "coolest"; "FP"; "language."]
+  nsplit (of_string "OCaml, the coolest FP language.") (of_char 'o') = \
+    List.map of_string ["OCaml, the c"; "lest FP language."]
+  nsplit (of_string "OCaml, the coolest FP language.") (of_char '!') = \
+    List.map of_string ["OCaml, the coolest FP language."]
+*)
 
 let join = concat
 
@@ -824,7 +877,7 @@ let replace ~str ~sub ~by =
     let i = find str sub in
     (true, append (slice ~last:i str)
       (append by (slice ~first:(i+(length sub)) str)))
-  with Invalid_rope -> (false, str)
+  with Not_found -> (false, str)
 
 
 let explode r = fold (fun a u -> u :: a) [] r

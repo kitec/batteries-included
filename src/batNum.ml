@@ -45,25 +45,28 @@ module BaseNum = struct
   let to_float   = float_of_num
   let to_string  = string_of_num
   let of_string  = num_of_string
-  let pred       = function
-    | Int     i -> Int ( i - 1 )
-    | Big_int i -> Big_int (Big_int.pred_big_int i)
-    | _         -> raise (Invalid_argument "Num.pred")
-  let succ       = function
-    | Int     i -> Int ( i + 1 )
-    | Big_int i -> Big_int (Big_int.succ_big_int i)
-    | _         -> raise (Invalid_argument "Num.succ")
-
+  let pred       = pred_num
+  let succ       = succ_num
 
   let of_float f =
-    let s = Printf.sprintf "%f" f in
-      try
-	let (prefix, suffix) = BatString.split s ~by:"."    in
-	let float_digits     = String.length suffix  in
-	let divider = pow (Int 10) (Int (String.length s - float_digits)) in
-	let dividee = Big_int (Big_int.big_int_of_string  (prefix^suffix))        in
-	  div divider dividee
-      with Not_found -> of_int (BatInt.of_float f)
+    match classify_float f with
+    | FP_normal
+    | FP_subnormal ->
+        let x,e = frexp f in
+        let n,e =
+          Big_int.big_int_of_int64 (Int64.of_float (ldexp x 52)),
+          (e-52)
+        in
+        if e >= 0 then
+          Big_int (Big_int.shift_left_big_int n e)
+        else
+          div
+            (Big_int n)
+            (Big_int Big_int.(shift_left_big_int unit_big_int ~-e))
+    | FP_zero -> zero
+    | FP_nan -> div zero zero
+    | FP_infinite ->
+        if f >= 0. then div one zero else div (neg one) zero
 end
 
 module TaggedInfix = struct
@@ -72,7 +75,7 @@ module TaggedInfix = struct
 end
 
 module Infix = struct
-  (* infix operators without / suffix: +-*/ *)
+  (* infix operators without / suffix: + - * / *)
   include BatNumber.MakeInfix (BaseNum)
   include TaggedInfix
 end
@@ -90,4 +93,25 @@ let quo   = quo_num
 let sign  = sign_num
 
 let print out t = BatInnerIO.nwrite out (to_string t)
+
+let of_float_string a =
+  try
+    let ipart_s,fpart_s = BatString.split a ~by:"." in
+    let ipart = if ipart_s = "" then zero else of_string ipart_s in
+    let fpart =
+      if fpart_s = "" then zero
+      else
+	let fpart = of_string fpart_s in
+	let num10 = of_int 10 in
+	let frac = pow num10 (of_int (String.length fpart_s)) in
+	Infix.(fpart/frac)
+    in
+    add ipart fpart
+  with Not_found -> of_string a
+
+(**T
+   of_float_string "2.5" = of_string "5/2"
+   of_float_string "2." = of_string "2"
+   of_float_string ".5" = of_string "1/2"
+*)
 #endif

@@ -89,9 +89,9 @@ let csplay = function
 
 let rec cfind ?(cx=[]) ~sel = function
   | Empty -> C (cx, Empty)
-  | Node (l, x, r) ->
+  | Node (l, x, r) as node ->
       let sx = sel x in
-      if sx = 0 then C (cx, Node (l, x, r))
+      if sx = 0 then C (cx, node)
       else if sx < 0 then cfind ~cx:(Left (x, r) :: cx) ~sel l
       else cfind ~cx:(Right (l, x) :: cx) ~sel r
 
@@ -132,8 +132,23 @@ struct
     csplay begin
       match cfind ~sel:(ksel k) tr with
         | C (cx, Node (l, (k, v), r)) -> C (cx, Node (l, (k, fn v), r))
-	| C (cx, Empty) -> C (cx, singleton' k (fn def))
+        | C (cx, Empty) -> C (cx, singleton' k (fn def))
     end
+  end
+
+  let modify_opt k fn (Map tr) = Map begin
+    try
+      match cfind ~sel:(ksel k) tr with
+        | C (cx, Node (l, (k, v), r)) -> begin
+            match fn (Some v) with
+              | Some v' -> csplay (C (cx, Node (l, (k, v'), r)))
+              | None    -> bst_append l r
+            end
+        | C (cx, Empty) ->
+            match fn None with
+              | Some v -> csplay (C (cx, singleton' k v))
+              | None   -> raise Exit
+    with Exit -> tr
   end
 
   (* Didactic implementation note : why that ugly Obj module here? Why not

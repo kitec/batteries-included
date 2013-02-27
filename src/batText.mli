@@ -237,14 +237,18 @@ val filter : (BatUChar.t -> bool) -> t -> t
   (** {6 Finding}*)
 
 val index : t -> BatUChar.t -> int
-  (** [Rope.index s c] returns the position of the leftmost
+  (** [index s c] returns the position of the leftmost
       occurrence of character [c] in rope [s].
       Raise [Not_found] if [c] does not occur in [s]. *)
 
 val index_from : t -> int -> BatUChar.t -> int
-  (** Same as {!Rope.index}, but start searching at the character
-      position given as second argument.  [Rope.index s c] is
-      equivalent to [Rope.index_from s 0 c].*)
+  (** [index_from r i c] returns the character number of the
+      first occurrence of character [c] in rope [r] after position [i].
+      [index s c] is equivalent to [index_from s 0 c].
+
+      @raise Out_of_bounds if [i] is not a valid position in [r].
+      @raise Not_found if [c] does not occur in [r] after position [i].
+  *)
 
 val rindex : t -> BatUChar.t -> int
   (** [Rope.rindex s c] returns the position of the rightmost
@@ -279,11 +283,15 @@ val find : t -> t -> int
 
       {b Note} This implementation is optimized for short ropes.
 
-      @raise Invalid_rope if [x] is not a subrope of [s]. *)
+      @raise Not_found if [x] is not a subrope of [s]. *)
 
 val find_from : t -> int -> t -> int
   (** [find_from s ofs x] behaves as [find s x] but starts searching
-      at offset [ofs]. [find s x] is equivalent to [find_from s 0 x].*)
+      at offset [ofs]. [find s x] is equivalent to [find_from s 0 x].
+
+      @raise Out_of_bounds if [ofs] is not a valid_position in [s].
+      @raise Not_found if [x] is not a subrope of [s].
+  *)
 
 val rfind : t -> t -> int
   (** [rfind s x] returns the starting index of the last occurrence
@@ -291,11 +299,15 @@ val rfind : t -> t -> int
 
       {b Note} This implementation is optimized for short ropes.
 
-      @raise Invalid_rope if [x] is not a subrope of [s]. *)
+      @raise Not_found if [x] is not a subrope of [s]. *)
 
 val rfind_from : t -> int -> t -> int
   (** [rfind_from s ofs x] behaves as [rfind s x] but starts searching
-      at offset [ofs]. [rfind s x] is equivalent to [rfind_from s (length s - 1) x].*)
+      at offset [ofs]. [rfind s x] is equivalent to [rfind_from s (length s - 1) x].
+
+      @raise Out_of_bounds if [ofs] is not a valid_position in [s].
+      @raise Not_found if [x] is not a subrope of [s].
+  *)
 
 
 val starts_with : t -> t -> bool
@@ -391,17 +403,19 @@ val replace : str:t -> sub:t -> by:t -> bool * t
 val split : t -> t -> t * t
   (** [split s sep] splits the rope [s] between the first
       occurrence of [sep].
-      @raise Invalid_rope if the separator is not found. *)
+      @raise Not_found if the separator is not found. *)
 
 val rsplit : t -> t -> t * t
   (** [rsplit s sep] splits the rope [s] between the last
       occurrence of [sep].
-      @raise Invalid_rope if the separator is not found. *)
+      @raise Not_found if the separator is not found. *)
 
 val nsplit : t -> t -> t list
   (** [nsplit s sep] splits the rope [s] into a list of ropes
       which are separated by [sep].
-      [nsplit "" _] returns the empty list. *)
+      [nsplit "" _] returns the empty list.
+      If the separator is not found, it returns a list of
+      the rope [s]. *)
 
 val compare : t -> t -> int
   (** The comparison function for ropes, with the same specification as
