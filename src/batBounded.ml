@@ -1,5 +1,6 @@
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
+
 module O = BatOrd
 
 exception Invalid_bounds
@@ -289,4 +290,5 @@ module MakeNumeric(M : BoundedNumericType) = struct
   let ( *: ) = map2_exn I.( * )
   let ( /: ) = map2_exn I.( / )
 end
+
 #endif

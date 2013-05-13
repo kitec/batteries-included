@@ -17,6 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 
@@ -76,6 +77,7 @@ let protect r v body =
 
 
 #if not BATTERIES_JS
+
 external ref : 'a -> 'a ref = "%makemutable"
 (** Return a fresh reference containing the given value. *)
 
@@ -94,6 +96,7 @@ external get : 'a ref -> 'a = "%field0"
     (** As [ ! ]*)
 
 let print print_a out r = print_a out !r
+
 #endif
 
 let toggle r = r := not !r

@@ -17,6 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -255,4 +256,5 @@ let print ?(first="[") ?(last="]") ?(sep="; ") elepr out dq =
     BatIO.to_string (print ~first:"<" ~last:">" ~sep:"," Int.print) (of_list l) \
     = BatIO.to_string (List.print ~first:"<" ~last:">" ~sep:"," Int.print) l)
 *)
+
 #endif

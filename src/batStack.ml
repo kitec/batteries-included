@@ -18,6 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -73,4 +74,5 @@ module Exceptionless = struct
   let top s = try Some (top s) with Empty -> None
   let pop s = try Some (pop s) with Empty -> None
 end
+
 #endif

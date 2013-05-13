@@ -3,6 +3,7 @@
 (* Modified by Edgar Friendly <thelema314@gmail.com> *)
 
 (** DIET Maps from integers, packed using ranges *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -158,4 +159,5 @@ module Infix : sig
         as comparison function.
     *)
 end
+
 #endif

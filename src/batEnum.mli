@@ -18,7 +18,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
+
 (**
     Enumeration over abstract collection of elements.
 
@@ -559,9 +561,11 @@ val merge : ('a -> 'a -> bool) -> 'a t -> 'a t -> 'a t
   *)
 
 #if not BATTERIES_JS
+
 val uniq : 'a t -> 'a t
   (** [uniq e] returns a duplicate of [e] with repeated values
       omitted. (similar to unix's [uniq] command) *)
+
 #endif
 
 val switch : ('a -> bool) -> 'a t -> 'a t * 'a t
@@ -720,10 +724,12 @@ end
 
 
 #if not BATTERIES_JS
+
 (** {6 Boilerplate code}*)
 
 val print :  ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b t -> unit
 (** Print and consume the contents of an enumeration.*)
+
 #endif
 
 val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int

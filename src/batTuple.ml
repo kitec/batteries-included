@@ -19,6 +19,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 module Tuple2 = struct
@@ -56,6 +57,7 @@ module Tuple2 = struct
         | Some y -> (x,y)
 
 #if not BATTERIES_JS
+
   let print ?(first="(") ?(sep=",") ?(last=")") print_a print_b out (a,b) =
     BatIO.nwrite out first;
     print_a out a;
@@ -65,6 +67,7 @@ module Tuple2 = struct
 
   let printn ?(first="(") ?(sep=",") ?(last=")") printer out pair =
     print ~first ~sep ~last printer printer out pair
+
 #endif
 
   let compare ?(cmp1=Pervasives.compare) ?(cmp2=Pervasives.compare) (a,b) (c,d) =
@@ -142,6 +145,7 @@ module Tuple3 = struct
             | Some c -> (a,b,c)
 
 #if not BATTERIES_JS
+
   let print ?(first="(") ?(sep=",") ?(last=")") print_a print_b print_c out (a,b,c) =
     BatIO.nwrite out first;
     print_a out a;
@@ -153,6 +157,7 @@ module Tuple3 = struct
 
   let printn ?(first="(") ?(sep=",") ?(last=")") printer out pair =
     print ~first ~sep ~last printer printer printer out pair
+
 #endif
 
   let compare ?(cmp1=Pervasives.compare) ?(cmp2=Pervasives.compare) ?(cmp3=Pervasives.compare) (a1,a2,a3) (b1,b2,b3) =
@@ -248,6 +253,7 @@ module Tuple4 = struct
                 | Some d -> (a,b,c,d)
 
 #if not BATTERIES_JS
+
   let print ?(first="(") ?(sep=",") ?(last=")") print_a print_b print_c print_d out (a,b,c,d) =
     BatIO.nwrite out first;
     print_a out a;
@@ -261,6 +267,7 @@ module Tuple4 = struct
 
   let printn ?(first="(") ?(sep=",") ?(last=")") printer out pair =
     print ~first ~sep ~last printer printer printer printer out pair
+
 #endif
 
   let compare ?(cmp1=Pervasives.compare) ?(cmp2=Pervasives.compare) ?(cmp3=Pervasives.compare) ?(cmp4=Pervasives.compare) (a1,a2,a3,a4) (b1,b2,b3,b4) =
@@ -384,6 +391,7 @@ module Tuple5 = struct
                     | Some e -> (a,b,c,d,e)
 
 #if not BATTERIES_JS
+
   let print ?(first="(") ?(sep=",") ?(last=")") print_a print_b print_c print_d print_e out (a,b,c,d,e) =
     BatIO.nwrite out first;
     print_a out a;
@@ -399,6 +407,7 @@ module Tuple5 = struct
 
   let printn ?(first="(") ?(sep=",") ?(last=")") printer out pair =
     print ~first ~sep ~last printer printer printer printer printer out pair
+
 #endif
 
   let compare ?(cmp1=Pervasives.compare) ?(cmp2=Pervasives.compare) ?(cmp3=Pervasives.compare) ?(cmp4=Pervasives.compare) ?(cmp5=Pervasives.compare) (a1,a2,a3,a4,a5) (b1,b2,b3,b4,b5) =

@@ -18,6 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 (*BISECT-IGNORE-BEGIN*)
@@ -96,11 +97,13 @@ module Infix = struct
 end
 
 #if not BATTERIES_JS
+
 let print out t = BatInnerIO.write out t
 (*$T print
   BatIO.to_string print 'a' = "a"
   BatIO.to_string print '\n' = "\n"
 *)
+
 #endif
 
 (*BISECT-IGNORE-BEGIN*)

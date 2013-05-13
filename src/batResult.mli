@@ -98,6 +98,8 @@ module Infix : sig
 end
 
 #if not BATTERIES_JS
+
 (** Print a result as Ok(x) or Bad(exn) *)
 val print : ('b BatInnerIO.output -> 'a -> unit) -> 'b BatInnerIO.output -> ('a, exn) t -> unit
+
 #endif

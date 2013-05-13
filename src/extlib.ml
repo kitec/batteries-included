@@ -1,5 +1,6 @@
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
+
 module Base64 = BatBase64
 module BitSet = BatBitSet
 module Dllist = BatDllist
@@ -27,4 +28,5 @@ module Std = BatPervasives
 module UChar = BatUChar
 module UTF8 = BatUTF8
 (* module Unzip = NOT AVAILABLE *)
+
 #endif

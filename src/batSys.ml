@@ -18,6 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -26,4 +27,5 @@ let big_endian = false  (* overridden by real big_endian value in 4.00 and above
 include Sys
 
 let files_of d = BatArray.enum (readdir d)
+
 #endif

@@ -18,6 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -684,4 +685,5 @@ let disjoint s1 s2 = Concrete.disjoint Pervasives.compare s1 s2
     compare a b = - (compare b c)
   compare (of_list [1;2;3]) (of_list [3;1;2]) = 0
  *)
+
 #endif

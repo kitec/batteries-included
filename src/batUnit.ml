@@ -17,6 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc.
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -35,4 +36,5 @@ let equal () () = true
 let print out () = BatInnerIO.nwrite out unit_string
 
 (*BISECT-IGNORE-END*)
+
 #endif

@@ -17,6 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc.
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -56,4 +57,5 @@ val equal : t -> t -> bool
 
 (** {7 Printing}*)
 val print: 'a BatInnerIO.output -> unit -> unit
+
 #endif

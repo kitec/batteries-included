@@ -10,4 +10,5 @@ let () =
   BatIO.lock_factory := RMutex.make;
   BatPervasives.lock := RMutex.make ();
   ()
+
 #endif

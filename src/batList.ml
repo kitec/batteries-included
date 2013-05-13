@@ -20,6 +20,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 
@@ -858,6 +859,7 @@ let rec n_cartesian_product = function
  *)
 
 #if not BATTERIES_JS
+
 let print ?(first="[") ?(last="]") ?(sep="; ") print_a  out = function
   | []   ->
     BatInnerIO.nwrite out first;
@@ -873,6 +875,7 @@ let print ?(first="[") ?(last="]") ?(sep="; ") print_a  out = function
     BatInnerIO.nwrite out last
 
 let t_printer a_printer _paren out x = print (a_printer false) out x
+
 #endif
 
 let reduce f = function [] -> invalid_arg "Empty List"

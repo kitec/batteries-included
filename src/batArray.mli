@@ -19,6 +19,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 (** {6 Array operations}
@@ -440,6 +441,7 @@ val insert : 'a array -> 'a -> int -> 'a array
 (** {6 Boilerplate code}*)
 
 #if not BATTERIES_JS
+
 val print : ?first:string -> ?last:string -> ?sep:string ->
   ('a, 'b) BatIO.printer -> ('a t, 'b) BatIO.printer
 (** Print the contents of an array, with [~first] preceeding the first
@@ -449,6 +451,7 @@ val print : ?first:string -> ?last:string -> ?sep:string ->
 
     Example: IO.to_string (Array.print Int.print) [|2;4;66|] = "[|2; 4; 66|]"
  *)
+
 #endif
 
 val compare : 'a BatOrd.comp -> 'a array BatOrd.comp
@@ -656,7 +659,9 @@ sig
 (** {6 Boilerplate code}*)
 
 #if not BATTERIES_JS
+
   val print : ?first:string -> ?last:string -> ?sep:string -> ('a BatIO.output -> 'b -> unit) ->  'a BatIO.output -> ('b, [>`Read]) t -> unit
+
 #endif
 
   val compare : 'a BatOrd.comp -> ('a, [> `Read]) t BatOrd.comp

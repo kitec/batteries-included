@@ -1,5 +1,6 @@
 (* $Id: iSet.mli,v 1.1 2003/12/19 17:24:34 yori Exp $ *)
 (* Copyright 2003 Yamagata Yoriyuki. distributed with LGPL *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -146,4 +147,5 @@ val of_list : (int*int) list -> t
 (** Build a ISet.t out of a list or enum of ranges *)
 
 val print : _ BatIO.output -> t -> unit
+
 #endif

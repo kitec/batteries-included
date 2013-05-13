@@ -311,4 +311,5 @@ val enum : t -> char BatEnum.t
 
 val print : 'a BatIO.output -> t -> unit
 (** [print oc ss] prints [ss] to the output channel [oc] *)
+
 #endif

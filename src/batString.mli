@@ -20,6 +20,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 (** String operations.
@@ -720,6 +721,7 @@ module IString : BatInterfaces.OrderedType with type t = t
 
 
 #if not BATTERIES_JS
+
 val numeric_compare: t -> t -> int
 (** Compare two strings, sorting "abc32def" before "abc210abc".
 
@@ -763,6 +765,7 @@ val print_quoted: 'a BatInnerIO.output -> string -> unit
    [String.print_quoted stdout "\n"] prints ["\n"] (not the escaped
    character, but ['\'] then ['n']).
 *)
+
 #endif
 
 (** Exceptionless counterparts for error-raising operations *)
@@ -886,7 +889,9 @@ val make : int -> char -> _ t
 val init : int -> (int -> char) -> _ t
 
 (** {6 Conversions}*)
+
 #if not BATTERIES_JS
+
 val enum : [> `Read] t -> char BatEnum.t
 
 val of_enum : char BatEnum.t -> _ t
@@ -894,6 +899,7 @@ val of_enum : char BatEnum.t -> _ t
 val backwards : [> `Read] t -> char BatEnum.t
 
 val of_backwards : char BatEnum.t -> _ t
+
 #endif
 
 val of_list : char list -> _ t
@@ -1029,6 +1035,7 @@ val icompare: [> `Read] t -> [> `Read] t -> int
 
 
 #if not BATTERIES_JS
+
 (** {7 Printing}*)
 
 val print: 'a BatInnerIO.output -> [> `Read] t -> unit
@@ -1038,6 +1045,7 @@ val println: 'a BatInnerIO.output -> [> `Read] t -> unit
 val print_quoted: 'a BatInnerIO.output -> [> `Read] t -> unit
 
 #endif
+
 (**/**)
 
 (** {6 Undocumented operations} *)

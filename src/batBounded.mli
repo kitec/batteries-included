@@ -6,6 +6,7 @@
 
     @since 2.0
 *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 

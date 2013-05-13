@@ -20,6 +20,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 (** Additional and modified functions for lists.
@@ -597,6 +598,7 @@ val transpose : 'a list list -> 'a list list
 (** {6 Boilerplate code}*)
 
 #if not BATTERIES_JS
+
 (** {7 Printing}*)
 
 val print : ?first:string -> ?last:string -> ?sep:string -> ('a
@@ -604,6 +606,7 @@ BatInnerIO.output -> 'b -> unit) ->  'a BatInnerIO.output -> 'b list -> unit
 (**Print the contents of a list*)
 
 #endif
+
 open BatOrd
 val eq : 'a eq -> 'a list eq
 val ord : 'a ord -> 'a list ord

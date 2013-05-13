@@ -18,6 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 (** Functions for the option type.
@@ -136,9 +137,11 @@ end
 (** {6 Boilerplate code}*)
 
 #if not BATTERIES_JS
+
 (** {7 Printing}*)
 
 val print : ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b t -> unit
+
 #endif
 
 (** Operations on options, with labels.*)

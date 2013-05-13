@@ -1,5 +1,6 @@
 (* Copyright 2003 Yamagata Yoriyuki. distributed with LGPL *)
 (* Modified by Edgar Friendly <thelema314@gmail.com> *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -130,4 +131,5 @@ let rec enum = function
   | Empty -> BatEnum.empty ()
   | Node (l, v, r, _) ->
     BatEnum.append (enum l) (BatEnum.delay (fun () -> BatEnum.append (BatEnum.singleton v) (enum r)))
+
 #endif

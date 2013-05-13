@@ -1,5 +1,6 @@
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
+
 open BatInnerPervasives
 open BatParserCo
 open BatCharParser
@@ -531,4 +532,5 @@ struct
     end
 
   end
+
 #endif

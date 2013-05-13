@@ -18,6 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 
@@ -493,6 +494,7 @@ let compare cmp a b =
 *)
 
 #if not BATTERIES_JS
+
 let print ?(first="[|") ?(last="|]") ?(sep="; ") print_a  out t =
   match length t with
     | 0 ->
@@ -741,9 +743,13 @@ struct
   let stable_sort  = stable_sort
   let fast_sort    = fast_sort
   let compare      = compare
+
 #if not BATTERIES_JS
+
   let print        = print
+
 #endif
+
   let ord          = ord
   let equal        = equal
   external unsafe_get : ('a, [> `Read]) t -> int -> 'a = "%array_unsafe_get"

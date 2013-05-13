@@ -20,6 +20,7 @@
  * See http://www.itu.dk/~sestoft/mosmllib/Substring.html for documentation
  *
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -301,4 +302,5 @@ let rec enum (str, off, len) =
       ~clone:(fun () -> enum (str, !i, len - !i))
 
 let print oc ss = iter (fun c -> BatIO.write oc c) ss
+
 #endif

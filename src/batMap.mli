@@ -18,6 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 (** Association tables over ordered types.
@@ -280,12 +281,14 @@ sig
     (** {6 Boilerplate code}*)
 
 #if not BATTERIES_JS
+
     (** {7 Printing}*)
 
     val print :  ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
       ('a BatInnerIO.output -> key -> unit) ->
       ('a BatInnerIO.output -> 'c -> unit) ->
       'a BatInnerIO.output -> 'c t -> unit
+
 #endif
 
     (** Output signature of the functor {!Map.Make}. *)
@@ -595,12 +598,14 @@ val bindings : ('key, 'a) t -> ('key * 'a) list
 (** {6 Boilerplate code}*)
 
 #if not BATTERIES_JS
+
 (** {7 Printing}*)
 
 val print :  ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
   ('a BatInnerIO.output -> 'b -> unit) ->
   ('a BatInnerIO.output -> 'c -> unit) ->
   'a BatInnerIO.output -> ('b, 'c) t -> unit
+
 #endif
 
 
@@ -873,12 +878,14 @@ module PMap : sig
   (** {6 Boilerplate code}*)
 
   (** {7 Printing}*)
+
 #if not BATTERIES_JS
 
   val print :  ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
     ('a BatInnerIO.output -> 'b -> unit) ->
     ('a BatInnerIO.output -> 'c -> unit) ->
     'a BatInnerIO.output -> ('b, 'c) t -> unit
+
 #endif
 
   (** get the comparison function used for a polymorphic map *)

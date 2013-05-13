@@ -17,6 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -389,4 +390,5 @@ let init () =
       "browse"
       (Toploop.Directive_string print_module)
   with e -> Printf.printf "Error while initializing help system:\n%s\n%!" (Printexc.to_string e)
+
 #endif

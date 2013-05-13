@@ -19,6 +19,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 
 include String
@@ -735,6 +736,7 @@ struct
 end
 
 #if not BATTERIES_JS
+
 let numeric_compare s1 s2 =
   let e1 = BatEnum.group BatChar.is_digit (enum s1) in
   let e2 = BatEnum.group BatChar.is_digit (enum s2) in
@@ -778,6 +780,7 @@ let print = BatInnerIO.nwrite
 let println out s = BatInnerIO.nwrite out s; BatInnerIO.write out '\n'
 
 #endif
+
 (*$T
   BatIO.to_string print "\n" = "\n"
   BatIO.to_string println "\n" = "\n\n"
@@ -797,7 +800,9 @@ let quote s = Printf.sprintf "%S" s
 *)
 
 #if not BATTERIES_JS
+
 let print_quoted out s = BatInnerIO.nwrite out (quote s)
+
 #endif
 
 module Exceptionless =
@@ -866,11 +871,14 @@ type 'a t = string
 let make          = make
 let is_empty      = is_empty
 let init          = init
+
 #if not BATTERIES_JS
+
 let enum          = enum
 let of_enum       = of_enum
 let backwards     = backwards
 let of_backwards  = of_backwards
+
 #endif
 
 let of_int        = of_int
@@ -935,10 +943,13 @@ let of_list       = of_list
 let to_list       = to_list
 
 let quote         = quote
+
 #if not BATTERIES_JS
+
 let print         = print
 let println       = println
 let print_quoted  = print_quoted
+
 #endif
 
 external of_string : string -> _ t                = "%identity"

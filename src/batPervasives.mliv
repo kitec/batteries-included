@@ -20,6 +20,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -62,10 +63,12 @@ val input_list : Pervasives.in_channel -> string list
 val input_all : Pervasives.in_channel -> string
 (** Return the whole contents of an input channel as a single
  string. *)
+
 #endif
 
 
 #if not BATTERIES_JS
+
 val dump : 'a -> string
 (** Attempt to convert a value to a string.
 
@@ -83,6 +86,7 @@ val print_any : 'b BatIO.output -> 'a -> unit
     Uses [dump] to convert the value to a string and prints that
     string to the output.
  *)
+
 #endif
 
 (** {6 List operations}
@@ -95,6 +99,7 @@ val ( @ ) : 'a list -> 'a list -> 'a list
 
 
 #if not BATTERIES_JS
+
 (** {6 Input/output}
 
     This section only contains the most common input/output operations.
@@ -373,6 +378,7 @@ val close_in : BatIO.input -> unit
 
 val close_in_noerr : BatIO.input -> unit
 (** Same as [close_in], but ignore all errors. *)
+
 #endif
 
 
@@ -408,6 +414,7 @@ Examples: the following are equivalent:
 
 ##V3## val ( |> ) : 'a -> ('a -> 'b) -> 'b
 ##V4## external (|>) : 'a -> ('a -> 'b) -> 'b = "%revapply"
+
 (** The "pipe": function application. [x |> f] is equivalent to [f x].
 
     This operator is commonly used to write a function composition by
@@ -482,10 +489,12 @@ val const : 'a -> (_ -> 'a)
     [const x] is the function which always returns [x].*)
 
 #if not BATTERIES_JS
+
 val unique : unit -> int
 (** Returns an unique identifier every time it is called.
 
     {b Note} This is thread-safe.*)
+
 #endif
 
 val tap : ('a -> unit) -> 'a -> 'a
@@ -511,6 +520,7 @@ val ignore_exceptions : ('a -> 'b) -> 'a -> unit
     and the exceptions that may be raised. *)
 
 #if not BATTERIES_JS
+
 val verify_arg : bool -> string -> unit
 (** [verify_arg condition message] will raise [Invalid_argument message] if
     [condition] is false, otherwise it does nothing.
@@ -537,6 +547,7 @@ val exe  : string
   (** The name of the current executable.
 
       [exe] is given by the first argument of [Sys.argv]*)
+
 #endif
 
 
@@ -824,8 +835,10 @@ val ( --~ ) : char -> char -> char BatEnum.t
 (** As ( -- ), but for characters.*)
 
 #if not BATTERIES_JS
+
 val print :  ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b BatEnum.t -> unit
 (** Print and consume the contents of an enumeration.*)
+
 #endif
 
 (**
@@ -873,6 +886,7 @@ return value or the [Bad] exception. *)
 *)
 
 #if not BATTERIES_JS
+
 val lock: BatConcurrent.lock ref
 (**
    A lock used to synchronize internal operations.
@@ -882,4 +896,5 @@ val lock: BatConcurrent.lock ref
    {!BatMutex}. If you're attempting to use Batteries with another
    concurrency model, set the lock appropriately.
 *)
+
 #endif

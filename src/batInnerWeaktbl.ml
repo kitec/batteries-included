@@ -15,6 +15,7 @@
 (*  GNU Library General Public License for more details.               *)
 (*                                                                     *)
 (***********************************************************************)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -139,4 +140,5 @@ let replace tbl k = replace tbl (repr k)
 let mem tbl k = mem tbl (repr k)
 let iter f = iter (fun k d -> f (obj k) d)
 let fold f = fold (fun k d a -> f (obj k) d a)
+
 #endif

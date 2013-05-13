@@ -18,6 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -63,4 +64,5 @@ external format : string -> int64 -> string = "caml_int64_format"
 
 let print out t = BatInnerIO.nwrite out (to_string t)
 let print_hex out t = BatPrintf.fprintf out "%Lx" t
+
 #endif

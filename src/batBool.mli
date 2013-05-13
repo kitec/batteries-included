@@ -18,6 +18,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
+
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
 
@@ -98,4 +99,5 @@ module Compare : BatNumber.Compare with type bat__compare_t = t
 
 (** {7 Printing}*)
 val print: 'a BatInnerIO.output -> t -> unit
+
 #endif

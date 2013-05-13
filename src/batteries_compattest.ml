@@ -1,5 +1,6 @@
 #include "src/config_incl.ml"
 #if not BATTERIES_JS
+
 open Batteries
 
 module Stdlib_verifications = struct
@@ -105,4 +106,5 @@ extensions of stdlib modules, and that no functionality is lost. *)
   module Big_int = (Big_int : module type of Legacy.Big_int)
   module Bigarray = (Bigarray : module type of Legacy.Bigarray)
 end
+
 #endif
