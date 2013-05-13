@@ -57,28 +57,28 @@ module Concrete = struct
     let hr = match r with Empty -> 0 | Node(_,_,_,h) -> h in
     if hl > hr + 2 then begin
       match l with
-          Empty -> invalid_arg "Set.bal"
-        | Node(ll, lv, lr, _) ->
-            if height ll >= height lr then
-              create ll lv (create lr v r)
-            else begin
-              match lr with
-                  Empty -> invalid_arg "Set.bal"
-                | Node(lrl, lrv, lrr, _)->
-                    create (create ll lv lrl) lrv (create lrr v r)
-            end
+        Empty -> invalid_arg "Set.bal"
+      | Node(ll, lv, lr, _) ->
+        if height ll >= height lr then
+          create ll lv (create lr v r)
+        else begin
+          match lr with
+            Empty -> invalid_arg "Set.bal"
+          | Node(lrl, lrv, lrr, _)->
+            create (create ll lv lrl) lrv (create lrr v r)
+        end
     end else if hr > hl + 2 then begin
       match r with
-          Empty -> invalid_arg "Set.bal"
-        | Node(rl, rv, rr, _) ->
-            if height rr >= height rl then
-              create (create l v rl) rv rr
-            else begin
-              match rl with
-                  Empty -> invalid_arg "Set.bal"
-                | Node(rll, rlv, rlr, _) ->
-                    create (create l v rll) rlv (create rlr rv rr)
-            end
+        Empty -> invalid_arg "Set.bal"
+      | Node(rl, rv, rr, _) ->
+        if height rr >= height rl then
+          create (create l v rl) rv rr
+        else begin
+          match rl with
+            Empty -> invalid_arg "Set.bal"
+          | Node(rll, rlv, rlr, _) ->
+            create (create l v rll) rlv (create rlr rv rr)
+        end
     end else
       Node(l, v, r, (if hl >= hr then hl + 1 else hr + 1))
 
@@ -104,36 +104,42 @@ module Concrete = struct
      Assume | height l - height r | <= 2. *)
   let merge t1 t2 =
     match (t1, t2) with
-        (Empty, t) -> t
-      | (t, Empty) -> t
-      | (_, _) -> bal t1 (min_elt t2) (remove_min_elt t2)
+      (Empty, t) -> t
+    | (t, Empty) -> t
+    | (_, _) -> bal t1 (min_elt t2) (remove_min_elt t2)
 
   let pop s =
     match s with
-      | Empty -> raise Not_found
-      | Node (l, v, r, _) ->
-          v, merge l r
+    | Empty -> raise Not_found
+    | Node (l, v, r, _) ->
+      v, merge l r
 
   (* Insertion of one element *)
   let rec add cmp x = function
       Empty -> Node(Empty, x, Empty, 1)
     | Node(l, v, r, _) as t ->
-        let c = cmp x v in
-        if c = 0 then t else
-          if c < 0 then bal (add cmp x l) v r else bal l v (add cmp x r)
+      let c = cmp x v in
+      if c = 0 then t else
+      if c < 0 then bal (add cmp x l) v r else bal l v (add cmp x r)
 
   let rec remove cmp x = function
       Empty -> Empty
     | Node(l, v, r, _) ->
-        let c = cmp x v in
-        if c = 0 then merge l r else
-          if c < 0 then bal (remove cmp x l) v r else bal l v (remove cmp x r)
+      let c = cmp x v in
+      if c = 0 then merge l r else
+      if c < 0 then bal (remove cmp x l) v r else bal l v (remove cmp x r)
 
   let rec mem cmp x = function
       Empty -> false
     | Node(l, v, r, _) ->
-        let c = cmp x v in
-        c = 0 || mem cmp x (if c < 0 then l else r)
+      let c = cmp x v in
+      c = 0 || mem cmp x (if c < 0 then l else r)
+
+  let rec find cmp x = function
+      Empty -> raise Not_found
+    | Node(l, v, r, _) ->
+      let c = cmp x v in
+      if c = 0 then v else  find cmp x (if c < 0 then l else r)
 
   let rec iter f = function
       Empty -> ()
@@ -141,34 +147,38 @@ module Concrete = struct
 
   let rec fold f s accu =
     match s with
-        Empty -> accu
-      | Node(l, v, r, _) -> fold f r (f v (fold f l accu))
+      Empty -> accu
+    | Node(l, v, r, _) -> fold f r (f v (fold f l accu))
 
   let map cmp f s =
     fold (fun v acc -> add cmp (f v) acc) s empty
+
+  let rec op_map f = function
+    | Empty -> Empty
+    | Node (l,x,r,h) -> Node (op_map f l, f x, op_map f r, h)
 
   let singleton x = Node(Empty, x, Empty, 1)
 
   let rec add_min v = function
     | Empty -> singleton v
     | Node (l, x, r, h) ->
-        bal (add_min v l) x r
+      bal (add_min v l) x r
 
   let rec add_max v = function
     | Empty -> singleton v
     | Node (l, x, r, h) ->
-        bal l x (add_max v r)
+      bal l x (add_max v r)
 
   (* Same as create and bal, but no assumptions are made on the
      relative heights of l and r. *)
   let rec join l v r =
     match (l, r) with
-        (Empty, _) -> add_min v r
-      | (_, Empty) -> add_max v l
-      | (Node(ll, lv, lr, lh), Node(rl, rv, rr, rh)) ->
-          if lh > rh + 2 then bal ll lv (join lr v r) else
-            if rh > lh + 2 then bal (join l v rl) rv rr else
-              create l v r
+      (Empty, _) -> add_min v r
+    | (_, Empty) -> add_max v l
+    | (Node(ll, lv, lr, lh), Node(rl, rv, rr, rh)) ->
+      if lh > rh + 2 then bal ll lv (join lr v r) else
+      if rh > lh + 2 then bal (join l v rl) rv rr else
+        create l v r
 
   (* Splitting.  split x s returns a triple (l, present, r) where
      - l is the set of elements of s that are < x
@@ -177,14 +187,14 @@ module Concrete = struct
      or true if s contains an element equal to x. *)
   let rec split cmp x = function
       Empty ->
-        (Empty, false, Empty)
+      (Empty, false, Empty)
     | Node(l, v, r, _) ->
-        let c = cmp x v in
-        if c = 0 then (l, true, r)
-        else if c < 0 then
-          let (ll, pres, rl) = split cmp x l in (ll, pres, join rl v r)
-        else
-          let (lr, pres, rr) = split cmp x r in (join l v lr, pres, rr)
+      let c = cmp x v in
+      if c = 0 then (l, true, r)
+      else if c < 0 then
+        let (ll, pres, rl) = split cmp x l in (ll, pres, join rl v r)
+      else
+        let (lr, pres, rr) = split cmp x r in (join l v lr, pres, rr)
 
   type 'a iter = E | C of 'a * 'a set * 'a iter
 
@@ -259,104 +269,104 @@ module Concrete = struct
     let rec part (t, f as accu) = function
       | Empty -> accu
       | Node(l, v, r, _) ->
-          part (part (if p v then (add cmp v t, f) else (t, add cmp v f)) l) r in
+        part (part (if p v then (add cmp v t, f) else (t, add cmp v f)) l) r in
     part (Empty, Empty) s
 
   let concat t1 t2 =
     match (t1, t2) with
-        (Empty, t) -> t
-      | (t, Empty) -> t
-      | (_, _) -> join t1 (min_elt t2) (remove_min_elt t2)
+      (Empty, t) -> t
+    | (t, Empty) -> t
+    | (_, _) -> join t1 (min_elt t2) (remove_min_elt t2)
 
   let rec union cmp12 s1 s2 =
     match (s1, s2) with
-        (Empty, t2) -> t2
-      | (t1, Empty) -> t1
-      | (Node(l1, v1, r1, h1), Node(l2, v2, r2, h2)) ->
-          if h1 >= h2 then
-            if h2 = 1 then add cmp12 v2 s1 else begin
-              let (l2, _, r2) = split cmp12 v1 s2 in
-              join (union cmp12 l1 l2) v1 (union cmp12 r1 r2)
-            end
-          else
-            if h1 = 1 then add cmp12 v1 s2 else begin
-              let (l1, _, r1) = split cmp12 v2 s1 in
-              join (union cmp12 l1 l2) v2 (union cmp12 r1 r2)
-            end
+      (Empty, t2) -> t2
+    | (t1, Empty) -> t1
+    | (Node(l1, v1, r1, h1), Node(l2, v2, r2, h2)) ->
+      if h1 >= h2 then
+        if h2 = 1 then add cmp12 v2 s1 else begin
+          let (l2, _, r2) = split cmp12 v1 s2 in
+          join (union cmp12 l1 l2) v1 (union cmp12 r1 r2)
+        end
+      else
+      if h1 = 1 then add cmp12 v1 s2 else begin
+        let (l1, _, r1) = split cmp12 v2 s1 in
+        join (union cmp12 l1 l2) v2 (union cmp12 r1 r2)
+      end
 
   let rec sym_diff cmp12 s1 s2 =
     match (s1, s2) with
-        (Empty, t2) -> t2
-      | (t1, Empty) -> t1
-      | (Node(l1, v1, r1, _), t2) ->
-          match split cmp12 v1 t2 with
-              (l2, false, r2) ->
-		join (sym_diff cmp12 l1 l2) v1 (sym_diff cmp12 r1 r2)
-            | (l2, true, r2) ->
-		concat (sym_diff cmp12 l1 l2) (sym_diff cmp12 r1 r2)
+      (Empty, t2) -> t2
+    | (t1, Empty) -> t1
+    | (Node(l1, v1, r1, _), t2) ->
+      match split cmp12 v1 t2 with
+        (l2, false, r2) ->
+        join (sym_diff cmp12 l1 l2) v1 (sym_diff cmp12 r1 r2)
+      | (l2, true, r2) ->
+        concat (sym_diff cmp12 l1 l2) (sym_diff cmp12 r1 r2)
 
   let rec inter cmp12 s1 s2 =
     match (s1, s2) with
-        (Empty, t2) -> Empty
-      | (t1, Empty) -> Empty
-      | (Node(l1, v1, r1, _), t2) ->
-          match split cmp12 v1 t2 with
-              (l2, false, r2) ->
-                concat (inter cmp12 l1 l2) (inter cmp12 r1 r2)
-            | (l2, true, r2) ->
-                join (inter cmp12 l1 l2) v1 (inter cmp12 r1 r2)
+      (Empty, t2) -> Empty
+    | (t1, Empty) -> Empty
+    | (Node(l1, v1, r1, _), t2) ->
+      match split cmp12 v1 t2 with
+        (l2, false, r2) ->
+        concat (inter cmp12 l1 l2) (inter cmp12 r1 r2)
+      | (l2, true, r2) ->
+        join (inter cmp12 l1 l2) v1 (inter cmp12 r1 r2)
 
   let rec diff cmp12 s1 s2 =
     match (s1, s2) with
-        (Empty, t2) -> Empty
-      | (t1, Empty) -> t1
-      | (Node(l1, v1, r1, _), t2) ->
-          match split cmp12 v1 t2 with
-              (l2, false, r2) ->
-                join (diff cmp12 l1 l2) v1 (diff cmp12 r1 r2)
-            | (l2, true, r2) ->
-                concat (diff cmp12 l1 l2) (diff cmp12 r1 r2)
+      (Empty, t2) -> Empty
+    | (t1, Empty) -> t1
+    | (Node(l1, v1, r1, _), t2) ->
+      match split cmp12 v1 t2 with
+        (l2, false, r2) ->
+        join (diff cmp12 l1 l2) v1 (diff cmp12 r1 r2)
+      | (l2, true, r2) ->
+        concat (diff cmp12 l1 l2) (diff cmp12 r1 r2)
 
   let rec disjoint cmp12 s1 s2 =
     match (s1, s2) with
-        (Empty, _)
-      | (_, Empty) -> true
-      | (Node(l1, v1, r1, _), t2) ->
-          match split cmp12 v1 t2 with
-              (l2, false, r2) ->
-                disjoint cmp12 l1 l2 && disjoint cmp12 r1 r2
-            | (l2, true, r2) -> false
+      (Empty, _)
+    | (_, Empty) -> true
+    | (Node(l1, v1, r1, _), t2) ->
+      match split cmp12 v1 t2 with
+        (l2, false, r2) ->
+        disjoint cmp12 l1 l2 && disjoint cmp12 r1 r2
+      | (l2, true, r2) -> false
 
   let compare cmp s1 s2 =
     let rec compare_aux t1' t2' =
       match (t1', t2') with
-          E, E ->  0
-        | E, _ -> -1
-        | _, E ->  1
-        | C (e1, r1, t1), C (e2, r2, t2) ->
-            let c = cmp e1 e2 in
-            if c = 0 then
-              compare_aux (cons_iter r1 t1) (cons_iter r2 t2)
-            else
-              c in
+        E, E ->  0
+      | E, _ -> -1
+      | _, E ->  1
+      | C (e1, r1, t1), C (e2, r2, t2) ->
+        let c = cmp e1 e2 in
+        if c = 0 then
+          compare_aux (cons_iter r1 t1) (cons_iter r2 t2)
+        else
+          c in
     compare_aux (cons_iter s1 E) (cons_iter s2 E)
 
   let equal cmp s1 s2 = compare cmp s1 s2 = 0
 
   let rec subset cmp s1 s2 =
     match (s1, s2) with
-        Empty, _ ->
-          true
-      | _, Empty ->
-          false
-      | Node (l1, v1, r1, _), (Node (l2, v2, r2, _) as t2) ->
-          let c = cmp v1 v2 in
-          if c = 0 then
-            subset cmp l1 l2 && subset cmp r1 r2
-          else if c < 0 then
-            subset cmp (Node (l1, v1, Empty, 0)) l2 && subset cmp r1 t2
-          else
-            subset cmp (Node (Empty, v1, r1, 0)) r2 && subset cmp l1 t2
+      Empty, _ ->
+      true
+    | _, Empty ->
+      false
+    | Node (l1, v1, r1, _), (Node (l2, v2, r2, _) as t2) ->
+      let c = cmp v1 v2 in
+      if c = 0 then
+        subset cmp l1 l2 && subset cmp r1 r2
+      else if c < 0 then
+        subset cmp (Node (l1, v1, Empty, 0)) l2 && subset cmp r1 t2
+      else
+        subset cmp (Node (Empty, v1, r1, 0)) r2 && subset cmp l1 t2
 end
 
 module type S =
@@ -367,6 +377,7 @@ sig
   val is_empty: t -> bool
   val singleton: elt -> t
   val mem: elt -> t -> bool
+  val find: elt -> t -> elt
   val add: elt -> t -> t
   val remove: elt -> t -> t
   val union: t -> t -> t
@@ -404,6 +415,7 @@ sig
     val min_elt: t -> elt option
     val max_elt: t -> elt option
     val choose:  t -> elt option
+    val find: elt -> t -> elt option
   end
   (** Operations on {!Set} with labels. *)
   module Labels : sig
@@ -418,7 +430,7 @@ sig
   end
 
 end
-    (** Output signature of the functor {!Set.Make}. *)
+(** Output signature of the functor {!Set.Make}. *)
 
 module Make (Ord : OrderedType) =
 struct
@@ -444,6 +456,7 @@ struct
   let filter f t = t_of_impl (Concrete.filter Ord.compare f (impl_of_t t))
   let filter_map f t = t_of_impl (Concrete.filter_map Ord.compare f (impl_of_t t))
 
+  let find x t = Concrete.find Ord.compare x (impl_of_t t)
   let exists f t = Concrete.exists f (impl_of_t t)
   let for_all f t = Concrete.for_all f (impl_of_t t)
   let paritition f t =
@@ -476,20 +489,20 @@ struct
 
   let rec compare_subset s1 s2 =
     match (s1, impl_of_t s2) with
-	(Concrete.Empty, Concrete.Empty) -> 0
-      | (Concrete.Empty, t2) -> -1
-      | (t1, Concrete.Empty) -> 1
-      | (Concrete.Node(l1, v1, r1, _), t2) ->
-          match split v1 (t_of_impl t2) with
-	      (l2, true, r2) -> (* v1 in both s1 and s2 *)
-	        (match compare_subset l1 l2, compare_subset r1 r2 with
-		   | -1, -1 | -1, 0 | 0, -1 -> -1
-		   | 0, 0 -> 0
-		   | 1, 1 | 1, 0 | 0, 1 -> 1
-		   | _ -> min_int)
-            | (l2, false, r2) -> (* v1 in s1, but not in s2 *)
-	        if (compare_subset l1 l2) >= 0 && (compare_subset r1 r2) >= 0
-	        then 1 else min_int
+      (Concrete.Empty, Concrete.Empty) -> 0
+    | (Concrete.Empty, t2) -> -1
+    | (t1, Concrete.Empty) -> 1
+    | (Concrete.Node(l1, v1, r1, _), t2) ->
+      match split v1 (t_of_impl t2) with
+        (l2, true, r2) -> (* v1 in both s1 and s2 *)
+        (match compare_subset l1 l2, compare_subset r1 r2 with
+         | -1, -1 | -1, 0 | 0, -1 -> -1
+         | 0, 0 -> 0
+         | 1, 1 | 1, 0 | 0, 1 -> 1
+         | _ -> min_int)
+      | (l2, false, r2) -> (* v1 in s1, but not in s2 *)
+        if (compare_subset l1 l2) >= 0 && (compare_subset r1 r2) >= 0
+        then 1 else min_int
 
   let compare_subset s1 s2 = compare_subset (impl_of_t s1) s2
 
@@ -501,6 +514,7 @@ struct
     let min_elt t = try Some (min_elt t) with Not_found -> None
     let max_elt t = try Some (max_elt t) with Not_found -> None
     let choose  t = try Some (choose t)  with Not_found -> None
+    let find  e t = try Some (find e t)  with Not_found -> None
   end
 
   module Labels =
@@ -530,14 +544,15 @@ module PSet = struct (*$< PSet *)
   let create cmp  = { cmp = cmp; set = Concrete.empty }
   let get_cmp {cmp} = cmp
 
-(*$T get_cmp
-  get_cmp (create Int.compare) == Int.compare
-*)
+  (*$T get_cmp
+    get_cmp (create Int.compare) == Int.compare
+  *)
 
 
   let singleton ?(cmp = compare) x = { cmp = cmp; set = Concrete.singleton x }
   let is_empty s = Concrete.is_empty s.set
   let mem x s = Concrete.mem s.cmp x s.set
+  let find x s = Concrete.find s.cmp x s.set
   let add x s  = { s with set = Concrete.add s.cmp x s.set }
   let remove x s = { s with set = Concrete.remove s.cmp x s.set }
   let iter f s = Concrete.iter f s.set
@@ -595,6 +610,19 @@ let singleton x = Concrete.singleton x
 let is_empty s = s = Concrete.Empty
 
 let mem x s = Concrete.mem Pervasives.compare x s
+
+let find x s = Concrete.find Pervasives.compare x s
+
+(*$T
+  (find 1 (of_list [1;2;3;4;5;6;7;8])) == 1
+  (find 8 (of_list [1;2;3;4;5;6;7;8])) == 8
+  (find 1 (singleton 1)) == 1
+  let x = "abc" in (find "abc" (singleton x)) == x
+  let x = (1,1) in (find (1,1) (singleton x)) == x
+  let x,y = (1,1),(1,1) in find x (singleton y) == y
+  let x,y = "a","a" in find x (singleton y) != x
+  try ignore (find (1,2) (singleton (1,1))); false with Not_found -> true
+*)
 
 let add x s  = Concrete.add Pervasives.compare x s
 
@@ -676,7 +704,7 @@ let disjoint s1 s2 = Concrete.disjoint Pervasives.compare s1 s2
    subset (of_list [1;2;3]) (of_list [1;2;3;4])
    not (subset (of_list [1;2;3;5]) (of_list [1;2;3;4]))
    not (subset (of_list [1;2;3;4]) (of_list [1;2;3]))
- *)
+*)
 
 (*$T compare
   compare (of_list [1;2;3]) (of_list [1;2;3;4]) <> 0
@@ -684,6 +712,18 @@ let disjoint s1 s2 = Concrete.disjoint Pervasives.compare s1 s2
   let a = of_list [1;2;3] and b = of_list [1;2;3;4] and c = of_list [3;1;2] in\
     compare a b = - (compare b c)
   compare (of_list [1;2;3]) (of_list [3;1;2]) = 0
- *)
+*)
+
+
+module Incubator = struct (*$< Incubator *)
+  let op_map f s = Concrete.op_map f s
+    (*$T op_map
+      of_enum (1--3) |> op_map ((+) 2) |> mem 5
+      of_enum (1--3) |> op_map ((+) 2) |> mem 4
+      of_enum (1--3) |> op_map ((+) 2) |> mem 3
+    *)
+
+
+end (*$>*)
 
 #endif

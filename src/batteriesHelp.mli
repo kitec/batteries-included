@@ -56,7 +56,7 @@ val help : unit -> unit
 (** [help ()] opens the tutorial.*)
 
 val man           : string -> unit
-(** [man "something"] opens the help about subject ["something"].
-*)
+  (** [man "something"] opens the help about subject ["something"].
+  *)
 
 #endif

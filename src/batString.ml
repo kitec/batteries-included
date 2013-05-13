@@ -148,7 +148,7 @@ let rfind_from str pos sub =
         done;
       done;
       raise Not_found
-  )
+    )
 (*$Q rfind_from
   (Q.triple Q.string Q.char Q.small_int) ~count:1000 (fun (s, c, ofs) -> \
     let v1 = try `res (rfind_from s ofs (String.make 1 c)) with Not_found -> `nf | Invalid_argument _ -> `inv in \
@@ -239,22 +239,22 @@ let tail s pos =
   left "abc" 10 = "abc"
   left "abc" 0 = ""
 *) (*$T right
-  right "abc" 1 = "c"
-  right "ab" 3 = "ab"
-  right "abc" 3 = "abc"
-  right "abc" 0 = ""
-  right "abc" 10 = "abc"
-*) (*$T tail
-  tail "abc" 1 = "bc"
-  tail "ab" 3 = ""
-  tail "abc" 3 = ""
-  tail "abc" 10 = ""
-  tail "abc" 0 = "abc"
-*) (*$T head
-  head "abc" 0 = ""
-  head "abc" 10 = "abc"
-  head "abc" 3 = "abc"
-*)
+     right "abc" 1 = "c"
+     right "ab" 3 = "ab"
+     right "abc" 3 = "abc"
+     right "abc" 0 = ""
+     right "abc" 10 = "abc"
+   *) (*$T tail
+        tail "abc" 1 = "bc"
+        tail "ab" 3 = ""
+        tail "abc" 3 = ""
+        tail "abc" 10 = ""
+        tail "abc" 0 = "abc"
+      *) (*$T head
+        head "abc" 0 = ""
+        head "abc" 10 = "abc"
+        head "abc" 3 = "abc"
+      *)
 
 let split str ~by:sep =
   let p = find str sep in
@@ -444,7 +444,7 @@ let backwards s =
       ~count:(fun () -> !i)
       ~clone:(fun () -> make (BatRef.copy i))
   in
-        make (ref (length s))
+  make (ref (length s))
 (*$T backwards
    "" |> backwards |> of_enum = ""
    "foo" |> backwards |> of_enum = "oof"
@@ -452,7 +452,7 @@ let backwards s =
    for _i = 0 to 2 do BatEnum.junk e done; \
    let e2 = BatEnum.clone e in \
    implode (BatList.of_enum e) = "cba" && implode (BatList.of_enum e2) = "cba"
- *)
+*)
 
 let of_enum e =
   (* TODO: use a buffer when not fast_count *)
@@ -558,7 +558,7 @@ let iteri f str =
     |> Array.to_list
     |> List.filter (fun (_c, pos) -> pos <> [])
   in
- assert_equal ~msg:"String.iteri test"
+  assert_equal ~msg:"String.iteri test"
      (letter_positions "hello")
      ['e',[1]; 'h',[0]; 'l',[2;3]; 'o',[4] ]
 *)
@@ -631,7 +631,7 @@ let replace ~str ~sub ~by =
   try
     let i = find str sub in
     (true, (slice ~last:i str) ^ by ^
-      (slice ~first:(i + String.length sub) str))
+           (slice ~first:(i + String.length sub) str))
   with
     Not_found -> (false, String.copy str)
 (*$T replace
@@ -652,9 +652,9 @@ let nreplace ~str ~sub ~by =
 let in_place_mirror s =
   let len = String.length s in
   if len > 0 then for k = 0 to (len - 1)/2 do
-    let old = s.[k] and mirror = len - 1 - k in
-    s.[k] <- s.[mirror]; s.[mirror] <- old;
-  done
+      let old = s.[k] and mirror = len - 1 - k in
+      s.[k] <- s.[mirror]; s.[mirror] <- old;
+    done
 (*$= in_place_mirror as f & ~printer:identity
   (let s="" in f s; s)          ""
   (let s="1" in f s; s)         "1"
@@ -866,122 +866,122 @@ end (* String.Exceptionless *)
 
 module Cap =
 struct
-type 'a t = string
+  type 'a t = string
 
-let make          = make
-let is_empty      = is_empty
-let init          = init
-
-#if not BATTERIES_JS
-
-let enum          = enum
-let of_enum       = of_enum
-let backwards     = backwards
-let of_backwards  = of_backwards
-
-#endif
-
-let of_int        = of_int
-let of_float      = of_float
-let of_char       = of_char
-let to_int        = to_int
-let to_float      = to_float
-let map           = map
-let fold_left     = fold_left
-let fold_right    = fold_right
-let iter          = iter
-let index         = index
-let rindex        = rindex
-let index_from    = index_from
-let rindex_from   = rindex_from
-let contains      = contains
-let contains_from = contains_from
-let rcontains_from= rcontains_from
-let find          = find
-let find_from     = find_from
-let rfind         = rfind
-let rfind_from    = rfind_from
-let ends_with     = ends_with
-let starts_with   = starts_with
-let exists        = exists
-let lchop         = lchop
-let rchop         = rchop
-let strip         = strip
-let uppercase     = uppercase
-let lowercase     = lowercase
-let capitalize    = capitalize
-let uncapitalize  = uncapitalize
-let copy          = copy
-let sub           = sub
-let fill          = fill
-let blit          = blit
-let concat        = concat
-let escaped       = escaped
-let replace_chars = replace_chars
-let replace       = replace
-let nreplace      = nreplace
-let split         = split
-let repeat        = repeat
-let rsplit        = rsplit
-let nsplit        = nsplit
-let join          = join
-let slice         = slice
-let explode       = explode
-let implode       = implode
-let compare       = compare
-let icompare      = icompare
-let splice        = splice
-let trim          = trim
-let quote         = quote
-let left          = left
-let right         = right
-let head          = head
-let tail          = tail
-let filter_map    = filter_map
-let filter        = filter
-let of_list       = of_list
-let to_list       = to_list
-
-let quote         = quote
+  let make          = make
+  let is_empty      = is_empty
+  let init          = init
 
 #if not BATTERIES_JS
 
-let print         = print
-let println       = println
-let print_quoted  = print_quoted
+  let enum          = enum
+  let of_enum       = of_enum
+  let backwards     = backwards
+  let of_backwards  = of_backwards
 
 #endif
 
-external of_string : string -> _ t                = "%identity"
-external to_string : [`Read | `Write] t -> string = "%identity"
-external read_only : [> `Read] t -> [`Read] t     = "%identity"
-external write_only: [> `Write] t -> [`Write] t   = "%identity"
+  let of_int        = of_int
+  let of_float      = of_float
+  let of_char       = of_char
+  let to_int        = to_int
+  let to_float      = to_float
+  let map           = map
+  let fold_left     = fold_left
+  let fold_right    = fold_right
+  let iter          = iter
+  let index         = index
+  let rindex        = rindex
+  let index_from    = index_from
+  let rindex_from   = rindex_from
+  let contains      = contains
+  let contains_from = contains_from
+  let rcontains_from= rcontains_from
+  let find          = find
+  let find_from     = find_from
+  let rfind         = rfind
+  let rfind_from    = rfind_from
+  let ends_with     = ends_with
+  let starts_with   = starts_with
+  let exists        = exists
+  let lchop         = lchop
+  let rchop         = rchop
+  let strip         = strip
+  let uppercase     = uppercase
+  let lowercase     = lowercase
+  let capitalize    = capitalize
+  let uncapitalize  = uncapitalize
+  let copy          = copy
+  let sub           = sub
+  let fill          = fill
+  let blit          = blit
+  let concat        = concat
+  let escaped       = escaped
+  let replace_chars = replace_chars
+  let replace       = replace
+  let nreplace      = nreplace
+  let split         = split
+  let repeat        = repeat
+  let rsplit        = rsplit
+  let nsplit        = nsplit
+  let join          = join
+  let slice         = slice
+  let explode       = explode
+  let implode       = implode
+  let compare       = compare
+  let icompare      = icompare
+  let splice        = splice
+  let trim          = trim
+  let quote         = quote
+  let left          = left
+  let right         = right
+  let head          = head
+  let tail          = tail
+  let filter_map    = filter_map
+  let filter        = filter
+  let of_list       = of_list
+  let to_list       = to_list
 
-external length : _ t -> int = "%string_length"
-external get : [> `Read] t -> int -> char = "%string_safe_get"
-external set : [> `Write] t -> int -> char -> unit = "%string_safe_set"
-external create : int -> _ t = "caml_create_string"
-external unsafe_get : [> `Read] t -> int -> char = "%string_unsafe_get"
-external unsafe_set : [> `Write] t -> int -> char -> unit = "%string_unsafe_set"
-external unsafe_blit :
-  [> `Read] t -> int -> [> `Write] t -> int -> int -> unit = "caml_blit_string" "noalloc"
-external unsafe_fill :
-  [> `Write] t -> int -> int -> char -> unit = "caml_fill_string" "noalloc"
+  let quote         = quote
 
-module Exceptionless =
-struct
-  let find_from = Exceptionless.find_from
-  let find = Exceptionless.find
-  let rfind_from = Exceptionless.rfind_from
-  let rfind = Exceptionless.rfind
-  let to_int = Exceptionless.to_int
-  let to_float = Exceptionless.to_float
-  let index = Exceptionless.index
-  let index_from = Exceptionless.index_from
-  let rindex_from = Exceptionless.rindex_from
-  let rindex = Exceptionless.rindex
-  let split = Exceptionless.split
-  let rsplit = Exceptionless.rsplit
-end (* String.Cap.Exceptionless *)
+#if not BATTERIES_JS
+
+  let print         = print
+  let println       = println
+  let print_quoted  = print_quoted
+
+#endif
+
+  external of_string : string -> _ t                = "%identity"
+  external to_string : [`Read | `Write] t -> string = "%identity"
+  external read_only : [> `Read] t -> [`Read] t     = "%identity"
+  external write_only: [> `Write] t -> [`Write] t   = "%identity"
+
+  external length : _ t -> int = "%string_length"
+  external get : [> `Read] t -> int -> char = "%string_safe_get"
+  external set : [> `Write] t -> int -> char -> unit = "%string_safe_set"
+  external create : int -> _ t = "caml_create_string"
+  external unsafe_get : [> `Read] t -> int -> char = "%string_unsafe_get"
+  external unsafe_set : [> `Write] t -> int -> char -> unit = "%string_unsafe_set"
+  external unsafe_blit :
+    [> `Read] t -> int -> [> `Write] t -> int -> int -> unit = "caml_blit_string" "noalloc"
+  external unsafe_fill :
+    [> `Write] t -> int -> int -> char -> unit = "caml_fill_string" "noalloc"
+
+  module Exceptionless =
+  struct
+    let find_from = Exceptionless.find_from
+    let find = Exceptionless.find
+    let rfind_from = Exceptionless.rfind_from
+    let rfind = Exceptionless.rfind
+    let to_int = Exceptionless.to_int
+    let to_float = Exceptionless.to_float
+    let index = Exceptionless.index
+    let index_from = Exceptionless.index_from
+    let rindex_from = Exceptionless.rindex_from
+    let rindex = Exceptionless.rindex
+    let split = Exceptionless.split
+    let rsplit = Exceptionless.rsplit
+  end (* String.Cap.Exceptionless *)
 
 end (* String.Cap *)

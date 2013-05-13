@@ -35,6 +35,6 @@ let ord () () = BatOrd.Eq
 let equal () () = true
 let print out () = BatInnerIO.nwrite out unit_string
 
-(*BISECT-IGNORE-END*)
+  (*BISECT-IGNORE-END*)
 
 #endif

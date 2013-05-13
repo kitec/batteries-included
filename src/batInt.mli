@@ -205,7 +205,7 @@ val print_hex: 'a BatInnerIO.output -> int -> unit
 (** prints as hex string *)
 
 (*    val bprint: 'a BatInnerIO.output -> t -> unit
-(** prints as binary string *) *)
+      (** prints as binary string *) *)
 
 #endif
 
@@ -234,7 +234,7 @@ val ord : t -> t -> BatOrd.order
     {!Number.Bounded}, {!Number.Discrete}.
 
     {b Important note} Untested.
- *)
+*)
 module Safe_int : sig
 
   type t = int

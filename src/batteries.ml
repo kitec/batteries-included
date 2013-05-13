@@ -225,7 +225,6 @@ module Tuple5 = BatTuple.Tuple5
 
 #if not BATTERIES_JS
 
-module ValuePrinter = BatValuePrinter
 module Vect = BatVect
 module ISet = BatISet
 module IMap = BatIMap
