@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Functional heaps over ordered types
 
@@ -78,12 +77,15 @@ val enum : 'a t -> 'a BatEnum.t
 (** Enumerate the elements of the heap in heap order. O(log n) per
     {!BatEnum.get}. *)
 
+#if not BATTERIES_JS
+
 (** {6 Printing} *)
 
 val print :  ?first:string -> ?last:string -> ?sep:string
   -> ('a, 'b) BatIO.printer -> ('a t, 'b) BatIO.printer
 (** Print the contents of the heap in heap order. O(n log n) *)
 
+#endif
 
 (** {6 Functorized version} *)
 
@@ -118,13 +120,17 @@ sig
   (** See {!BatHeap.of_enum}. *)
   val enum      : t -> elem BatEnum.t
   (** See {!BatHeap.enum}. *)
+
+#if not BATTERIES_JS
+
   val print     :  ?first:string -> ?last:string -> ?sep:string
     -> (elem, 'a) BatIO.printer -> (t, 'a) BatIO.printer
       (** See {!BatHeap.print}. *)
+
+#endif
+
 end
 
 module Make (Ord : BatInterfaces.OrderedType) : H with type elem = Ord.t
   (** Functorized heaps over arbitrary orderings. All the functions have
       the same complexity as the non-functorized versions. *)
-
-#endif

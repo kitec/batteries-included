@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (**Operations on booleans
 
@@ -96,6 +95,8 @@ module Infix : BatNumber.Infix with type bat__infix_t = t
 module Compare : BatNumber.Compare with type bat__compare_t = t
 
 (** {6 Boilerplate code}*)
+
+#if not BATTERIES_JS
 
 (** {7 Printing}*)
 val print: 'a BatInnerIO.output -> t -> unit

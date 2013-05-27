@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 module STRING : sig
   (* this module must provide the following functions: *)
@@ -586,8 +585,12 @@ let init n f =
   init 1000 (fun x -> x * x) |> to_array = Array.init 1000 (fun x -> x * x)
 *)
 
+#if not BATTERIES_JS
+
 let print ?(first="[|") ?(last="|]") ?(sep="; ") print_a out t =
   BatEnum.print ~first ~last ~sep print_a out (enum t)
+
+#endif
 
 let compare cmp_val v1 v2 = BatEnum.compare cmp_val (enum v1) (enum v2)
 let equal eq_val v1 v2 = BatEnum.equal eq_val (enum v1) (enum v2)
@@ -1165,9 +1168,11 @@ struct
     (* And then concatenate them *)
     List.fold_left (fun (acc:'a t) (array:'a array) -> concat (of_array array) acc) (empty:'a t) (base:'a array list)
 
+#if not BATTERIES_JS
+
   let print ?(first="[|") ?(last="|]") ?(sep="; ") print_a out t =
     BatEnum.print ~first ~last ~sep print_a out (enum t)
 
-end
-
 #endif
+
+end

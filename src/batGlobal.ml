@@ -19,8 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
-
 
 exception Global_not_initialized of string
 
@@ -49,5 +47,3 @@ let isdef (r, _) =
 
 let get (r,_) = !r
   (*BISECT-IGNORE-END*)
-
-#endif

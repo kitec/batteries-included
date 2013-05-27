@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** First-in first-out queues.
 
@@ -104,9 +103,13 @@ val of_enum : 'a BatEnum.t -> 'a t
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
+
 (** {7 Printing}*)
 
 val print : ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) ->  'a BatInnerIO.output -> 'b t -> unit
+
+#endif
 
 val compare : 'a BatOrd.comp -> 'a t BatOrd.comp
 val equal : 'a BatOrd.eq -> 'a t BatOrd.eq
@@ -115,5 +118,3 @@ module Exceptionless : sig
   val take : 'a t -> 'a option
   val peek : 'a t -> 'a option
 end
-
-#endif

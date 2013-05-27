@@ -20,8 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
-
 
 include Queue
 
@@ -47,11 +45,15 @@ let enum q = BatEnum.from (fun () -> try pop q with Empty -> raise BatEnum.No_mo
   BatEnum.count e = 11 && BatEnum.for_all (fun elt -> incr i; !i = elt) e
 *)
 
+#if not BATTERIES_JS
+
 let print ?(first="") ?(last="") ?(sep="") print_a out t =
   BatEnum.print ~first ~last ~sep print_a out (enum (copy t))
 (*$T print
   BatIO.to_string (print ~sep:"," ~first:"[" ~last:"]" BatInt.print) (of_enum (BatArray.enum [|2;4;66|])) = "[2,4,66]"
 *)
+
+#endif
 
 let compare cmp a b = BatEnum.compare cmp (enum a) (enum b)
 let equal eq a b = BatEnum.equal eq (enum a) (enum b)
@@ -64,5 +66,3 @@ module Exceptionless = struct
     Exceptionless.take (Queue.create ()) = None
   *)
 end
-
-#endif

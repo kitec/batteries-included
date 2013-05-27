@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 type 'a dq = { front : 'a list ; flen : int ;
                rear : 'a list  ; rlen : int }
@@ -236,6 +235,8 @@ let of_enum e =
 *)(*$Q of_enum
     (Q.list Q.int) (fun l -> to_list (of_enum (List.enum l)) = l)
   *)
+
+#if not BATTERIES_JS
 
 let print ?(first="[") ?(last="]") ?(sep="; ") elepr out dq =
   let rec spin dq = match front dq with

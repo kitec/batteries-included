@@ -19,19 +19,22 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Maps and sets based on splay trees *)
 
 module Map (Ord : BatInterfaces.OrderedType)
   : sig
     include BatMap.S with type key = Ord.t
+
+#if not BATTERIES_JS
+
     val print_as_list:
       ('a BatInnerIO.output -> key -> unit) ->
       ('a BatInnerIO.output -> 'c -> unit) ->
       'a BatInnerIO.output -> 'c t -> unit
+
+#endif
+
     val of_list : (Ord.t * 'a) list -> 'a t
     val to_list : 'a t -> (Ord.t * 'a) list
   end
-
-#endif

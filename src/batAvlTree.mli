@@ -3,7 +3,6 @@
 (* Modified by Edgar Friendly <thelema314@gmail.com> *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Internals of ISet and IMap, usable as generic tree library *)
 
@@ -39,5 +38,3 @@ val iter : ('a -> unit) -> 'a tree -> unit
 val fold : ('a -> 'b -> 'b) -> 'a tree -> 'b -> 'b
 
 val enum : 'a tree -> 'a BatEnum.t
-
-#endif

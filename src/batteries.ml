@@ -30,7 +30,13 @@ module Legacy = struct
   module Format = Format
   module Gc = Gc
   module Genlex = Genlex
+
+#endif
+
   module Hashtbl = Hashtbl
+
+#if not BATTERIES_JS
+
   module Int32 = Int32
   module Int64 = Int64
   module Lazy = Lazy
@@ -51,10 +57,22 @@ module Legacy = struct
   module Parsing = Parsing
   module Printexc = Printexc
   module Printf = Printf
+
+#endif
+
   module Queue = Queue
+
+#if not BATTERIES_JS
+
   module Random = Random
   module Scanf = Scanf
+
+#endif
+
   module Set = Set
+
+#if not BATTERIES_JS
+
   module Sort = Sort
   module Stack = Stack
   module StdLabels = StdLabels
@@ -69,10 +87,6 @@ module Legacy = struct
 
   module Sys = Sys
   module Weak = Weak
-
-#endif
-#if not BATTERIES_JS
-
   module Unix = Unix
   module Num = Num
   module Big_int = Big_int
@@ -105,7 +119,13 @@ module Digest = BatDigest
 module Format = BatFormat
 module Gc = BatGc
 module Genlex = BatGenlex
+
+#endif
+
 module Hashtbl = BatHashtbl
+
+#if not BATTERIES_JS
+
 module Int32 = BatInt32
 module Int64 = BatInt64
 (* Lazy *)
@@ -126,10 +146,22 @@ module Oo = BatOo
 (* Parsing *)
 module Printexc = BatPrintexc
 module Printf = BatPrintf (* UNTESTED FOR BACKWARDS COMPATIBILITY *)
+
+#endif
+
 module Queue = BatQueue
+
+#if not BATTERIES_JS
+
 module Random = BatRandom
 module Scanf = BatScanf
+
+#endif
+
 module Set = BatSet
+
+#if not BATTERIES_JS
+
 (* Sort - Deprecated *)
 module Stack = BatStack
 module Stream = BatStream
@@ -160,47 +192,59 @@ module Base64 = BatBase64
 
 module BitSet = BatBitSet
 module Bit_set = BatBitSet
+module Dllist = BatDllist
 
 #if not BATTERIES_JS
 
-module Dllist = BatDllist
 module DynArray = BatDynArray
 
 #endif
 
 module Enum = BatEnum
 module File = BatFile
+module Global = BatGlobal
 
 #if not BATTERIES_JS
 
-module Global = BatGlobal
 module IO = BatIO
+
+#endif
+
 module LazyList = BatLazyList
+
+#if not BATTERIES_JS
+
 module MultiPMap = BatMultiPMap
 
 #endif
 
 module Option = BatOption
-
-#if not BATTERIES_JS
-
 (* REMOVED, Extlib only module OptParse = BatOptParse *)
 module RefList = BatRefList
-
-#endif
-
 module Ref = BatRef
-
-#if not BATTERIES_JS
-
 (*module Std = REMOVED - use BatPervasives *)
 
 (* Batteries specific modules *)
 module Cache = BatCache
+
+#if not BATTERIES_JS
+
 module CharParser = BatCharParser
+
+#endif
+
 module Deque = BatDeque
+
+#if not BATTERIES_JS
+
 module Hashcons = BatHashcons
+
+#endif
+
 module Heap = BatHeap
+
+#if not BATTERIES_JS
+
 module FingerTree = BatFingerTree
 module Logger = BatLogger
 module MultiMap = BatMultiMap
@@ -210,26 +254,20 @@ module ParserCo = BatParserCo
 
 module Result = BatResult
 module Return = BatReturn
-
-#if not BATTERIES_JS
-
 module Seq = BatSeq
-
-#endif
-
 module Tuple = BatTuple
 module Tuple2 = BatTuple.Tuple2
 module Tuple3 = BatTuple.Tuple3
 module Tuple4 = BatTuple.Tuple4
 module Tuple5 = BatTuple.Tuple5
-
-#if not BATTERIES_JS
-
 module Vect = BatVect
 module ISet = BatISet
 module IMap = BatIMap
 module Splay = BatSplay
 module Uref = BatUref
+
+#if not BATTERIES_JS
+
 module UChar = BatUChar
 module UTF8 = BatUTF8
 module Text = BatText
@@ -249,11 +287,11 @@ module Float = BatFloat
 #endif
 
 module Int = BatInt
+module Bool = BatBool
+module Unit = BatUnit
 
 #if not BATTERIES_JS
 
-module Bool = BatBool
-module Unit = BatUnit
 (*module Int63 = BatInt63*)
 
 (* Modules in-progress, API stability not guaranteed *)

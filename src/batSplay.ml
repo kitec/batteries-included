@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 module List = struct include List include BatList end
 module Enum = BatEnum
@@ -432,6 +431,8 @@ struct
   let to_list m = List.of_enum (enum m)
   let of_list l = of_enum (List.enum l)
 
+#if not BATTERIES_JS
+
   let custom_print ~first ~last ~sep kvpr out m =
     Enum.print ~first ~last ~sep
       (fun out (k, v) -> kvpr out k v)
@@ -444,6 +445,8 @@ struct
 
   let print_as_list kpr vpr out m =
     print ~first:"[" ~last:"]" ~sep:"; " ~kvsep:", " kpr vpr out m
+
+#endif
 
   module Labels = struct
     let add ~key ~data t = add key data t
@@ -580,5 +583,3 @@ struct
     | None -> raise Not_found
     | Some v -> v, Map tr
 end
-
-#endif

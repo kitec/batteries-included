@@ -20,8 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
-
 
 type 'a node_t = {
   mutable data : 'a;
@@ -376,13 +374,15 @@ let of_enum enm =
     ignore(BatEnum.fold f first enm);
     first
 
+#if not BATTERIES_JS
+
 let print ?(first="[") ?(last="]") ?(sep="; ") print_a out t =
   BatEnum.print ~first ~last ~sep print_a out (enum t)
+
+#endif
 
 let filter f node = (*TODO : make faster*)
   of_enum (BatEnum.filter f (enum node))
 
 let filter_map f node = (*TODO : make faster*)
   of_enum (BatEnum.filter_map f (enum node))
-
-#endif

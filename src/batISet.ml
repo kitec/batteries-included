@@ -2,7 +2,6 @@
 (* Modified by Edgar Friendly <thelema314@gmail.com> *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 include BatAvlTree
 
@@ -419,6 +418,8 @@ let choose s = fst (root s)
 
 let of_list l = List.fold_left (fun s (lo,hi) -> add_range lo hi s) empty l
 let of_enum e = BatEnum.fold (fun s (lo,hi) -> add_range lo hi s) empty e
+
+#if not BATTERIES_JS
 
 let print oc t =
   let print_range oc (lo,hi) =

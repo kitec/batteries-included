@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Mutable global variable.
 
@@ -66,5 +65,3 @@ val undef : 'a t -> unit
 
 val isdef : 'a t -> bool
   (** Return [true] if the global value has been set. *)
-
-#endif

@@ -5,7 +5,6 @@
 (** DIET Maps from integers, packed using ranges *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (* Note: Lost covariance with use of record for keeping eq *)
 type 'a t (*= (int * int * 'a) BatAvlTree.tree*)
@@ -159,5 +158,3 @@ module Infix : sig
         as comparison function.
     *)
 end
-
-#endif

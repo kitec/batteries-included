@@ -18,7 +18,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 type 'a node =
   | Nil
@@ -258,6 +257,8 @@ let rec combine s1 s2 () = match s1 (), s2 () with
   | _ ->
     raise (Invalid_argument "Seq.combine")
 
+#if not BATTERIES_JS
+
 let print ?(first="[") ?(last="]") ?(sep="; ") print_a out s = match s () with
   | Nil ->
     BatInnerIO.nwrite out first;
@@ -271,6 +272,8 @@ let print ?(first="[") ?(last="]") ?(sep="; ") print_a out s = match s () with
       print_a out e;
       iter (BatPrintf.fprintf out "%s%a" sep print_a) s;
       BatInnerIO.nwrite out last
+
+#endif
 
 module Infix = struct
   (** Infix operators matching those provided by {!BatEnum.Infix} *)
@@ -364,5 +367,3 @@ module Exceptionless = struct
     try Some (combine s1 s2)
     with Invalid_argument "Seq.combine" -> None
 end
-
-#endif

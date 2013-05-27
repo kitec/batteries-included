@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** A mutable, imperative, circular, doubly linked list library
 
@@ -251,12 +250,14 @@ val of_enum : 'a BatEnum.t -> 'a node_t
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
+
 (** {7 Printing}*)
 
 val print : ?first:string -> ?last:string -> ?sep:string ->('a BatInnerIO.output -> 'b -> unit) ->  'a BatInnerIO.output -> 'b t -> unit
 
+#endif
+
 (**/**)
 val invariants : _ t -> unit
   (**/**)
-
-#endif

@@ -22,8 +22,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
-
 
 (** {6 Import the contents of {!Hashtbl}}
 
@@ -262,8 +260,12 @@ let modify_def v0 key f h =
   length h = 1 && find_option h "foo" = Some 1
 *)
 
+#if not BATTERIES_JS
+
 let print ?(first="{\n") ?(last="\n}") ?(sep=",\n") ?(kvsep=": ") print_k print_v out t =
   BatEnum.print ~first ~last ~sep (fun out (k,v) -> BatPrintf.fprintf out "%a%s%a" print_k k kvsep print_v v) out (enum t)
+
+#endif
 
 let filteri (f:'key -> 'a -> bool) (t:('key, 'a) t) =
   let result = create 16 in
@@ -395,10 +397,15 @@ sig
   val values : 'a t -> 'a BatEnum.t
   val enum : 'a t -> (key * 'a) BatEnum.t
   val of_enum : (key * 'a) BatEnum.t -> 'a t
+
+#if not BATTERIES_JS
+
   val print :  ?first:string -> ?last:string -> ?sep:string ->
     ('a BatInnerIO.output -> key -> unit) ->
     ('a BatInnerIO.output -> 'b -> unit) ->
     'a BatInnerIO.output -> 'b t -> unit
+
+#endif
 
   (** Operations on {!Hashtbl} without exceptions.*)
   module Exceptionless :
@@ -597,8 +604,12 @@ struct
 
   let is_empty h = length h = 0
 
+#if not BATTERIES_JS
+
   let print ?first ?last ?sep print_k print_v out t =
     print ?first ?last ?sep print_k print_v out (to_hash t)
+
+#endif
 
   let filteri f t =
     let result = create 16 in
@@ -735,7 +746,13 @@ struct
   let values      = values
   let enum        = enum
   let of_enum     = of_enum
+
+#if not BATTERIES_JS
+
   let print       = print
+
+#endif
+
   let filter      = filter
   let filteri     = filteri
   let filter_map  = filter_map
@@ -765,5 +782,3 @@ struct
     let modify k f = BatPervasives.wrap (modify k f)
   end
 end
-
-#endif

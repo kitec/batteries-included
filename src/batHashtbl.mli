@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Extra functions over hashtables. *)
 
@@ -257,12 +256,16 @@ external hash_param : int -> int -> 'a -> int = "caml_hash_univ_param" "noalloc"
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
+
 (** {7 Printing}*)
 
 val print :  ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
   ('a BatInnerIO.output -> 'b -> unit) ->
   ('a BatInnerIO.output -> 'c -> unit) ->
   'a BatInnerIO.output -> ('b, 'c) t -> unit
+
+#endif
 
 (** {6 Override modules}*)
 
@@ -386,10 +389,15 @@ sig
   val values : 'a t -> 'a BatEnum.t
   val enum : 'a t -> (key * 'a) BatEnum.t
   val of_enum : (key * 'a) BatEnum.t -> 'a t
+
+#if not BATTERIES_JS
+
   val print :  ?first:string -> ?last:string -> ?sep:string ->
     ('a BatInnerIO.output -> key -> unit) ->
     ('a BatInnerIO.output -> 'b -> unit) ->
     'a BatInnerIO.output -> 'b t -> unit
+
+#endif
 
   (** {6 Override modules}*)
 
@@ -552,12 +560,16 @@ sig
 
   (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
+
   (** {7 Printing}*)
 
   val print :  ?first:string -> ?last:string -> ?sep:string -> ?kvsep:string ->
     ('a BatInnerIO.output -> 'b -> unit) ->
     ('a BatInnerIO.output -> 'c -> unit) ->
     'a BatInnerIO.output -> ('b, 'c, [>`Read]) t -> unit
+
+#endif
 
   (** {6 Override modules}*)
 
@@ -586,5 +598,3 @@ sig
   end
 
 end (* Cap module *)
-
-#endif

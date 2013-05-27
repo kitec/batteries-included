@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 
 open BatNumber
@@ -130,6 +129,8 @@ external ( || ) : bool -> bool -> bool = "%sequor"
 
 type bounded = t
 let min_num, max_num = false, true
+
+#if not BATTERIES_JS
 
 let print out t = BatInnerIO.nwrite out (to_string t)
   (*$T

@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 open BatInnerPervasives
 
@@ -93,5 +92,3 @@ let lru_cache ~gen ~cap =
     s = 12 && !runs = 5
 
   *)
-
-#endif

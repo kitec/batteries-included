@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** {6 Exceptions} *)
 
@@ -611,9 +610,12 @@ let uncombine l =
 	      | None -> None
 	      | Cons (h1, h2), t*)
 
+#if not BATTERIES_JS
 
 let print ?(first="[^") ?(last="^]") ?(sep="; ") print_a out t =
   BatEnum.print ~first ~last ~sep print_a out (enum t)
+
+#endif
 
 module Infix = struct
   let ( ^:^ ), ( ^@^ ) = ( ^:^ ), ( ^@^ )
@@ -690,5 +692,3 @@ module Labels = struct
   end
 
 end
-
-#endif

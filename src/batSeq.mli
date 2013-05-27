@@ -18,7 +18,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Sequence of elements *)
 
@@ -238,10 +237,14 @@ val combine : 'a t -> 'b t -> ('a * 'b) t
 
     @raise Invalid_argument if given sequences of different length. *)
 
+#if not BATTERIES_JS
+
 (** {6 Printing} *)
 
 val print : ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) ->  'a BatInnerIO.output -> 'b t -> unit
 (**Print the contents of a sequence*)
+
+#endif
 
 module Infix : sig
   (** Infix operators matching those provided by {!BatEnum.Infix} *)
@@ -276,4 +279,3 @@ module Exceptionless : sig
   val combine : 'a t -> 'b t -> ('a * 'b) t option
 end
 
-#endif

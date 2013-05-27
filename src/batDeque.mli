@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Functional double-ended queues *)
 
@@ -136,14 +135,16 @@ val enum : 'a dq -> 'a BatEnum.t
     is amortized O(1), and O(n) worst case.
 *)
 
+#if not BATTERIES_JS
+
 (** {6 Printing} *)
 
 val print : ?first:string -> ?last:string -> ?sep:string
   -> ('a, 'b) BatIO.printer -> ('a dq, 'b) BatIO.printer
 (** Print the contents of the deque. O(n) *)
 
+#endif
+
 (**/**)
 val invariants : _ t -> unit
   (**/**)
-
-#endif

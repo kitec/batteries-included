@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (*BISECT-IGNORE-BEGIN*)
 
@@ -33,8 +32,11 @@ let of_string = function
 let compare () () = 0
 let ord () () = BatOrd.Eq
 let equal () () = true
+
+#if not BATTERIES_JS
+
 let print out () = BatInnerIO.nwrite out unit_string
 
-  (*BISECT-IGNORE-END*)
-
 #endif
+
+  (*BISECT-IGNORE-END*)

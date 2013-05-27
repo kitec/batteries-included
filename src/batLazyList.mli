@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (**  Lazy lists of elements.
 
@@ -553,10 +552,13 @@ end
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
+
 (** {7 Printing}*)
 
 val print : ?first:string -> ?last:string -> ?sep:string ->('a BatInnerIO.output -> 'b -> unit) ->  'a BatInnerIO.output -> 'b t -> unit
 
+#endif
 
 (** {6 Override modules}*)
 
@@ -656,6 +658,3 @@ module Labels : sig
     val assq : 'a -> ('a * 'b) t -> 'b option
   end
 end
-
-
-#endif

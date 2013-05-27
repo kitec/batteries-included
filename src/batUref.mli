@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Unifiable references using destructive union-find *)
 
@@ -49,6 +48,8 @@ val equal : 'a uref -> 'a uref -> bool
 (** [equal ur1 ur2] returns [true] iff [ur1] and [ur2] are equal
     urefs, either because they are physically the same or because
     they have been {!unite}d. *)
+
+#if not BATTERIES_JS
 
 (** {6 Printing} *)
 

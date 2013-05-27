@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 let min x y = if Pervasives.compare x y <= 0 then x else y
 
@@ -155,6 +154,8 @@ let to_list bh =
 
 let elems = to_list
 
+#if not BATTERIES_JS
+
 let print ?(first="[") ?(last="]") ?(sep="; ") elepr out bh =
   let rec spin bh =
     if size bh = 0 then ()
@@ -168,6 +169,8 @@ let print ?(first="[") ?(last="]") ?(sep="; ") elepr out bh =
   BatInnerIO.nwrite out first ;
   spin bh ;
   BatInnerIO.nwrite out last
+
+#endif
 
 let rec enum bh =
   let cur = ref bh in
@@ -197,9 +200,15 @@ module type H = sig
   val elems     : t -> elem list
   val of_enum   : elem BatEnum.t -> t
   val enum      : t -> elem BatEnum.t
+
+#if not BATTERIES_JS
+
   val print     :  ?first:string -> ?last:string -> ?sep:string
     -> ('a BatInnerIO.output -> elem -> unit)
     -> 'a BatInnerIO.output -> t -> unit
+
+#endif
+
 end
 
 module Make (Ord : BatInterfaces.OrderedType) = struct
@@ -330,6 +339,8 @@ module Make (Ord : BatInterfaces.OrderedType) = struct
 
   let of_enum e = BatEnum.fold insert empty e
 
+#if not BATTERIES_JS
+
   let print ?(first="[") ?(last="]") ?(sep="; ") elepr out bh =
     let rec spin bh =
       if size bh = 0 then ()
@@ -344,6 +355,6 @@ module Make (Ord : BatInterfaces.OrderedType) = struct
     spin bh ;
     BatInnerIO.nwrite out last
 
-end
-
 #endif
+
+end

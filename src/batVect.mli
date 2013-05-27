@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (* Vect: extensible arrays based on ropes as described in
 
@@ -321,7 +320,11 @@ val pop : 'a t -> 'a * 'a t
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
+
 val print : ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) ->  'a BatInnerIO.output -> 'b t -> unit
+
+#endif
 
 val compare : 'a BatOrd.comp -> 'a t BatOrd.comp
 val equal : 'a BatOrd.eq -> 'a t BatOrd.eq
@@ -626,14 +629,16 @@ val pop : 'a t -> 'a * 'a t
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
+
 (** {7 Printing}*)
 
 val print : ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) ->  'a BatInnerIO.output -> 'b t -> unit
+
+#endif
 
 (**/**)
 val invariants : _ t -> unit
   (**/**)
 
 end
-
-#endif

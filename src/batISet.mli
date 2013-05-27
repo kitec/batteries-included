@@ -2,7 +2,6 @@
 (* Copyright 2003 Yamagata Yoriyuki. distributed with LGPL *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** DIET : Discrete Interval Encoding Trees
 
@@ -145,6 +144,8 @@ val enum : t -> (int * int) BatEnum.t
 val of_enum : (int*int) BatEnum.t -> t
 val of_list : (int*int) list -> t
 (** Build a ISet.t out of a list or enum of ranges *)
+
+#if not BATTERIES_JS
 
 val print : _ BatIO.output -> t -> unit
 

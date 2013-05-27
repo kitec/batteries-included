@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (* Implements union-find with ranks and path-compression  *)
 
@@ -93,6 +92,8 @@ let unite ?sel ur vr =
         vr := Ranked (z, yr) ;
         ur := Ptr vr
       end
+
+#if not BATTERIES_JS
 
 let print elepr out ur =
   match !(find ur) with

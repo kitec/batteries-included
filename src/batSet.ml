@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 module type OrderedType = BatInterfaces.OrderedType
 (** Input signature of the functor {!Set.Make}. *)
@@ -248,8 +247,12 @@ module Concrete = struct
   let of_enum cmp e =
     BatEnum.fold (fun acc elem -> add cmp elem acc) empty e
 
+#if not BATTERIES_JS
+
   let print ?(first="{") ?(last="}") ?(sep=",") print_elt out t =
     BatEnum.print ~first ~last ~sep (fun out e -> BatPrintf.fprintf out "%a" print_elt e) out (enum t)
+
+#endif
 
   let filter cmp f e = fold (fun x acc -> if f x then add cmp x acc else acc) e empty
 
@@ -407,9 +410,15 @@ sig
   val enum: t -> elt BatEnum.t
   val backwards: t -> elt BatEnum.t
   val of_enum: elt BatEnum.t -> t
+
+#if not BATTERIES_JS
+
   val print :  ?first:string -> ?last:string -> ?sep:string ->
     ('a BatInnerIO.output -> elt -> unit) ->
     'a BatInnerIO.output -> t -> unit
+
+#endif
+
   (** Operations on {!Set} without exceptions.*)
   module Exceptionless : sig
     val min_elt: t -> elt option
@@ -506,8 +515,12 @@ struct
 
   let compare_subset s1 s2 = compare_subset (impl_of_t s1) s2
 
+#if not BATTERIES_JS
+
   let print ?first ?last ?sep print_elt out t =
     Concrete.print ?first ?last ?sep print_elt out (impl_of_t t)
+
+#endif
 
   module Exceptionless =
   struct
@@ -572,8 +585,14 @@ module PSet = struct (*$< PSet *)
   let of_enum e = { cmp = compare; set = Concrete.of_enum compare e }
   let of_enum_cmp ~cmp t = { cmp = cmp; set = Concrete.of_enum cmp t }
   let of_list l = List.fold_left (fun a x -> add x a) empty l
+
+#if not BATTERIES_JS
+
   let print ?first ?last ?sep print_elt out s =
     Concrete.print ?first ?last ?sep print_elt out s.set
+
+#endif
+
   let for_all f s = Concrete.for_all f s.set
   let partition f s =
     let l, r = Concrete.partition s.cmp f s.set in
@@ -684,8 +703,12 @@ let of_list l = List.fold_left (fun a x -> add x a) empty l
   )
 *)
 
+#if not BATTERIES_JS
+
 let print ?first ?last ?sep print_elt out s =
   Concrete.print ?first ?last ?sep print_elt out s
+
+#endif
 
 let for_all f s = Concrete.for_all f s
 let partition f s = Concrete.partition Pervasives.compare f s
@@ -725,5 +748,3 @@ module Incubator = struct (*$< Incubator *)
 
 
 end (*$>*)
-
-#endif

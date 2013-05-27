@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 
 (** The data structure for a manual cache with keys ['a] and values ['b].
@@ -91,5 +90,3 @@ val lru_cache : gen:('a -> 'b) -> cap:int -> ('a, 'b) auto_cache
      val rec_cache : gen:(('a -> 'b) -> 'a -> 'b) -> ('a, 'b) manual_cache
      val other_fancy_caching_strategy : (as lru_cache, probably)
   *)
-
-#endif

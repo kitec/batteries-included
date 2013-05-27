@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 exception Empty_list
 
@@ -141,5 +140,3 @@ module Index = struct
 
 
 end
-
-#endif

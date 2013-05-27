@@ -20,7 +20,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (** Sets over ordered types.
 
@@ -212,12 +211,15 @@ sig
 
   (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
+
   (** {7 Printing}*)
 
   val print :  ?first:string -> ?last:string -> ?sep:string ->
     ('a BatInnerIO.output -> elt -> unit) ->
     'a BatInnerIO.output -> t -> unit
 
+#endif
 
   (** {6 Override modules}*)
 
@@ -463,6 +465,7 @@ val of_list: 'a list -> 'a t
 
 (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 
 (** {7 Printing}*)
 
@@ -470,6 +473,7 @@ val print :  ?first:string -> ?last:string -> ?sep:string ->
   ('a BatInnerIO.output -> 'c -> unit) ->
   'a BatInnerIO.output -> 'c t -> unit
 
+#endif
 
 (** {6 Incubator} *)
 module Incubator : sig
@@ -661,6 +665,7 @@ module PSet : sig
 
   (** {6 Boilerplate code}*)
 
+#if not BATTERIES_JS
 
   (** {7 Printing}*)
 
@@ -668,9 +673,9 @@ module PSet : sig
     ('a BatInnerIO.output -> 'c -> unit) ->
     'a BatInnerIO.output -> 'c t -> unit
 
+#endif
+
   (** get the comparison function used for a polymorphic map *)
   val get_cmp : 'a t -> ('a -> 'a -> int)
 
 end
-
-#endif

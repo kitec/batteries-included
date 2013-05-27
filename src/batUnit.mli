@@ -19,7 +19,6 @@
  *)
 
 #include "src/config_incl.ml"
-#if not BATTERIES_JS
 
 (**
    Operations on [unit].
@@ -54,6 +53,8 @@ val equal : t -> t -> bool
 (** Always returns true. *)
 
 (** {6 Boilerplate code}*)
+
+#if not BATTERIES_JS
 
 (** {7 Printing}*)
 val print: 'a BatInnerIO.output -> unit -> unit
