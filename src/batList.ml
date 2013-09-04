@@ -61,7 +61,14 @@ type 'a mappable = 'a t
 
 external inj : 'a mut_list -> 'a list = "%identity"
 
-let dummy_node () = { hd = Obj.magic (); tl = [] }
+module Acc = struct
+  let dummy () =
+    { hd = Obj.magic (); tl = [] }
+  let accum acc x =
+    let cell = { hd = x; tl = [] } in
+    acc.tl <- inj cell;
+    cell
+end
 
 let cons h t = h::t
 
@@ -100,9 +107,7 @@ let append l1 l2 =
       | [] ->
         dst.tl <- l2
       | h :: t ->
-        let cell = { hd = h; tl = [] } in
-        dst.tl <- inj cell;
-        loop cell t
+        loop (Acc.accum dst h) t
     in
     let r = { hd = h; tl = [] } in
     loop r t;
@@ -112,15 +117,13 @@ let rec flatten l =
   let rec inner dst = function
     | [] -> dst
     | h :: t ->
-      let r = { hd = h; tl = [] } in
-      dst.tl <- inj r;
-      inner r t
+      inner (Acc.accum dst h) t
   in
   let rec outer dst = function
     | [] -> ()
     | h :: t -> outer (inner dst h) t
   in
-  let r = dummy_node () in
+  let r = Acc.dummy () in
   outer r l;
   r.tl
 
@@ -131,15 +134,18 @@ let concat = flatten
   flatten [[]] = []
 *)
 
+let singleton x = [x]
+(*$Q singleton
+  Q.int (fun x -> let s = singleton x in hd s = x && length s = 1)
+*)
+
 let map f = function
   | [] -> []
   | h :: t ->
     let rec loop dst = function
       | [] -> ()
       | h :: t ->
-        let r = { hd = f h; tl = [] } in
-        dst.tl <- inj r;
-        loop r t
+        loop (Acc.accum dst (f h)) t
     in
     let r = { hd = f h; tl = [] } in
     loop r t;
@@ -163,13 +169,11 @@ let rec drop n = function
 let take n l =
   let rec loop n dst = function
     | h :: t when n > 0 ->
-      let r = { hd = h; tl = [] } in
-      dst.tl <- inj r;
-      loop (n-1) r t
+      loop (n - 1) (Acc.accum dst h) t
     | _ ->
       ()
   in
-  let dummy = dummy_node() in
+  let dummy = Acc.dummy () in
   loop n dummy l;
   dummy.tl
 
@@ -185,10 +189,8 @@ let take_while p li =
     | [] -> ()
     | x :: xs ->
       if p x then
-        let r = { hd = x; tl = [] } in
-        dst.tl <- inj r;
-        loop r xs in
-  let dummy = dummy_node () in
+        loop (Acc.accum dst x) xs in
+  let dummy = Acc.dummy () in
   loop dummy li;
   dummy.tl
 
@@ -208,6 +210,78 @@ let rec drop_while f = function
 (*$= drop_while & ~printer:(IO.to_string (List.print Int.print))
   (drop_while ((=) 3) [3;3;4;3;3]) [4;3;3]
   (drop_while ((=) 3) [3]) []
+*)
+
+let span p li =
+  let rec loop dst = function
+    | [] -> []
+    | x :: xs as l ->
+      if p x then
+        loop (Acc.accum dst x) xs
+      else l
+  in
+  let dummy = Acc.dummy () in
+  let xs = loop dummy li in
+  (dummy.tl , xs)
+
+(*$= span
+  (span ((=) 3) [3;3;4;3;3])  ([3;3],[4;3;3])
+  (span ((=) 3) [3])          ([3],[])
+  (span ((=) 3) [4])          ([],[4])
+  (span ((=) 3) [])           ([],[])
+  (span ((=) 2) [2; 2])       ([2; 2],[])
+*)
+
+let nsplit p = function
+  | [] -> []
+  (* note that returning [] on empty inputs is an arbitrary choice
+     that is made for consistence with the behavior of
+     BatString.nsplit. Note having this hardcoded case would have
+     `nsplit p []` return `[[]]`, which is also a semantically valid
+     return value (in fact the two are equivalent, but `[[]]` would be
+     a more natural choice as it allows to enforce the simply
+     invariant that `nsplit` return values are always non-empty).
+
+     If that was to redo from scratch, `[[]]` would be a better return
+     value for both `BatList.nsplit` and `BatString.nsplit`.
+  *)
+  | li ->
+    let not_p x = not (p x) in
+    let rec loop dst l =
+      let ok, rest = span not_p l in
+      let r = Acc.accum dst ok in
+      match rest with
+        | [] -> ()
+        | x :: xs -> loop r xs
+    in
+    let dummy = Acc.dummy () in
+    loop dummy li;
+    dummy.tl
+
+(*$T nsplit
+  nsplit ((=) 0) []                    = []
+  nsplit ((=) 0) [0]                   = [[]; []]
+  nsplit ((=) 0) [1; 0]                = [[1]; []]
+  nsplit ((=) 0) [0; 1]                = [[]; [1]]
+  nsplit ((=) 0) [1; 2; 0; 0; 3; 4; 0; 5] = [[1; 2]; []; [3; 4]; [5]]
+*)
+
+let group_consecutive p l =
+  let rec loop dst = function
+    | [] -> ()
+    | x :: rest ->
+      let xs, rest = span (p x) rest in
+      loop (Acc.accum dst (x :: xs)) rest
+  in
+  let dummy = Acc.dummy () in
+  loop dummy l;
+  dummy.tl
+
+(*$= group_consecutive & ~printer:(IO.to_string (List.print (List.print Int.print)))
+  (group_consecutive (=) [3; 3; 4; 3; 3]) [[3; 3]; [4]; [3; 3]]
+  (group_consecutive (=) [3])             [[3]]
+  (group_consecutive (=) [])              []
+  (group_consecutive (=) [2; 2])          [[2; 2]]
 *)
 
 let takewhile = take_while
@@ -254,11 +328,9 @@ let rec unique ?(eq = ( = )) l =
       match exists (eq h) t with
       | true -> loop dst t
       | false ->
-        let r = { hd =  h; tl = [] }  in
-        dst.tl <- inj r;
-        loop r t
+        loop (Acc.accum dst h) t
   in
-  let dummy = dummy_node() in
+  let dummy = Acc.dummy () in
   loop dummy l;
   dummy.tl
 
@@ -291,14 +363,14 @@ let unique_hash (type et) ?(hash = Hashtbl.hash) ?(eq = (=)) (l : et list) =
   let rec loop dst = function
     | h::t when not (HT.mem ht h) ->
       HT.add ht h (); (* put h in hash table *)
-      let r = {hd = h; tl = []} in (* and to output list *)
-      dst.tl <- inj r;
-      loop r t
+      loop
+        (Acc.accum dst h) (* and to output list *)
+        t
     | _::t -> (* if already in hashtable then don't add to output list *)
       loop dst t
     | [] -> ()
   in
-  let dummy = dummy_node() in
+  let dummy = Acc.dummy () in
   loop dummy l;
   dummy.tl
 
@@ -315,11 +387,9 @@ let filter_map f l =
       match f h with
       | None -> loop dst t
       | Some x ->
-        let r = { hd = x; tl = [] }  in
-        dst.tl <- inj r;
-        loop r t
+        loop (Acc.accum dst x) t
   in
-  let dummy = dummy_node() in
+  let dummy = Acc.dummy () in
   loop dummy l;
   dummy.tl
 
@@ -352,12 +422,10 @@ let map2 f l1 l2 =
     match src1, src2 with
     | [], [] -> ()
     | h1 :: t1, h2 :: t2 ->
-      let r = { hd = f h1 h2; tl = [] } in
-      dst.tl <- inj r;
-      loop r t1 t2
+      loop (Acc.accum dst (f h1 h2)) t1 t2
     | _ -> invalid_arg "map2: Different_list_size"
   in
-  let dummy = dummy_node () in
+  let dummy = Acc.dummy () in
   loop dummy l1 l2;
   dummy.tl
 
@@ -417,11 +485,9 @@ let remove_assoc x lst =
       if a = x then
         dst.tl <- t
       else
-        let r = { hd = pair; tl = [] } in
-        dst.tl <- inj r;
-        loop r t
+        loop (Acc.accum dst pair) t
   in
-  let dummy = dummy_node () in
+  let dummy = Acc.dummy () in
   loop dummy lst;
   dummy.tl
 
@@ -432,11 +498,9 @@ let remove_assq x lst =
       if a == x then
         dst.tl <- t
       else
-        let r = { hd =  pair; tl = [] } in
-        dst.tl <- inj r;
-        loop r t
+        loop (Acc.accum dst pair) t
   in
-  let dummy = dummy_node() in
+  let dummy = Acc.dummy () in
   loop dummy lst;
   dummy.tl
 
@@ -447,13 +511,11 @@ let find_all p l =
     | [] -> ()
     | h :: t ->
       if p h then
-        let r = { hd = h; tl = [] } in
-        dst.tl <- inj r;
-        findnext r t
+        findnext (Acc.accum dst h) t
       else
         findnext dst t
   in
-  let dummy = dummy_node () in
+  let dummy = Acc.dummy () in
   findnext dummy l;
   dummy.tl
 
@@ -496,6 +558,7 @@ let rec rindex_ofq e l =
 
 let filter = find_all
 
+(* berenger: it is not clear to me if I can use Acc.accum in there *)
 let partition p lst =
   let rec loop yesdst nodst = function
     | [] -> ()
@@ -512,8 +575,8 @@ let partition p lst =
           loop yesdst r t
         end
   in
-  let yesdummy = dummy_node()
-  and nodummy = dummy_node()
+  let yesdummy = Acc.dummy ()
+  and nodummy = Acc.dummy ()
   in
   loop yesdummy nodummy lst;
   yesdummy.tl, nodummy.tl
@@ -522,31 +585,32 @@ let split lst =
   let rec loop adst bdst = function
     | [] -> ()
     | (a, b) :: t ->
-      let x = { hd = a; tl = [] }
-      and y = { hd = b; tl = [] } in
-      adst.tl <- inj x;
-      bdst.tl <- inj y;
-      loop x y t
+      loop (Acc.accum adst a) (Acc.accum bdst b) t
   in
-  let adummy = dummy_node ()
-  and bdummy = dummy_node ()
+  let adummy = Acc.dummy ()
+  and bdummy = Acc.dummy ()
   in
   loop adummy bdummy lst;
   adummy.tl, bdummy.tl
 
 let combine l1 l2 =
-  let rec loop dst l1 l2 =
-    match l1, l2 with
-    | [], [] -> ()
-    | h1 :: t1, h2 :: t2 ->
-      let r = { hd = h1, h2; tl = [] } in
-      dst.tl <- inj r;
-      loop r t1 t2
-    | _, _ -> invalid_arg "combine: Different_list_size"
-  in
-  let dummy = dummy_node () in
-  loop dummy l1 l2;
-  dummy.tl
+  let list_sizes_differ = Invalid_argument "combine: Different_list_size" in
+  match l1, l2 with
+    | [], [] -> []
+    | x :: xs, y :: ys ->
+      let acc = { hd = (x, y); tl = [] } in
+      let rec loop dst l1 l2 = match l1, l2 with
+        | [], [] -> inj acc
+        | h1 :: t1, h2 :: t2 -> loop (Acc.accum dst (h1, h2)) t1 t2
+        | _, _ -> raise list_sizes_differ
+      in loop acc xs ys
+    | _, _ -> raise list_sizes_differ
+
+(*$T combine
+  combine []     []     = []
+  combine [1]    [2]    = [(1, 2)]
+  combine [1; 3] [2; 4] = [(1, 2); (3, 4)]
+*)
 
 let rec init size f =
   if size = 0 then []
@@ -554,9 +618,7 @@ let rec init size f =
   else
     let rec loop dst n =
       if n < size then
-        let r = { hd = f n; tl = [] } in
-        dst.tl <- inj r;
-        loop r (n+1)
+        loop (Acc.accum dst (f n)) (n+1)
     in
     let r = { hd = f 0; tl = [] } in
     loop r 1;
@@ -576,9 +638,7 @@ let mapi f = function
     let rec loop dst n = function
       | [] -> ()
       | h :: t ->
-        let r = { hd = f n h; tl = [] } in
-        dst.tl <- inj r;
-        loop r (n+1) t
+        loop (Acc.accum dst (f n h)) (n + 1) t
     in
     let r = { hd = f 0 h; tl = [] } in
     loop r 1 t;
@@ -611,9 +671,7 @@ let split_nth index = function
           match l with
           | [] -> invalid_arg "Index past end of list"
           | h :: t ->
-            let r = { hd =  h; tl = [] } in
-            dst.tl <- inj r;
-            loop (n-1) r t
+            loop (n - 1) (Acc.accum dst h) t
       in
       let r = { hd = h; tl = [] } in
       inj r, loop (index-1) r t
@@ -633,11 +691,9 @@ let remove l x =
       if x = h then
         dst.tl <- t
       else
-        let r = { hd = h; tl = [] } in
-        dst.tl <- inj r;
-        loop r t
+        loop (Acc.accum dst h) t
   in
-  let dummy = dummy_node () in
+  let dummy = Acc.dummy () in
   loop dummy l;
   dummy.tl
 
@@ -648,11 +704,9 @@ let rec remove_if f lst =
       if f x then
         dst.tl <- l
       else
-        let r = { hd = x; tl = [] } in
-        dst.tl <- inj r;
-        loop r l
+        loop (Acc.accum dst x) l
   in
-  let dummy = dummy_node () in
+  let dummy = Acc.dummy () in
   loop dummy lst;
   dummy.tl
 
@@ -663,11 +717,9 @@ let rec remove_all l x =
       if x = h then
         loop dst t
       else
-        let r = { hd = h; tl = [] } in
-        dst.tl <- inj r;
-        loop r t
+        loop (Acc.accum dst h) t
   in
-  let dummy = dummy_node () in
+  let dummy = Acc.dummy () in
   loop dummy l;
   dummy.tl
 
@@ -677,7 +729,10 @@ let transpose = function
   | x::xs ->
     let heads = List.map (fun x -> {hd=x; tl=[]}) x in
     ignore ( List.fold_left
-        (fun acc x -> List.map2 (fun x xs -> let r = {hd = x; tl = []} in xs.tl <- inj r; r) x acc)
+        (fun acc x ->
+           List.map2
+             (fun x xs -> Acc.accum xs x)
+             x acc)
         heads xs);
     Obj.magic heads (* equivalent to List.map inj heads, but without creating a new list *)
 
@@ -710,11 +765,8 @@ let enum l =
   make (ref l) (ref (-1))
 
 let of_enum e =
-  let h = dummy_node() in
-  let _ = BatEnum.fold (fun acc x ->
-      let r = { hd = x; tl = [] }  in
-      acc.tl <- inj r;
-      r) h e in
+  let h = Acc.dummy () in
+  let _ = BatEnum.fold Acc.accum h e in
   h.tl
 
 
@@ -836,6 +888,13 @@ let group cmp lst =
       List.rev_map List.rev (lastgr::groups)
     end
 
+(*$T group
+  group Pervasives.compare []                 = []
+  group Pervasives.compare [1]                = [[1]]
+  group Pervasives.compare [2; 2]             = [[2; 2]]
+  group Pervasives.compare [5; 4; 4; 2; 1; 6] = [[1]; [2]; [4; 4]; [5]; [6]]
+*)
+
 let cartesian_product l1 l2 =
   List.concat (List.map (fun i -> List.map (fun j -> (i,j)) l2) l1)
 
@@ -885,6 +944,45 @@ let min l = reduce Pervasives.min l
 let max l = reduce Pervasives.max l
 let sum l = reduce (+) l
 let fsum l = reduce (+.) l
+
+let min_max ?cmp:(cmp = Pervasives.compare) = function
+  | [] -> invalid_arg "List.min_max: Empty List"
+  | x :: xs ->
+    fold_left
+      (fun (curr_min, curr_max) y ->
+         let new_min =
+           if cmp curr_min y = 1
+           then y
+           else curr_min
+         in
+         let new_max =
+           if cmp curr_max y = -1
+           then y
+           else curr_max
+         in
+         (new_min, new_max)
+      )
+      (x, x)
+      xs
+
+(*$T min_max
+  min_max [1] = (1, 1)
+  min_max [1; 1] = (1, 1)
+  min_max [1; -2; 3; 4; 5; 60; 7; 8] = (-2, 60)
+*)
+
+let unfold b f =
+  let acc = Acc.dummy () in
+  let rec loop dst v =
+    match f v with
+    | None -> acc.tl
+    | Some (a, v) -> loop (Acc.accum dst a) v
+  in loop acc b
+
+(*$T unfold
+  unfold 1 (fun x -> None) = []
+  unfold 0 (fun x -> if x > 3 then None else Some (x, succ x)) = [0;1;2;3]
+*)
 
 module Exceptionless = struct
   let rfind p l =

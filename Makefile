@@ -50,6 +50,7 @@ BENCH_TARGETS += benchsuite/deque.native
 BENCH_TARGETS += benchsuite/lines_of.native
 BENCH_TARGETS += benchsuite/bitset.native
 BENCH_TARGETS += benchsuite/bench_map.native
+BENCH_TARGETS += benchsuite/bench_nreplace.native
 TEST_TARGET = test-byte
 
 ifeq ($(BATTERIES_NATIVE_SHLIB), yes)
@@ -123,7 +124,8 @@ reinstall:
 #	Pre-Processing of Source Code
 ###############################################################################
 
-prefilter: src/batUnix.mli src/batPervasives.mli src/batInnerPervasives.ml src/batHashtbl.ml
+prefilter: src/batMarshal.mli src/batUnix.mli src/batPervasives.mli \
+	   src/batInnerPervasives.ml src/batHashtbl.ml
 
 # Ocaml 4.00 can benefit strongly from some pre-processing to expose
 # slightly different interfaces
@@ -132,10 +134,10 @@ prefilter: src/batUnix.mli src/batPervasives.mli src/batInnerPervasives.ml src/b
 # Look for lines starting with ##Vx##, and delete just the tag or the
 # whole line depending whether the x matches the ocaml major version
 .mliv.mli:
-	sed -e 's/^##V$(OCAML_MAJOR_VERSION)##//' -e '/^##V.##/d' $< > $@
+	ocaml str.cma build/prefilter.ml < $^ > $@
 
 .mlv.ml:
-	sed -e 's/^##V$(OCAML_MAJOR_VERSION)##//' -e '/^##V.##/d' $< > $@
+	ocaml str.cma build/prefilter.ml < $^ > $@
 
 ###############################################################################
 #	BUILDING AND RUNNING UNIT TESTS
@@ -189,7 +191,7 @@ test-byte: prefilter _build/testsuite/main.byte _build/$(QTESTDIR)/all_tests.byt
 	@echo "" # newline after "OK"
 	@_build/$(QTESTDIR)/all_tests.byte
 
-test-native: test-byte _build/testsuite/main.native _build/$(QTESTDIR)/all_tests.native
+test-native: prefilter _build/testsuite/main.native _build/$(QTESTDIR)/all_tests.native
 	@_build/testsuite/main.native
 	@echo "" # newline after "OK"
 	@_build/$(QTESTDIR)/all_tests.native

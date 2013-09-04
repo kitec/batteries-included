@@ -176,6 +176,18 @@ val sum : int array -> int
 val fsum : float array -> float
 (** [fsum l] returns the sum of the floats of [l] *)
 
+val avg : int array -> float
+(** [avg l] returns the average of [l]
+
+    @since 2.1
+ *)
+
+val favg : float array -> float
+(** [favg l] returns the average of [l]
+
+    @since 2.1
+*)
+
 val left : 'a array -> int -> 'a array
 (**[left r len] returns the array containing the [len] first
    characters of [r]. If [r] contains less than [len] characters, it
@@ -253,6 +265,12 @@ val reduce : ('a -> 'a -> 'a) -> 'a array -> 'a
     reasonable default value to return if the group is empty.
 
     @raise Invalid_argument on empty arrays. *)
+
+val singleton : 'a -> 'a array
+(** Create an array consisting of exactly one element.
+
+    @since 2.1
+*)
 
 
 (** {6 Sorting} *)
@@ -388,7 +406,7 @@ val filteri : (int -> 'a -> bool) -> 'a array -> 'a array
 (** As [filter] but with the index passed to the predicate. *)
 
 val filter_map : ('a -> 'b option) -> 'a array -> 'b array
-(** [filter_map f e] returns an array consisting in all elements
+(** [filter_map f e] returns an array consisting of all elements
     [x] such that [f y] returns [Some x] , where [y] is an element
     of [e]. *)
 

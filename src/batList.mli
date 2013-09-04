@@ -116,6 +116,12 @@ val concat : 'a list list -> 'a list
 val flatten : 'a list list -> 'a list
 (** Same as [concat]. *)
 
+val singleton : 'a -> 'a list
+(** Create a list consisting of exactly one element.
+
+    @since 2.1
+*)
+
 
 (**{6 Constructors}*)
 
@@ -129,6 +135,18 @@ val init : int -> (int -> 'a) -> 'a list
     the results of (f 0),(f 1).... (f (n-1)).
     @raise Invalid_argument if n < 0.*)
 
+val unfold: 'b -> ('b -> ('a * 'b) option) -> 'a list
+(** [unfold init f] creates a list by repeatedly applying [f] to the
+    second element of its own result, starting from the initial value
+    [init]. The first element of each result is accumulated in
+    a list. The list is terminated and returned as soon as [f] returns
+    [None].
+
+    Example: [List.unfold 0 (fun x -> if x = 3 then None else Some (string_of_int x, x+1))]
+    will return [["0";"1";"2"]]
+
+    @since 2.1
+*)
 
 (**{6 Iterators}*)
 
@@ -169,7 +187,7 @@ val fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
 val reduce : ('a -> 'a -> 'a) -> 'a list -> 'a
 (** [List.reduce f h::t] is [fold_left f h t].
 
-    @raise Empty_list on empty lists. *)
+    @raise Invalid_argument on empty list. *)
 
 val max : 'a list -> 'a
 (** [max l] returns the largest value in [l] as judged by
@@ -180,11 +198,23 @@ val min : 'a list -> 'a
     [Pervasives.compare] *)
 
 val sum : int list -> int
-(** [sum l] returns the sum of the integers of [l] *)
+(** [sum l] returns the sum of the integers of [l] 
+    @raise Invalid_argument on the empty list.
+ *)
 
 val fsum : float list -> float
-(** [fsum l] returns the sum of the floats of [l] *)
+(** [fsum l] returns the sum of the floats of [l] 
+    @raise Invalid_argument on the empty list.
+ *)
 
+val min_max : ?cmp:('a -> 'a -> int) -> 'a list -> 'a * 'a
+(** [min_max l] returns the pair (smallest, largest) from [l] as judged by
+    [Pervasives.compare] (by default). You can provide another
+    comparison function via the optional [cmp] parameter.
+    @raise Invalid_argument on an empty list.
+
+    @since 2.1
+ *)
 
 (** {6 Iterators on two lists} *)
 
@@ -408,19 +438,19 @@ val modify : 'a -> ('b -> 'b) -> ('a * 'b) list -> ('a * 'b) list
     to key [a] replaced with [f a].
 
     @raise Not_found if no value is associated with [a] in [l]
-    @since NEXT_RELEASE *)
+    @since 2.1 *)
 
 val modify_def : 'b -> 'a -> ('b -> 'b) -> ('a * 'b) list -> ('a * 'b) list
 (** [modify_def dfl a f l] performs as [modify a f l] except that it
     add an association from [a] to [f dfl] instead of raising [Not_found].
 
-    @since NEXT_RELEASE *)
+    @since 2.1 *)
 
 val modify_opt : 'a -> ('b option -> 'b option) -> ('a * 'b) list -> ('a * 'b) list
 (** [modify_opt a f l] allows to modify the binding for [a] in [l]
     or absence thereof.
 
-    @since NEXT_RELEASE *)
+    @since 2.1 *)
 
 (** {6 List transformations}*)
 
@@ -459,7 +489,49 @@ val take_while : ('a -> bool) -> 'a list -> 'a list
 
 val drop_while : ('a -> bool) -> 'a list -> 'a list
 (** [drop_while p xs] returns the suffix remaining after
-    [takeWhile p xs]. *)
+    [take_while p xs]. *)
+    
+val span : ('a -> bool) -> 'a list -> 'a list * 'a list
+(** [span], applied to a predicate [p] and a list [xs], returns a 
+    tuple where first element is longest prefix (possibly empty) of xs 
+    of elements that satisfy p and second element is the remainder of
+    the list. This is equivalent to [(take_while p xs, drop_while p xs)],
+    but is done in one pass. 
+
+    @since 2.1
+*)
+
+val nsplit : ('a -> bool) -> 'a list -> 'a list list
+(** [nsplit], applied to a predicate [p] and a list [xs], returns a
+    list of lists. [xs] is split when [p x] is true and [x] is excluded
+    from the result.
+    
+    If elements that satisfy [p] are consecutive, or at the beginning
+    or end of the input list, the output list will contain empty lists
+    marking their position. For example,
+    [split (fun n -> n<0) [-1;2;-2;-3;4;-5]] is [[[];[2];[];[4];[]]].
+    This is consistent with the behavior of [String.nsplit], where
+    [String.nsplit ";" "1;2;;3;" = ["1";"2";"";"3";""]].
+    
+    Note that for any [xss : 'a list list] and [sep : 'a], we always have
+    that [flatten (interleave [sep] (nsplit ((=) sep) xss))] is [xss].
+
+    @since 2.1
+*)
+
+val group_consecutive : ('a -> 'a -> bool) -> 'a list -> 'a list list
+(** The [group_consecutive] function takes a list and returns a list of lists such 
+    that the concatenation of the result is equal to the argument. Moreover, each 
+    sublist in the result contains only equal elements. For example, 
+    [group_consecutive (=) [3;3;4;3;3] =  [[3;3];[4];[3;3]]].
+
+    {b Note:} In the next major version, this function is intended to replace the 
+    current [group], which also sorts its input before grouping, and which will
+    therefore be renamed into something more pertinent, such as [classify], 
+    [regroup], or [group_sort].
+
+    @since 2.1
+*)
 
 val interleave : ?first:'a -> ?last:'a -> 'a -> 'a list -> 'a list
 (** [interleave ~first ~last sep [a0;a1;a2;...;an]] returns
@@ -573,6 +645,8 @@ val group : ('a -> 'a -> int) -> 'a list -> 'a list list
     For example [group cmp [f;c;b;e;d;a]] can give [[[a;b];[c];[d;e;f]]] if
     following conditions are met:
     [cmp a b = 0], [cmp b c = -1], [cmp c d = -1], [cmp d e = 0],...
+    
+    See the note on [group_consecutive].
 *)
 
 val cartesian_product : 'a list -> 'b list -> ('a * 'b) list

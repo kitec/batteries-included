@@ -294,7 +294,7 @@ val filter : ('a -> bool) -> 'a t -> 'a t
     [f x] returns [true]. Operates in [O(n)] time. *)
 
 val filter_map : ('a -> 'b option) -> 'a t -> 'b t
-(** [filter_map f e] returns a vect consisting in all elements
+(** [filter_map f e] returns a vect consisting of all elements
     [x] such that [f y] returns [Some x] , where [y] is an element
     of [e]. *)
 
@@ -603,7 +603,7 @@ val filter : ('a -> bool) -> 'a t -> 'a t
     [f x] returns [true]. Operates in [O(n)] time. *)
 
 val filter_map : ('a -> 'b option) -> 'a t -> 'b t
-(** [filter_map f e] returns a vect consisting in all elements
+(** [filter_map f e] returns a vect consisting of all elements
 	[x] such that [f y] returns [Some x] , where [y] is an element
 	of [e]. *)
 
