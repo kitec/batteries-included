@@ -8,7 +8,7 @@ open Ocamlbuild_plugin
 
 let ocamlfind x = S[A"ocamlfind"; A x]
 
-let packs = "bigarray,num,str"
+let packs = "str"
 
 let doc_intro = "build/intro.text"
 let mkconf = "build/mkconf.byte"
