@@ -35,6 +35,12 @@
 
 type 'a t = 'a option
 
+val some : 'a -> 'a option
+(** [some x] returns [Some x].
+
+    @since 2.2.0
+ *)
+
 val may : ('a -> unit) -> 'a option -> unit
 (** [may f (Some x)] calls [f x] and [may f None] does nothing. *)
 
@@ -147,6 +153,11 @@ module Monad : sig
 end
 
 (** {6 Boilerplate code}*)
+
+open BatOrd
+val ord : 'a ord -> 'a option ord
+(** Comparison between optional values
+    @since 2.2.0 *)
 
 #if not BATTERIES_JS
 

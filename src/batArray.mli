@@ -176,6 +176,25 @@ val sum : int array -> int
 val fsum : float array -> float
 (** [fsum l] returns the sum of the floats of [l] *)
 
+val kahan_sum : float array -> float
+(** [kahan_sum l] returns a numerically-accurate
+    sum of the floats of [l].
+
+    You should consider using Kahan summation when you really care
+    about very small differences in the result, while the result or
+    one of the intermediate sums can be very large (which usually
+    results in loss of precision of floating-point addition).
+
+    The worst-case rounding error is constant, instead of growing with
+    (the square root of) the length of the input array as with {!
+    fsum}. On the other hand, processing each element requires four
+    floating-point operations instead of one. See
+    {{: https://en.wikipedia.org/wiki/Kahan_summation_algorithm }
+    the wikipedia article} on Kahan summation for more details.
+
+    @since 2.2.0
+*)
+
 val avg : int array -> float
 (** [avg l] returns the average of [l]
 
@@ -332,6 +351,24 @@ val decorate_stable_sort : ('a -> 'b) -> 'a array -> 'a array
 val decorate_fast_sort : ('a -> 'b) -> 'a array -> 'a array
 (** As {!Array.decorate_stable_sort}, but uses fast_sort internally. *)
 
+val bsearch : 'a BatOrd.ord -> 'a array -> 'a ->
+  [ `All_lower | `All_bigger | `Just_after of int | `Empty | `At of int ]
+(** [bsearch cmp arr x] finds the index of the object [x] in the array [arr],
+    provided [arr] is {b sorted} using [cmp]. If the array is not sorted,
+    the result is not specified (may raise Invalid_argument).
+
+    Complexity: O(log n) where n is the length of the array
+    (dichotomic search).
+
+    @return
+    - [`At i] if [cmp arr.(i) x = 0] (for some i)
+    - [`All_lower] if all elements of [arr] are lower than [x]
+    - [`All_bigger] if all elements of [arr] are bigger than [x]
+    - [`Just_after i] if [arr.(i) < x < arr.(i+1)]
+    - [`Empty] if the array is empty
+
+    @raise Invalid_argument if the array is found to be unsorted w.r.t [cmp]
+    @since 2.2.0 *)
 
 (**{6 Operations on two arrays}*)
 
@@ -364,6 +401,10 @@ val map2 : ('a -> 'b -> 'c) -> 'a array -> 'b array -> 'c array
 (** As {!Array.map} but on two arrays.
 
     @raise Invalid_argument if the two arrays have different lengths. *)
+
+val cartesian_product : 'a array -> 'b array -> ('a * 'b) array
+(** Cartesian product of the two arrays.
+    @since 2.2.0 *)
 
 (**{6 Predicates}*)
 

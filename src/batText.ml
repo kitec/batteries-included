@@ -260,6 +260,8 @@ module Iter = struct
     mutable rest : t list;
   }
 
+  let copy i = {i with idx=i.idx; }
+
   type t = iterator option
 
   (* Initial iterator state: *)
@@ -594,6 +596,56 @@ let index r u =
   in
   loop 0
 
+let enum r =
+  let next iter () = match Iter.next iter with
+    | None -> raise BatEnum.No_more_elements
+    | Some x -> x
+  and count iter () =
+    let n = ref 0 in
+    let iter' = Iter.copy iter in
+    begin try
+      while true do match Iter.next iter' with None -> raise Exit | Some _ -> incr n
+    done with Exit -> ()
+    end;
+    !n
+  in
+  let rec make iter =
+    BatEnum.make ~next:(next iter) ~clone:(clone iter) ~count:(count iter)
+  and clone iter () = make (Iter.copy iter)
+  in
+  make (Iter.make r)
+
+let backwards r =
+  let next iter () = match Iter.prev iter with
+    | None -> raise BatEnum.No_more_elements
+    | Some x -> x
+  and count iter () =
+    let n = ref 0 in
+    let iter' = Iter.copy iter in
+    begin try
+      while true do match Iter.prev iter' with None -> raise Exit | Some _ -> incr n
+    done with Exit -> ()
+    end;
+    !n
+  in
+  let rec make iter =
+    BatEnum.make ~next:(next iter) ~clone:(clone iter) ~count:(count iter)
+  and clone iter () = make (Iter.copy iter)
+  in
+  make (Iter.make r)
+
+let of_enum e =
+  let size = BatEnum.count e in
+  init size
+    (fun i ->
+       try BatEnum.get_exn e
+       with BatEnum.No_more_elements -> assert false)
+
+(*$Q enum; of_enum
+  (Q.array Q.small_int) (fun a -> \
+    let s = BatUTF8.init (Array.length a) (fun i -> BatUChar.chr (Array.get a i)) in \
+    s = (of_string s |> enum |> of_enum |> to_string))
+*)
 
 module Return = BatReturn
 
@@ -644,7 +696,7 @@ let contains_from r start char =
 
 let rcontains_from = contains_from
 
-let equals r1 r2 = compare r1 r2 = 0
+let equal r1 r2 = compare r1 r2 = 0
 
 let starts_with r prefix =
   let ir = Iter.make r and iprefix = Iter.make prefix in

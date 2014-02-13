@@ -64,8 +64,10 @@ external inj : 'a mut_list -> 'a list = "%identity"
 module Acc = struct
   let dummy () =
     { hd = Obj.magic (); tl = [] }
+  let create x =
+    { hd = x; tl = [] }
   let accum acc x =
-    let cell = { hd = x; tl = [] } in
+    let cell = create x in
     acc.tl <- inj cell;
     cell
 end
@@ -75,7 +77,6 @@ let cons h t = h::t
 let is_empty = function
   | [] -> true
   | _  -> false
-
 
 (*$T is_empty
   is_empty []
@@ -99,6 +100,16 @@ let at = nth
   at [1;2;3] 2 = 3
 *)
 
+let mem_cmp cmp x l =
+  exists (fun y -> cmp x y = 0) l
+
+(*$T mem_cmp
+  mem_cmp Pervasives.compare 0 []     = false
+  mem_cmp Pervasives.compare 0 [1; 2] = false
+  mem_cmp Pervasives.compare 1 [1; 2] = true
+  mem_cmp Pervasives.compare 2 [1; 2] = true
+*)
+
 let append l1 l2 =
   match l1 with
   | [] -> l2
@@ -109,11 +120,11 @@ let append l1 l2 =
       | h :: t ->
         loop (Acc.accum dst h) t
     in
-    let r = { hd = h; tl = [] } in
+    let r = Acc.create h in
     loop r t;
     inj r
 
-let rec flatten l =
+let flatten l =
   let rec inner dst = function
     | [] -> dst
     | h :: t ->
@@ -147,7 +158,7 @@ let map f = function
       | h :: t ->
         loop (Acc.accum dst (f h)) t
     in
-    let r = { hd = f h; tl = [] } in
+    let r = Acc.create (f h) in
     loop r t;
     inj r
 (*$Q map
@@ -182,6 +193,41 @@ let take n l =
   (take 3 [1;2;3]) [1;2;3]
   (take 4 [1;2;3]) [1;2;3]
   (take 1 [1;2;3]) [1]
+*)
+
+let takedrop n l =
+  let rec loop n dst = function
+    | h :: t when n > 0 -> loop (n - 1) (Acc.accum dst h) t
+    | rest -> rest
+  in
+  let dummy = Acc.dummy () in
+  let rest = loop n dummy l in
+  (dummy.tl, rest)
+
+(*$T takedrop
+  takedrop 0 [1; 2; 3] = ([],        [1; 2; 3])
+  takedrop 3 [1; 2; 3] = ([1; 2; 3], [])
+  takedrop 4 [1; 2; 3] = ([1; 2; 3], [])
+  takedrop 1 [1; 2; 3] = ([1],       [2; 3])
+*)
+
+let ntake n l =
+  if n < 1 then invalid_arg "BatList.ntake";
+  let took, left = takedrop n l in
+  let acc = Acc.create took in
+  let rec loop dst = function
+    | [] -> inj acc
+    | li -> let taken, rest = takedrop n li in
+            loop (Acc.accum dst taken) rest
+  in
+  loop acc left
+
+(*$T ntake
+  ntake 2 []           = [[]]
+  ntake 2 [1]          = [[1]]
+  ntake 2 [1; 2]       = [[1; 2]]
+  ntake 2 [1; 2; 3]    = [[1; 2]; [3]]
+  ntake 2 [1; 2; 3; 4] = [[1; 2]; [3; 4]]
 *)
 
 let take_while p li =
@@ -266,6 +312,23 @@ let nsplit p = function
   nsplit ((=) 0) [1; 2; 0; 0; 3; 4; 0; 5] = [[1; 2]; []; [3; 4]; [5]]
 *)
 
+(*$Q nsplit & ~count:10
+  (Q.list (Q.list Q.pos_int)) (fun xss -> \
+    let join sep xss = flatten (interleave [sep] xss) in \
+    (* normalize: the return type of nsplit \
+       is quotiented by the equivalence []~[[]] *) \
+    let normalize = function [] -> [[]] | li -> li in \
+    let neg = -1 in \
+    normalize xss = normalize (nsplit ((=) neg) (join neg xss)) \
+  )
+  (Q.pair Q.small_int (Q.list Q.small_int)) (fun (sep,xs) -> \
+    let join sep xss = flatten (interleave [sep] xss) in \
+    xs = join sep (nsplit ((=) sep) xs) \
+  )
+*)
+
+(* nsplit ((=) sep) la @ nsplit ((=) sep) lb   = nsplit ((=) sep) (la @ [sep] @ lb) *)
+
 let group_consecutive p l =
   let rec loop dst = function
     | [] -> ()
@@ -321,7 +384,7 @@ let interleave ?first ?last (sep:'a) (l:'a list) =
   (interleave ~first:(-1) ~last:(-2) 0 []) [-1;-2]
 *)
 
-let rec unique ?(eq = ( = )) l =
+let unique ?(eq = ( = )) l =
   let rec loop dst = function
     | [] -> ()
     | h :: t ->
@@ -392,6 +455,25 @@ let filter_map f l =
   let dummy = Acc.dummy () in
   loop dummy l;
   dummy.tl
+
+let filteri_map f l =
+  let rec loop i dst = function
+    | [] -> ()
+    | h :: t ->
+      match f i h with
+      | None -> loop (succ i) dst t
+      | Some x ->
+        loop (succ i) (Acc.accum dst x) t
+  in
+  let dummy = Acc.dummy () in
+  loop 0 dummy l;
+  dummy.tl
+(*$T filteri_map
+  (let r = ref (-1) in filteri_map (fun i _ -> incr r; if i = !r then Some i else None) [5; 4; 8] = [0; 1; 2])
+  filteri_map (fun _ x -> if x > 4 then Some (x, string_of_int x) else None) [5; 4; 8] = [(5, "5"); (8, "8")]
+  filteri_map (fun _ _ -> Some ()) [] = []
+  filteri_map (fun _ _ -> None) [1; 2] = []
+*)
 
 let rec find_map f = function
   | [] -> raise Not_found
@@ -555,31 +637,35 @@ let rec rindex_ofq e l =
     | _::t             -> loop ( n + 1 ) acc       t
   in loop 0 None l
 
-
 let filter = find_all
 
-(* berenger: it is not clear to me if I can use Acc.accum in there *)
+let filteri f =
+  let rec aux i = function
+    | [] -> []
+    | x::xs when f i x -> x :: aux (succ i) xs
+    | x::xs -> aux (succ i) xs
+  in
+  aux 0
+(*$T filteri
+  (let r = ref (-1) in filteri (fun i _ -> incr r; i = !r) [5; 4; 8] = [5; 4; 8])
+  filteri (fun _ x -> x > 4) [5; 4; 8] = [5; 8]
+  filteri (fun _ _ -> true) [] = []
+*)
+
 let partition p lst =
   let rec loop yesdst nodst = function
     | [] -> ()
     | h :: t ->
-      let r = { hd = h; tl = [] } in
       if p h then
-        begin
-          yesdst.tl <- inj r;
-          loop r nodst t
-        end
+        loop (Acc.accum yesdst h) nodst t
       else
-        begin
-          nodst.tl <- inj r;
-          loop yesdst r t
-        end
+        loop yesdst (Acc.accum nodst h) t
   in
   let yesdummy = Acc.dummy ()
   and nodummy = Acc.dummy ()
   in
   loop yesdummy nodummy lst;
-  yesdummy.tl, nodummy.tl
+  (yesdummy.tl, nodummy.tl)
 
 let split lst =
   let rec loop adst bdst = function
@@ -598,7 +684,7 @@ let combine l1 l2 =
   match l1, l2 with
     | [], [] -> []
     | x :: xs, y :: ys ->
-      let acc = { hd = (x, y); tl = [] } in
+      let acc = Acc.create (x, y) in
       let rec loop dst l1 l2 = match l1, l2 with
         | [], [] -> inj acc
         | h1 :: t1, h2 :: t2 -> loop (Acc.accum dst (h1, h2)) t1 t2
@@ -612,7 +698,7 @@ let combine l1 l2 =
   combine [1; 3] [2; 4] = [(1, 2); (3, 4)]
 *)
 
-let rec init size f =
+let init size f =
   if size = 0 then []
   else if size < 0 then invalid_arg "BatList.init"
   else
@@ -620,7 +706,7 @@ let rec init size f =
       if n < size then
         loop (Acc.accum dst (f n)) (n+1)
     in
-    let r = { hd = f 0; tl = [] } in
+    let r = Acc.create (f 0) in
     loop r 1;
     inj r
 
@@ -632,6 +718,34 @@ let make i x =
   in
   loop x [] i
 
+let range i dir j =
+  let op = match dir with
+    | `To ->
+      if i > j
+      then invalid_arg (Printf.sprintf "List.range %d `To %d" i j)
+      else pred
+    | `Downto ->
+      if i < j
+      then invalid_arg (Printf.sprintf "List.range %d `Downto %d" i j)
+      else succ
+  in
+  let rec loop acc k =
+    if i = k then
+      k :: acc
+    else
+      loop (k :: acc) (op k)
+  in
+  loop [] j
+
+(*$T range
+  range 1 `To 3     = [1; 2; 3]
+  range 1 `To 1     = [1]
+  range 3 `Downto 1 = [3; 2; 1]
+  range 3 `Downto 3 = [3]
+  try ignore(range 1 `To 0); true with Invalid_argument _ -> true
+  try ignore(range 1 `Downto 2); true with Invalid_argument _ -> true
+*)
+
 let mapi f = function
   | [] -> []
   | h :: t ->
@@ -640,7 +754,7 @@ let mapi f = function
       | h :: t ->
         loop (Acc.accum dst (f n h)) (n + 1) t
     in
-    let r = { hd = f 0 h; tl = [] } in
+    let r = Acc.create (f 0 h) in
     loop r 1 t;
     inj r
 
@@ -673,7 +787,7 @@ let split_nth index = function
           | h :: t ->
             loop (n - 1) (Acc.accum dst h) t
       in
-      let r = { hd = h; tl = [] } in
+      let r = Acc.create h in
       inj r, loop (index-1) r t
 
 let split_at = split_nth
@@ -697,7 +811,7 @@ let remove l x =
   loop dummy l;
   dummy.tl
 
-let rec remove_if f lst =
+let remove_if f lst =
   let rec loop dst = function
     | [] -> ()
     | x :: l ->
@@ -710,7 +824,7 @@ let rec remove_if f lst =
   loop dummy lst;
   dummy.tl
 
-let rec remove_all l x =
+let remove_all l x =
   let rec loop dst = function
     | [] -> ()
     | h :: t ->
@@ -727,7 +841,7 @@ let transpose = function
   | [] -> []
   | [x] -> List.map (fun x -> [x]) x
   | x::xs ->
-    let heads = List.map (fun x -> {hd=x; tl=[]}) x in
+    let heads = List.map Acc.create x in
     ignore ( List.fold_left
         (fun acc x ->
            List.map2
@@ -945,6 +1059,36 @@ let max l = reduce Pervasives.max l
 let sum l = reduce (+) l
 let fsum l = reduce (+.) l
 
+let kahan_sum li =
+  (* This algorithm is written in a particularly untasteful imperative
+     style to benefit from the nice unboxing of float references that
+     is harder to obtain with recursive functions today. See the
+     definition of kahan sum on arrays, on which this one is directly
+     modeled. *)
+  let li = ref li in
+  let continue = ref (!li <> []) in
+  let sum = ref 0. in
+  let err = ref 0. in
+  while !continue do
+    match !li with
+      | [] -> continue := false
+      | x::xs ->
+        li := xs;
+        let x = x -. !err in
+        let new_sum = !sum +. x in
+        err := (new_sum -. !sum) -. x;
+        sum := new_sum +. 0.;
+  done;
+  !sum +. 0.
+
+(*$T kahan_sum
+   kahan_sum [ ] = 0.
+   kahan_sum [ 1.; 2. ] = 3.
+   let n, x = 1_000, 1.1 in \
+     Float.approx_equal (float n *. x) \
+                        (kahan_sum (List.make n x))
+*)
+
 let min_max ?cmp:(cmp = Pervasives.compare) = function
   | [] -> invalid_arg "List.min_max: Empty List"
   | x :: xs ->
@@ -982,6 +1126,15 @@ let unfold b f =
 (*$T unfold
   unfold 1 (fun x -> None) = []
   unfold 0 (fun x -> if x > 3 then None else Some (x, succ x)) = [0;1;2;3]
+*)
+
+let subset cmp l l' = for_all (fun x -> mem_cmp cmp x l') l
+
+(*$T subset
+  subset Pervasives.compare [1;2;3;4] [1;2;3] = false
+  subset Pervasives.compare [1;2;3] [1;2;3] = true
+  subset Pervasives.compare [3;2;1] [1;2;3] = true
+  subset Pervasives.compare [1;2] [1;2;3] = true
 *)
 
 module Exceptionless = struct
@@ -1069,6 +1222,7 @@ module Labels = struct
   let for_all ~f    = for_all f
   let for_all2 ~f   = for_all2 f
   let exists ~f     = exists f
+  let subset ~cmp = subset cmp
   let stable_sort ?(cmp=compare)  = stable_sort cmp
   let fast_sort ?(cmp=compare)    = fast_sort cmp
   let sort ?(cmp=compare)         = sort cmp

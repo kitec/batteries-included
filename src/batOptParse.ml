@@ -646,86 +646,87 @@ struct
           og_children = BatRefList.empty ();
           og_description = description
         }
-      in
-      BatOption.may                         (* Add version option? *)
-        (fun version ->
-           add optparser ~long_name:"version"
-             (StdOpt.version_option
-                (fun () -> unprogify optparser version)))
-        version;
-      if not suppress_help then              (* Add help option? *)
-        add optparser ~short_name:'h' ~long_name:"help"
-          (StdOpt.help_option ());
+      }
+    in
+    BatOption.may                         (* Add version option? *)
+      (fun version ->
+        add optparser ~long_name:"version"
+          (StdOpt.version_option
+             (fun () -> unprogify optparser version)))
+      version;
+    if not suppress_help then              (* Add help option? *)
+      add optparser ~short_name:'h' ~long_name:"help"
+        (StdOpt.help_option ());
 
-      optparser
+    optparser
 
-    let format_usage optparser eol =
-      match optparser.op_suppress_usage with
-        true -> ""
-      | false ->
-          unprogify optparser
-            (optparser.op_formatter.format_usage optparser.op_usage) ^ eol
+  let format_usage optparser eol =
+    match optparser.op_suppress_usage with
+      true -> ""
+    | false ->
+      unprogify optparser
+        (optparser.op_formatter.format_usage optparser.op_usage) ^ eol
 
-    let error optparser ?(chn = stderr) ?(status = 1) message =
-      fprintf chn "%s%s: %s\n" (format_usage optparser "\n") optparser.op_prog
-        message;
-      flush chn;
-      exit status
+  let error optparser ?(chn = stderr) ?(status = 1) message =
+    fprintf chn "%s%s: %s\n" (format_usage optparser "\n") optparser.op_prog
+      message;
+    flush chn;
+    exit status
 
-    let usage optparser ?(chn = stdout) () =
-      let rec loop g =
-        (* Heading: *)
-        output_string chn
-          (optparser.op_formatter.format_heading g.og_heading);
+  let usage optparser ?(chn = stdout) () =
+    let rec loop g =
+      (* Heading: *)
+      output_string chn
+        (optparser.op_formatter.format_heading g.og_heading);
 
-        optparser.op_formatter.indent ();
-        (* Description: *)
-        BatOption.may
-          (fun x ->
-             output_string chn (optparser.op_formatter.format_description x))
-          g.og_description;
-        (* Options: *)
-        BatRefList.iter
-          (fun (names, metavars, help) ->
-             output_string chn
-               (optparser.op_formatter.format_option names metavars help))
-          g.og_options;
-        (* Child groups: *)
-        output_string chn "\n";
-        BatRefList.iter loop g.og_children;
+      optparser.op_formatter.indent ();
+      (* Description: *)
+      BatOption.may
+        (fun x ->
+          output_string chn (optparser.op_formatter.format_description x))
+        g.og_description;
+      (* Options: *)
+      BatRefList.iter
+        (fun (names, metavars, help) ->
+          output_string chn
+            (optparser.op_formatter.format_option names metavars help))
+        g.og_options;
+      (* Child groups: *)
+      output_string chn "\n";
+      BatRefList.iter loop g.og_children;
 
-        optparser.op_formatter.dedent ()
-      in
-      output_string chn (format_usage optparser "\n");
-      loop optparser.op_groups;
-      flush chn
+      optparser.op_formatter.dedent ()
+    in
+    output_string chn (format_usage optparser "\n");
+    loop optparser.op_groups;
+    flush chn
 
-    let parse optparser ?(first = 0) ?last argv =
-      let args = BatRefList.empty ()
-      and n =
-        match last with
-          None -> Array.length argv - first
-        | Some m -> m - first + 1
-      in
-      begin
-        try
-          GetOpt.parse optparser.op_only_leading
-            (BatRefList.push args)
-            (GetOpt.find_short_opt
-               (BatRefList.to_list optparser.op_short_options))
-            (GetOpt.find_long_opt (BatRefList.to_list optparser.op_long_options))
-            (Array.to_list (Array.sub argv first n))
-        with
-            GetOpt.Error (opt, errmsg) ->
-              error optparser (sprintf "option '%s': %s" opt errmsg)
-          | Option_error (opt, errmsg) ->
-              error optparser (sprintf "option '%s': %s" opt errmsg)
-          | Option_help -> usage optparser (); exit 0
-      end;
-      List.rev (BatRefList.to_list args)
+  let parse optparser ?(first = 0) ?last argv =
+    let args = BatRefList.empty ()
+    and n =
+      match last with
+        None -> Array.length argv - first
+      | Some m -> m - first + 1
+    in
+    begin
+      try
+        GetOpt.parse optparser.op_only_leading
+          (BatRefList.push args)
+          (GetOpt.find_short_opt
+             (BatRefList.to_list optparser.op_short_options))
+          (GetOpt.find_long_opt (BatRefList.to_list optparser.op_long_options))
+          (Array.to_list (Array.sub argv first n))
+      with
+        GetOpt.Error (opt, errmsg) ->
+        error optparser (sprintf "option '%s': %s" opt errmsg)
+      | Option_error (opt, errmsg) ->
+        error optparser (sprintf "option '%s': %s" opt errmsg)
+      | Option_help -> usage optparser (); exit 0
+    end;
+    List.rev (BatRefList.to_list args)
 
-    let parse_argv optparser =
-      parse optparser ~first:1 Sys.argv
+  let parse_argv optparser =
+    parse optparser ~first:1 Sys.argv
 end
 
 #endif

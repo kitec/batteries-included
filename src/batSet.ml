@@ -195,6 +195,68 @@ module Concrete = struct
       else
         let (lr, pres, rr) = split cmp x r in (join l v lr, pres, rr)
 
+  (* split_opt x s returns a triple (l, maybe_v, r) where
+     - l is the set of elements of s that are < x
+     - r is the set of elements of s that are > x
+     - maybe_v is None if s contains no element equal to x,
+       or (Some v) if s contains an element v that compares equal to x. *)
+  let rec split_opt cmp x = function
+    | Empty -> (Empty, None, Empty)
+    | Node(l, v, r, _) ->
+      let c = cmp x v in
+      if c = 0 then (l, Some v, r)
+      else if c < 0 then
+        let (ll, pres, rl) = split_opt cmp x l in
+        (ll, pres, join rl v r)
+      else (* c > 0 *)
+        let (lr, pres, rr) = split_opt cmp x r in
+        (join l v lr, pres, rr)
+
+  (*$inject
+    let s12    = of_list [1; 2         ] ;;
+    let s45    = of_list [         4; 5] ;;
+    let s1245  = of_list [1; 2;    4; 5] ;;
+    let s12345 = of_list [1; 2; 3; 4; 5] ;;
+  *)
+  (*$T split_opt
+    let l1, mv1, r1 = split_opt 3 s1245 in \
+    (elements l1, mv1, elements r1) = ([1; 2], None  , [4; 5])
+    let l2, mv2, r2 = split_opt 3 s12345 in \
+    (elements l2, mv2, elements r2) = ([1; 2], Some 3, [4; 5])
+  *)
+
+  (* returns a pair of sets: ({y | y < x}, {y | y >= x}) *)
+  let split_lt cmp x s =
+      let l, maybe, r = split_opt cmp x s in
+      match maybe with
+        | None -> l, r
+        | Some eq_x -> l, add cmp eq_x r
+
+  (*$T split_lt
+    let l, r = split_lt 3 s12345 in \
+    (elements l, elements r) = ([1; 2], [3; 4; 5])
+    let l, r = split_lt 3 s12 in \
+    (elements l, elements r) = ([1; 2], [])
+    let l, r = split_lt 3 s45 in \
+    (elements l, elements r) = ([], [4; 5])
+  *)
+
+  (* returns a pair of sets: ({y | y <= x}, {y | y > x}) *)
+  let split_le cmp x s =
+    let l, maybe, r = split_opt cmp x s in
+    match maybe with
+      | None -> l, r
+      | Some eq_x -> add cmp eq_x l, r
+
+  (*$T split_le
+    let l, r = split_le 3 s12345 in \
+    (elements l, elements r) = ([1; 2; 3], [4; 5])
+    let l, r = split_le 3 s12 in \
+    (elements l, elements r) = ([1; 2], [])
+    let l, r = split_le 3 s45 in \
+    (elements l, elements r) = ([], [4; 5])
+  *)
+
   type 'a iter = E | C of 'a * 'a set * 'a iter
 
   let rec cardinal = function
@@ -205,8 +267,8 @@ module Concrete = struct
       Empty -> accu
     | Node(l, v, r, _) -> elements_aux (v :: elements_aux accu r) l
 
-  let elements s =
-    elements_aux [] s
+  let elements s = elements_aux [] s
+  let to_list = elements
 
   let rec cons_iter s t = match s with
       Empty -> t
@@ -280,6 +342,17 @@ module Concrete = struct
       (Empty, t) -> t
     | (t, Empty) -> t
     | (_, _) -> join t1 (min_elt t2) (remove_min_elt t2)
+
+  let cartesian_product a b =
+    let rec product a b = match a with
+      | Empty -> Empty
+      | Node (la, xa, ra, _) ->
+        let lab = product la b in
+        let xab = op_map (fun xb -> (xa,xb)) b in
+        let rab = product ra b in
+        concat lab (concat xab rab)
+    in
+    product a b
 
   let rec union cmp12 s1 s2 =
     match (s1, s2) with
@@ -401,8 +474,12 @@ sig
   val exists: (elt -> bool) -> t -> bool
   val partition: (elt -> bool) -> t -> t * t
   val split: elt -> t -> t * bool * t
+  val split_opt: elt -> t -> t * elt option * t
+  val split_lt: elt -> t -> t * t
+  val split_le: elt -> t -> t * t
   val cardinal: t -> int
   val elements: t -> elt list
+  val to_list: t -> elt list
   val min_elt: t -> elt
   val max_elt: t -> elt
   val choose: t -> elt
@@ -483,13 +560,30 @@ struct
     let l, v, r = Concrete.split Ord.compare e (impl_of_t s) in
     (t_of_impl l, v, t_of_impl r)
 
+  let split_opt e s =
+    let l, maybe_v, r = Concrete.split_opt Ord.compare e (impl_of_t s) in
+    (t_of_impl l, maybe_v, t_of_impl r)
+
+  let split_lt e s =
+    let l, r = Concrete.split_lt Ord.compare e (impl_of_t s) in
+    (t_of_impl l, t_of_impl r)
+
+  let split_le e s =
+    let l, r = Concrete.split_le Ord.compare e (impl_of_t s) in
+    (t_of_impl l, t_of_impl r)
+
   let singleton e = t_of_impl (Concrete.singleton e)
   let elements t = Concrete.elements (impl_of_t t)
+  let to_list = elements
 
-  let union s1 s2 = t_of_impl (Concrete.union Ord.compare (impl_of_t s1) (impl_of_t s2))
-  let diff s1 s2 = t_of_impl (Concrete.diff Ord.compare (impl_of_t s1) (impl_of_t s2))
-  let inter s1 s2 = t_of_impl (Concrete.inter Ord.compare (impl_of_t s1) (impl_of_t s2))
-  let sym_diff s1 s2 = t_of_impl (Concrete.sym_diff Ord.compare (impl_of_t s1) (impl_of_t s2))
+  let union s1 s2 =
+    t_of_impl (Concrete.union Ord.compare (impl_of_t s1) (impl_of_t s2))
+  let diff s1 s2 =
+    t_of_impl (Concrete.diff Ord.compare (impl_of_t s1) (impl_of_t s2))
+  let inter s1 s2 =
+    t_of_impl (Concrete.inter Ord.compare (impl_of_t s1) (impl_of_t s2))
+  let sym_diff s1 s2 =
+    t_of_impl (Concrete.sym_diff Ord.compare (impl_of_t s1) (impl_of_t s2))
 
   let compare t1 t2 = Concrete.compare Ord.compare (impl_of_t t1) (impl_of_t t2)
   let equal t1 t2 = Concrete.equal Ord.compare (impl_of_t t1) (impl_of_t t2)
@@ -578,6 +672,7 @@ module PSet = struct (*$< PSet *)
   let exists f s = Concrete.exists f s.set
   let cardinal s = fold (fun _ acc -> acc + 1) s 0
   let elements s = Concrete.elements s.set
+  let to_list = elements
   let choose s = Concrete.choose s.set
   let min_elt s = Concrete.min_elt s.set
   let max_elt s = Concrete.max_elt s.set
@@ -603,6 +698,15 @@ module PSet = struct (*$< PSet *)
   let split e s =
     let s1, found, s2 = Concrete.split s.cmp e s.set in
     { s with set = s1 }, found, { s with set = s2 }
+  let split_opt e s =
+    let s1, maybe_v, s2 = Concrete.split_opt s.cmp e s.set in
+    { s with set = s1 }, maybe_v, { s with set = s2 }
+  let split_lt e s =
+    let s1, s2 = Concrete.split_lt s.cmp e s.set in
+    { s with set = s1 }, {s with set = s2 }
+  let split_le e s =
+    let s1, s2 = Concrete.split_le s.cmp e s.set in
+    { s with set = s1 }, {s with set = s2 }
   let union s1 s2 =
     { s1 with set = Concrete.union s1.cmp s1.set s2.set }
   let diff s1 s2 =
@@ -666,6 +770,7 @@ let exists f s = Concrete.exists f s
 let cardinal s = fold (fun _ acc -> acc + 1) s 0
 
 let elements s = Concrete.elements s
+let to_list = elements
 
 let choose s = Concrete.choose s
 
@@ -713,7 +818,11 @@ let print ?first ?last ?sep print_elt out s =
 let for_all f s = Concrete.for_all f s
 let partition f s = Concrete.partition Pervasives.compare f s
 let pop s = Concrete.pop s
+let cartesian_product = Concrete.cartesian_product
 let split e s = Concrete.split Pervasives.compare e s
+let split_opt e s = Concrete.split_opt Pervasives.compare e s
+let split_lt e s = Concrete.split_lt Pervasives.compare e s
+let split_le e s = Concrete.split_le Pervasives.compare e s
 let union s1 s2 = Concrete.union Pervasives.compare s1 s2
 let diff s1 s2 = Concrete.diff Pervasives.compare s1 s2
 let sym_diff s1 s2 = Concrete.sym_diff Pervasives.compare s1 s2
@@ -736,6 +845,16 @@ let disjoint s1 s2 = Concrete.disjoint Pervasives.compare s1 s2
     compare a b = - (compare b c)
   compare (of_list [1;2;3]) (of_list [3;1;2]) = 0
 *)
+
+(*$T cartesian_product
+  cartesian_product (of_list [1;2;3]) (of_list ["a"; "b"]) |> to_list = \
+    [1, "a"; 1, "b"; 2, "a"; 2, "b"; 3, "a"; 3, "b"]
+  is_empty @@ cartesian_product (of_list [1;2;3]) empty
+  is_empty @@ cartesian_product empty (of_list [1;2;3])
+  let s1, s2 = of_list ["a"; "b"; "c"], of_list [1;2;3] in \
+    equal (cartesian_product s1 s2) \
+          (map BatTuple.Tuple2.swap (cartesian_product s2 s1))
+ *)
 
 
 module Incubator = struct (*$< Incubator *)

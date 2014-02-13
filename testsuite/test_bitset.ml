@@ -52,9 +52,9 @@ let assert_mem t lst =
 let lst1 = [1; 4; 25; 27]
 let lst2 = [1; 5; 26; 250]
 
-let biop op ?(rev=false) lst () = 
-  let t1 = BS.of_list lst1 in 
-  let t2 = BS.of_list lst2 in 
+let biop op ?(rev=false) lst () =
+  let t1 = BS.of_list lst1 in
+  let t2 = BS.of_list lst2 in
   let t1, t2 = if rev then t2, t1 else t1, t2 in
   let tr = op t1 t2 in
     assert_mem tr (List.map (fun i -> i, true) lst);
@@ -64,7 +64,7 @@ let biop op ?(rev=false) lst () =
       (List.length lst)
       (BS.count tr)
 
-module EInt = 
+module EInt =
 struct
   type t = int
   let compare = ( - )
@@ -72,11 +72,11 @@ struct
   let pp_print_sep = OUnitDiff.pp_comma_separator
 end
 
-module ListInt = 
-struct 
+module ListInt =
+struct
   include OUnitDiff.SetMake(EInt)
 
-  let assert_equal ?msg lst1 lst2 = 
+  let assert_equal ?msg lst1 lst2 =
     assert_equal ?msg (of_list lst1) (of_list lst2)
 end
 
@@ -114,6 +114,18 @@ let tests = "BitSet" >::: [
         10, false;
         100, false]);
 
+  "create 0" >::
+  (fun () ->
+     let t = BS.create 0 in
+     BS.set t 0;
+     assert_mem t
+       [0, true;
+        1, false;
+        2, false;
+        9, false;
+        10, false;
+        100, false]);
+
   "full" >::
   (fun () ->
      let t = BS.create_full 10 in
@@ -134,7 +146,7 @@ let tests = "BitSet" >::: [
   (fun () ->
      let t = BS.of_list lst1 in
      let t' = BS.copy t in
-     assert_bool 
+     assert_bool
        "Copy should be equals"
        (BS.equal t t'));
 
@@ -162,15 +174,15 @@ let tests = "BitSet" >::: [
   "next_set_bit" >::
   (fun () ->
      let bs = BS.of_list lst1 in
-     let string_of_int_opt = 
-       function 
+     let string_of_int_opt =
+       function
          | Some i -> string_of_int i
          | None -> "<none>"
      in
-     let last = 
-       List.fold_left 
+     let last =
+       List.fold_left
          (fun prv cur ->
-            assert_equal 
+            assert_equal
               ~printer:string_of_int_opt
               (Some cur)
               (BS.next_set_bit bs (prv + 1));
@@ -211,5 +223,3 @@ let tests = "BitSet" >::: [
      assert_bool "lst1 = lst1" (BS.compare t1 t1 = 0);
      assert_bool "lst2 = lst2" (BS.compare t2 t2 = 0))
 ]
-
-

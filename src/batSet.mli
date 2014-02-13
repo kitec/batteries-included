@@ -166,6 +166,29 @@ sig
         [present] is [false] if [s] contains no element equal to [x],
         or [true] if [s] contains an element equal to [x]. *)
 
+  val split_opt: elt -> t -> t * elt option * t
+  (** [split_opt x s] returns a triple [(l, maybe_v, r)], where
+        [l] is the set of elements of [s] that are
+        strictly less than [x];
+        [r] is the set of elements of [s] that are
+        strictly greater than [x];
+        [maybe_v] is [None] if [s] contains no element equal to [x],
+        or [Some v] if [s] contains an element [v] that compares equal to [x].
+      @since 2.2.0
+  *)
+
+  val split_lt: elt -> t -> t * t
+  (** [split_lt x s] returns a pair of sets [(l, r)], such that
+      [l] is the subset of [s] with elements < [x];
+      [r] is the subset of [s] with elements >= [x].
+      @since 2.2.0 *)
+
+  val split_le: elt -> t -> t * t
+  (** [split_le x s] returns a pair of sets [(l, r)], such that
+      [l] is the subset of [s] with elements <= [x];
+      [r] is the subset of [s] with elements > [x].
+      @since 2.2.0 *)
+
   val cardinal: t -> int
   (** Return the number of elements of a set. *)
 
@@ -174,6 +197,10 @@ sig
       The returned list is sorted in increasing order with respect
       to the ordering [Ord.compare], where [Ord] is the argument
       given to {!Set.Make}. *)
+
+  val to_list: t -> elt list
+  (** Alias for [elements].
+      @since 2.2.0 *)
 
   val min_elt: t -> elt
   (** Return the smallest element of the given set
@@ -424,6 +451,29 @@ val split : 'a -> 'a t -> 'a t * bool * 'a t
     [present] is [false] if [s] contains no element equal to [x],
     or [true] if [s] contains an element equal to [x]. *)
 
+val split_opt: 'a -> 'a t -> 'a t * 'a option * 'a t
+(** [split_opt x s] returns a triple [(l, maybe_v, r)], where
+      [l] is the set of elements of [s] that are
+      strictly less than [x];
+      [r] is the set of elements of [s] that are
+      strictly greater than [x];
+      [maybe_v] is [None] if [s] contains no element equal to [x],
+      or [Some v] if [s] contains an element [v] that compares equal to [x].
+    @since 2.2.0
+*)
+
+val split_lt: 'a -> 'a t -> 'a t * 'a t
+(** [split_lt x s] returns a pair of sets [(l, r)], such that
+    [l] is the subset of [s] with elements < [x];
+    [r] is the subset of [s] with elements >= [x].
+    @since 2.2.0 *)
+
+val split_le: 'a -> 'a t -> 'a t * 'a t
+(** [split_le x s] returns a pair of sets [(l, r)], such that
+    [l] is the subset of [s] with elements <= [x];
+    [r] is the subset of [s] with elements > [x].
+    @since 2.2.0 *)
+
 val cardinal: 'a t -> int
 (** Return the number of elements of a set. *)
 
@@ -431,6 +481,10 @@ val elements: 'a t -> 'a list
 (** Return the list of all elements of the given set.
     The returned list is sorted in increasing order with respect
     to the ordering of the given set. *)
+
+val to_list: 'a t -> 'a list
+(** Alias for [elements].
+    @since 2.2.0 *)
 
 val min_elt : 'a t -> 'a
 (** returns the smallest element of the set.
@@ -447,6 +501,10 @@ val choose : 'a t -> 'a
 val pop : 'a t -> 'a * 'a t
 (** returns one element of the set and the set without that element.
     @raise Not_found if given an empty set *)
+
+val cartesian_product : 'a t -> 'b t -> ('a * 'b) t
+(** cartesian product of the two sets
+    @since 2.2.0 *)
 
 val enum: 'a t -> 'a BatEnum.t
 (** Return an enumeration of all elements of the given set.
@@ -631,6 +689,26 @@ module PSet : sig
       [present] is [false] if [s] contains no element equal to [x],
       or [true] if [s] contains an element equal to [x]. *)
 
+  val split_opt: 'a -> 'a t -> 'a t * 'a option * 'a t
+  (** [split_opt x s] returns a triple [(l, maybe_v, r)], where
+        [l] is the set of elements of [s] that are
+        strictly less than [x];
+        [r] is the set of elements of [s] that are
+        strictly greater than [x];
+        [maybe_v] is [None] if [s] contains no element equal to [x],
+        or [Some v] if [s] contains an element [v] that compares equal to [x].
+  *)
+
+  val split_lt: 'a -> 'a t -> 'a t * 'a t
+  (** [split_lt x s] returns a pair of sets [(l, r)], such that
+      [l] is the subset of [s] with elements < [x];
+      [r] is the subset of [s] with elements >= [x]. *)
+
+  val split_le: 'a -> 'a t -> 'a t * 'a t
+  (** [split_le x s] returns a pair of sets [(l, r)], such that
+      [l] is the subset of [s] with elements <= [x];
+      [r] is the subset of [s] with elements > [x]. *)
+
   val cardinal: 'a t -> int
   (** Return the number of elements of a set. *)
 
@@ -638,6 +716,9 @@ module PSet : sig
   (** Return the list of all elements of the given set.
       The returned list is sorted in increasing order with respect
       to the ordering of the given set. *)
+
+  val to_list: 'a t -> 'a list
+  (** Alias for [elements]. *)
 
   val min_elt : 'a t -> 'a
   (** returns the smallest element of the set.

@@ -404,11 +404,22 @@ let fsum t =
     ) t;
     !sum
 
+let kahan_sum = fsum
+
 (* NEED A PROPER TEST OF ROUNDING ERROR *)
 (*$T fsum
    let arr = Array.make 10001 1e-10 in arr.(0) <- 1e10; \
       Float.approx_equal (fsum (Array.enum arr)) (1e10 +. 1e-5)
 *)
+
+(*$T kahan_sum
+   kahan_sum (Array.enum [| |]) = 0.
+   kahan_sum (Array.enum [| 1.; 2. |]) = 3.
+   let n, x = 1_000, 1.1 in \
+     Float.approx_equal (float n *. x) \
+                        (kahan_sum (Array.enum (Array.make n x)))
+*)
+
 
 let exists f t =
   try let rec aux () = f (t.next()) || aux ()
@@ -621,7 +632,7 @@ let rec concat t =
   let clone () = append ((!tn).clone()) (concat (t.clone())) in
   from2 next clone
 
-(*$T
+(*$T concat
   let e = List.enum [ [| 1; 2; 3; 4|]; [| 5; 6 |] ] |> map Array.enum |> concat in drop 1 e; (count e) = (count (clone e))
 *)
 
@@ -907,6 +918,126 @@ let clump clump_size add get e = (* convert a uchar enum into a ustring enum *)
   in
   from next
 
+(* mutable state used for {!cartesian_product}. Use a module to have a private namespace. *)
+module ProductState = struct
+  type ('a, 'b) current_state =
+    | GetLeft
+    | GetRight
+    | GetRightOrStop
+    | Stop
+    | ProdLeft of 'a * 'b list
+    | ProdRight of 'b * 'a list
+
+  type ('a,'b) t = {
+    e1 : 'a enumerable;
+    e2 : 'b enumerable;
+    mutable all1 : 'a list;
+    mutable all2 : 'b list;
+    mutable cur : ('a,'b) current_state;
+  }
+end
+
+let cartesian_product e1 e2 =
+  let open ProductState in
+  (* sketch of the algo: state machine that alternates between taking a
+     new element from [e1] and yield its product with [state.all2], and
+     taking a new element from [e2] and make its product with [state.all1]
+
+     [state.cur]: current state of automaton, i.e., what we have to do next.
+     Can be `Stop,
+     `GetLeft/`GetRight (to obtain next element from first/second generator),
+     or `ProdLeft/`ProdRIght to compute the product of an element with a list
+     of already met elements *)
+  let rec next state () =
+    match state.cur with
+    | Stop -> raise No_more_elements
+    | GetLeft ->
+      let x1 = try Some (state.e1.next()) with No_more_elements -> None in
+      begin match x1 with
+        | None -> state.cur <- GetRightOrStop
+        | Some x ->
+          state.all1 <- x :: state.all1;
+          state.cur <- ProdLeft (x, state.all2)
+      end;
+      next state ()
+    | GetRight | GetRightOrStop ->
+      let x2 = try Some (state.e2.next()) with No_more_elements -> None in
+      begin match x2, state.cur with
+        | None, GetRightOrStop -> state.cur <- Stop; raise No_more_elements
+        | None, GetRight -> state.cur <- GetLeft
+        | Some y, _ ->
+          state.all2 <- y::state.all2;
+          state.cur <- ProdRight (y, state.all1)
+        | None, _ -> assert false
+      end;
+      next state ()
+    | ProdLeft (_, []) ->
+      state.cur <- GetRight;
+      next state ()
+    | ProdLeft (x, y::l) ->
+      state.cur <- ProdLeft (x, l);
+      x, y
+    | ProdRight (_, []) ->
+      state.cur <- GetLeft;
+      next state()
+    | ProdRight (y, x::l) ->
+      state.cur <- ProdRight (y, l);
+      x, y
+  and clone state () =
+    let state' = {state with e1=state.e1.clone(); e2=state.e2.clone();} in
+    _make state'
+  and count state () =
+    let n1 = state.e1.count ()
+    and n2 = state.e2.count () in
+    (* 3 products to make: e1 with e2, and ei with all{2-i} for i in {1,2} *)
+    let n = n1 * n2 + n1 * List.length state.all2 + n2 * List.length state.all1 in
+    match state.cur with
+    | ProdRight (_, l) -> n + List.length l
+    | ProdLeft (_, l) -> n + List.length l
+    | Stop -> 0
+    | GetLeft | GetRight | GetRightOrStop -> n
+  (* build enum from the state *)
+  and _make state = {
+    next = next state;
+    clone = clone state;
+    count = count state;
+    fast = state.e1.fast && state.e2.fast;
+  }
+  in
+  let state = {e1; e2; cur=GetLeft; all1=[]; all2=[]} in
+  _make state
+
+(*$T cartesian_product
+  cartesian_product (List.enum [1;2;3]) (List.enum ["a";"b"]) \
+    |> List.of_enum |> List.sort Pervasives.compare = \
+    [1,"a"; 1,"b"; 2,"a"; 2,"b"; 3,"a"; 3,"b"]
+  let e = cartesian_product (List.enum [1;2;3]) (List.enum [1]) in \
+    e |> List.of_enum |> List.sort Pervasives.compare = [1,1; 2,1; 3,1]
+  let e = cartesian_product (List.enum [1]) (List.enum [1;2;3]) in \
+    e |> List.of_enum |> List.sort Pervasives.compare = [1,1; 1,2; 1,3]
+  let e = cartesian_product (List.enum [1;2;3]) (List.enum [1;2;3]) in \
+    ignore (Enum.get e); Enum.count e = 8
+  let e = cartesian_product (List.enum [1;2]) (Enum.repeat 3) in\
+    e |> Enum.take 4 |> Enum.map fst |> List.of_enum \
+      |> List.sort Pervasives.compare = [1; 1; 2; 2]
+  let e = cartesian_product (Enum.repeat 3) (List.enum [1;2]) in\
+    e |> Enum.take 4 |> Enum.map snd |> List.of_enum \
+      |> List.sort Pervasives.compare = [1; 1; 2; 2]
+  let e = cartesian_product (Enum.repeat 3) (Enum.repeat "a") in\
+    e |> Enum.take 3 |> List.of_enum \
+      |> List.sort Pervasives.compare = [3, "a"; 3, "a"; 3, "a"]
+*)
+
+(*$Q cartesian_product
+  Q.(pair (list small_int) (list small_int)) \
+    (fun (l1,l2) -> \
+      cartesian_product (List.enum l1) (List.enum l2) |> count = \
+      List.length l1 * List.length l2)
+  Q.(pair (list small_int) (list small_int)) \
+    (fun (l1,l2) -> cartesian_product (List.enum l1) (List.enum l2) \
+      |> List.of_enum |> List.length = List.length l1 * List.length l2)
+*)
+
 let from_while f =
   from (fun () -> match f () with
     | None   -> raise No_more_elements
@@ -1057,20 +1188,36 @@ let hard_count t =
 
 #if not BATTERIES_JS
 
-let print ?(first="") ?(last="") ?(sep=" ") print_a  out e =
+(* common hidden function for print and print_at_most *)
+let _print_common ~first ~last ~sep ~limit print_a out e =
   BatInnerIO.nwrite out first;
   match get e with
   | None    -> BatInnerIO.nwrite out last
   | Some x  ->
     print_a out x;
-    let rec aux () =
-      match get e with
-      | None   -> BatInnerIO.nwrite out last
-      | Some x ->
+    let rec aux limit =
+      match get e, limit with
+      | None, _ -> BatInnerIO.nwrite out last
+      | Some _, 0 ->
+        BatInnerIO.nwrite out "...";
+        BatInnerIO.nwrite out last
+      | Some x, _ ->
         BatInnerIO.nwrite out sep;
         print_a out x;
-        aux ()
-    in aux()
+        aux (limit-1)
+    in aux (limit-1)
+
+let print ?(first="") ?(last="") ?(sep=" ") print_a  out e =
+  _print_common ~first ~last ~sep ~limit:max_int print_a out e
+
+let print_at_most ?(first="") ?(last="") ?(sep=" ") ~limit print_a out e =
+  if limit <= 0 then raise (Invalid_argument "enum.print_at_most");
+  _print_common ~first ~last ~sep ~limit print_a out e
+
+(*$T print_at_most
+  Printf.sprintf2 "yolo %a" (print_at_most ~limit:3 Int.print) \
+    (range 0 ~until:10) = "yolo 0 1 2..."
+*)
 
 let t_printer a_printer _paren out e =
   print ~first:"[" ~sep:"; " ~last:"]" (a_printer false) out e
@@ -1113,6 +1260,23 @@ let rec of_object o =
     ~clone:(fun () -> of_object (o#clone))
 
 let flatten = concat
+
+let concat_map f e = concat (map f e)
+
+(*$T concat_map
+  (1 -- 10 |> concat_map (fun x -> List.enum [x;-x]) |> sum) = 0
+  let e = (1 -- 10 |> concat_map (fun x -> List.enum [x;-x])) in \
+    let n = Enum.count e in \
+    n = (List.of_enum e |> List.length)
+  let e = (1 -- 10 |> concat_map (fun x -> List.enum [x;-x])) in \
+    Enum.count e = 20
+*)
+
+(*$Q concat_map
+  Q.small_int (fun i -> \
+    let i = abs i in \
+    equal (=) (0 -- i) (concat_map singleton (0 -- i)))
+ *)
 
 module Exceptionless = struct
   let find f e =

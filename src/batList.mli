@@ -130,6 +130,13 @@ val make : int -> 'a -> 'a list
 (** Similar to [String.make], [make n x] returns a
     list containing [n] elements [x]. *)
 
+val range : int -> [< `To | `Downto ] -> int -> int list
+(** [range 1 `To 3] = [[1; 2; 3]].
+    [range 3 `Downto 1] = [[3; 2; 1]].
+    @raise Invalid_argument in ([range i `To j]) if (i > j).
+    @raise Invalid_argument in ([range i `Downto j]) if (i < j).
+    @since 2.2.0 *)
+
 val init : int -> (int -> 'a) -> 'a list
 (** Similar to [Array.init], [init n f] returns the list containing
     the results of (f 0),(f 1).... (f (n-1)).
@@ -151,12 +158,12 @@ val unfold: 'b -> ('b -> ('a * 'b) option) -> 'a list
 (**{6 Iterators}*)
 
 val iter : ('a -> unit) -> 'a list -> unit
-(** [List.iter f [a1; ...; an]] applies function [f] in turn to
-    [a1; ...; an]. It is equivalent to
-    [begin f a1; f a2; ...; f an; () end]. *)
+(** [List.iter f [a0; a1; ...; an]] applies function [f] in turn to
+    [a0; a1; ...; an]. It is equivalent to
+    [begin f a0; f a1; ...; f an; () end]. *)
 
 val iteri : (int -> 'a -> unit) -> 'a list -> unit
-(** [iteri f l] will call [(f 0 a0);(f 1 a1) ... (f n an)] where
+(** [iteri f l] will call [(f 0 a0); (f 1 a1) ... (f n an)] where
     [a0..an] are the elements of the list [l]. *)
 
 val map : ('a -> 'b) -> 'a list -> 'b list
@@ -173,12 +180,12 @@ val rev_map : ('a -> 'b) -> 'a list -> 'b list
 
 val mapi : (int -> 'a -> 'b) -> 'a list -> 'b list
 (** [mapi f l] will build the list containing
-    [(f 0 a0);(f 1 a1) ... (f n an)] where [a0..an] are the elements of
+    [(f 0 a0); (f 1 a1) ... (f n an)] where [a0..an] are the elements of
     the list [l]. *)
 
 val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
-(** [List.fold_left f a [b1; ...; bn]] is
-    [f (... (f (f a b1) b2) ...) bn]. *)
+(** [List.fold_left f a [b0; b1; ...; bn]] is
+    [f (... (f (f a b0) b1) ...) bn]. *)
 
 val fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
 (** [List.fold_right f [a0; a1; ...; an] b] is
@@ -198,14 +205,21 @@ val min : 'a list -> 'a
     [Pervasives.compare] *)
 
 val sum : int list -> int
-(** [sum l] returns the sum of the integers of [l] 
+(** [sum l] returns the sum of the integers of [l]
     @raise Invalid_argument on the empty list.
  *)
 
 val fsum : float list -> float
-(** [fsum l] returns the sum of the floats of [l] 
+(** [fsum l] returns the sum of the floats of [l]
     @raise Invalid_argument on the empty list.
  *)
+
+val kahan_sum : float list -> float
+(** [kahan_sum l] returns a numerically-accurate sum of the floats of
+    [l]. See {!BatArray.fsum} for more details.
+
+    @since 2.2.0
+*)
 
 val min_max : ?cmp:('a -> 'a -> int) -> 'a list -> 'a * 'a
 (** [min_max l] returns the pair (smallest, largest) from [l] as judged by
@@ -256,22 +270,26 @@ val mem : 'a -> 'a list -> bool
 (** [mem a l] is true if and only if [a] is equal
     to an element of [l]. *)
 
+val mem_cmp : ('a -> 'a -> int) -> 'a -> 'a list -> bool
+(** Same as {!List.mem}, but the comparator function is explicitely
+    provided.
+    @since 2.2.0 *)
+
 val memq : 'a -> 'a list -> bool
 (** Same as {!List.mem}, but uses physical equality instead of structural
     equality to compare list elements. *)
 
-
 (**{7 Unary predicate, One list}*)
 
 val for_all : ('a -> bool) -> 'a list -> bool
-(** [for_all p [a1; ...; an]] checks if all elements of the list
+(** [for_all p [a0; a1; ...; an]] checks if all elements of the list
     satisfy the predicate [p]. That is, it returns
-    [(p a1) && (p a2) && ... && (p an)]. *)
+    [(p a0) && (p a1) && ... && (p an)]. *)
 
 val exists : ('a -> bool) -> 'a list -> bool
-(** [exists p [a1; ...; an]] checks if at least one element of
+(** [exists p [a0; a1; ...; an]] checks if at least one element of
     the list satisfies the predicate [p]. That is, it returns
-    [(p a1) || (p a2) || ... || (p an)]. *)
+    [(p a0) || (p a1) || ... || (p an)]. *)
 
 (**{7 Binary predicate, Two lists}*)
 
@@ -286,6 +304,13 @@ val exists2 : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
 
     @raise Invalid_argument if the two lists have
     different lengths. *)
+
+val subset : ('a -> 'b -> int) -> 'a list -> 'b list -> bool
+(** [subset cmp l l'] check if all elements of the list [l]
+    is contained in the list [l'] by applying [cmp] as comparator.
+
+    @since 2.2.0
+*)
 
 
 (**{6 List searching}*)
@@ -321,11 +346,28 @@ val filter : ('a -> bool) -> 'a list -> 'a list
     that satisfy the predicate [p].  The order of the elements
     in the input list is preserved.  *)
 
+val filteri : (int -> 'a -> bool) -> 'a list -> 'a list
+(** [filter p [a0; a1; ...; an]] returns all the elements [ai] of index [i]
+    that satisfy the predicate [p i ai].  The order of the elements
+    in the input list is preserved.
+
+    @since 2.2.0
+ *)
+
 val filter_map : ('a -> 'b option) -> 'a list -> 'b list
 (** [filter_map f l] calls [(f a0) (f a1).... (f an)] where [a0,a1..an] are
     the elements of [l]. It returns the list of elements [bi] such as
     [f ai = Some bi] (when [f] returns [None], the corresponding element of
     [l] is discarded). *)
+
+val filteri_map : (int -> 'a -> 'b option) -> 'a list -> 'b list
+(** [filter_map f l] calls [(f 0 a0) (f 1 a1).... (f n an)] where [a0,a1..an] are
+    the elements of [l]. It returns the list of elements [bi] such as
+    [f ai = Some bi] (when [f] returns [None], the corresponding element of
+    [l] is discarded).
+
+    @since 2.2.0
+*)
 
 val find_all : ('a -> bool) -> 'a list -> 'a list
 (** [find_all] is another name for {!List.filter}. *)
@@ -479,9 +521,24 @@ val take : int -> 'a list -> 'a list
 (** [take n l] returns up to the [n] first elements from list [l], if
     available. *)
 
+val ntake : int -> 'a list -> 'a list list
+(** [ntake n l] cuts [l] into lists of size at most [n].
+    [n] must be > 0.
+    @raise Invalid_argument if [n] <= 0.
+    Each list in the result has size n, except the last
+    one which may have fewer elements in case [l] was too short.
+    Example: [ntake 2 [1; 2; 3; 4; 5] = [[1; 2]; [3; 4]; [5]]]
+    
+    @since 2.2.0 *)
+
 val drop : int -> 'a list -> 'a list
 (** [drop n l] returns [l] without the first [n] elements, or the empty
     list if [l] have less than [n] elements. *)
+
+val takedrop : int -> 'a list -> 'a list * 'a list
+(** [take_drop n l] is equivalent to [(take n l, drop n l)]
+    but is done in one pass.
+    @since 2.2.0 *)
 
 val take_while : ('a -> bool) -> 'a list -> 'a list
 (** [take_while p xs] returns the (possibly empty) longest prefix of
@@ -490,13 +547,13 @@ val take_while : ('a -> bool) -> 'a list -> 'a list
 val drop_while : ('a -> bool) -> 'a list -> 'a list
 (** [drop_while p xs] returns the suffix remaining after
     [take_while p xs]. *)
-    
+
 val span : ('a -> bool) -> 'a list -> 'a list * 'a list
-(** [span], applied to a predicate [p] and a list [xs], returns a 
-    tuple where first element is longest prefix (possibly empty) of xs 
+(** [span], applied to a predicate [p] and a list [xs], returns a
+    tuple where first element is longest prefix (possibly empty) of xs
     of elements that satisfy p and second element is the remainder of
     the list. This is equivalent to [(take_while p xs, drop_while p xs)],
-    but is done in one pass. 
+    but is done in one pass.
 
     @since 2.1
 *)
@@ -505,14 +562,14 @@ val nsplit : ('a -> bool) -> 'a list -> 'a list list
 (** [nsplit], applied to a predicate [p] and a list [xs], returns a
     list of lists. [xs] is split when [p x] is true and [x] is excluded
     from the result.
-    
+
     If elements that satisfy [p] are consecutive, or at the beginning
     or end of the input list, the output list will contain empty lists
     marking their position. For example,
     [split (fun n -> n<0) [-1;2;-2;-3;4;-5]] is [[[];[2];[];[4];[]]].
     This is consistent with the behavior of [String.nsplit], where
     [String.nsplit ";" "1;2;;3;" = ["1";"2";"";"3";""]].
-    
+
     Note that for any [xss : 'a list list] and [sep : 'a], we always have
     that [flatten (interleave [sep] (nsplit ((=) sep) xss))] is [xss].
 
@@ -520,14 +577,14 @@ val nsplit : ('a -> bool) -> 'a list -> 'a list list
 *)
 
 val group_consecutive : ('a -> 'a -> bool) -> 'a list -> 'a list list
-(** The [group_consecutive] function takes a list and returns a list of lists such 
-    that the concatenation of the result is equal to the argument. Moreover, each 
-    sublist in the result contains only equal elements. For example, 
+(** The [group_consecutive] function takes a list and returns a list of lists such
+    that the concatenation of the result is equal to the argument. Moreover, each
+    sublist in the result contains only equal elements. For example,
     [group_consecutive (=) [3;3;4;3;3] =  [[3;3];[4];[3;3]]].
 
-    {b Note:} In the next major version, this function is intended to replace the 
+    {b Note:} In the next major version, this function is intended to replace the
     current [group], which also sorts its input before grouping, and which will
-    therefore be renamed into something more pertinent, such as [classify], 
+    therefore be renamed into something more pertinent, such as [classify],
     [regroup], or [group_sort].
 
     @since 2.1
@@ -645,7 +702,7 @@ val group : ('a -> 'a -> int) -> 'a list -> 'a list list
     For example [group cmp [f;c;b;e;d;a]] can give [[[a;b];[c];[d;e;f]]] if
     following conditions are met:
     [cmp a b = 0], [cmp b c = -1], [cmp c d = -1], [cmp d e = 0],...
-    
+
     See the note on [group_consecutive].
 *)
 
@@ -818,6 +875,7 @@ module Labels : sig
   val exists : f:('a -> bool) -> 'a list -> bool
   val for_all2 : f:('a -> 'b -> bool) -> 'a list -> 'b list -> bool
   val exists2 : f:('a -> 'b -> bool) -> 'a list -> 'b list -> bool
+  val subset : cmp:('a -> 'b -> int) -> 'a list -> 'b list -> bool
   val find : f:('a -> bool) -> 'a list -> 'a
   val find_exn : f:('a -> bool) -> exn -> 'a list -> 'a
   val findi : f:(int -> 'a -> bool) -> 'a list -> (int * 'a)

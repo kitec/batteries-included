@@ -179,6 +179,42 @@ let rfind str sub = rfind_from str (String.length str - 1) sub
   try ignore (rfind "foo" "barr"); false with Not_found -> true
 *)
 
+let find_all str sub =
+  (* enumerator *)
+  let rec next r () =
+    try
+      let i = find_from str !r sub in
+      r := i+1;
+      i
+    with Not_found -> raise BatEnum.No_more_elements
+  in
+  let count r () =
+    let n = ref 0 in
+    let r' = BatRef.copy r in
+    begin try while true do ignore (next r' ()); incr n; done;
+    with BatEnum.No_more_elements -> ();
+    end;
+    !n
+  in
+  let rec clone r () = make (BatRef.copy r)
+  and make r = BatEnum.make ~next:(next r) ~count:(count r) ~clone:(clone r)
+  in
+  let r = ref 0 in
+  make r
+
+(*$T find_all
+  find_all "aaabbaabaaa" "aa" |> List.of_enum = [0;1;5;8;9]
+  find_all "abcde" "bd" |> List.of_enum = []
+  find_all "baaaaaaaaaaaaaaaaaaaab" "baa" |> List.of_enum = [0]
+  find_all "aaabbaabaaa" "aa" |> Enum.skip 1 |> Enum.clone \
+    |> List.of_enum = [1;5;8;9]
+  find_all "aaabbaabaaa" "aa" |> Enum.skip 1 |> Enum.count = 4
+  find_all "" "foo" |> BatEnum.is_empty
+  let e = find_all "aaabbaabaaa" "aa" in \
+    Enum.drop 2 e; let e' = Enum.clone e in \
+    (List.of_enum e = [5;8;9]) && (Enum.skip 1 e' |> List.of_enum = [8;9])
+ *)
+
 let exists str sub =
   try
     ignore (find str sub);
@@ -706,7 +742,7 @@ let repeat s n =
    repeat "" 4 = ""
 *)
 
-let rev s = 
+let rev s =
   let len = String.length s in
   let reversed = String.create len in
   for i = 0 to len - 1 do
@@ -823,6 +859,47 @@ struct
   let compare = numeric_compare
 end
 
+let edit_distance s1 s2 =
+  if String.length s1 = 0
+    then String.length s2
+  else if String.length s2 = 0
+    then String.length s1
+  else if s1 = s2
+    then 0
+  else begin
+    (* distance vectors (v0=previous, v1=current) *)
+    let v0 = Array.make (String.length s2 + 1) 0 in
+    let v1 = Array.make (String.length s2 + 1) 0 in
+    (* initialize v0: v0(i) = A(0)(i) = delete i chars from t *)
+    for i = 0 to String.length s2 do
+      v0.(i) <- i
+    done;
+    (* main loop for the bottom up dynamic algorithm *)
+    for i = 0 to String.length s1 - 1 do
+      (* first edit distance is the deletion of i+1 elements from s *)
+      v1.(0) <- i+1;
+
+      (* try add/delete/replace operations *)
+      for j = 0 to String.length s2 - 1 do
+        let cost = if s1.[i] = s2.[j] then 0 else 1 in
+        v1.(j+1) <- min (v1.(j) + 1) (min (v0.(j+1) + 1) (v0.(j) + cost));
+      done;
+
+      (* copy v1 into v0 for next iteration *)
+      Array.blit v1 0 v0 0 (String.length s2 + 1);
+    done;
+    v1.(String.length s2)
+  end
+
+(*$T edit_distance
+  edit_distance "foo" "fo0" = 1
+  edit_distance "hello" "hell" = 1
+  edit_distance "kitten" "sitton" = 2
+*)
+
+(*$Q edit_distance
+  Q.(pair string string) (fun (s1, s2) -> edit_distance s1 s2 = edit_distance s2 s1)
+*)
 
 let print = BatInnerIO.nwrite
 let println out s = BatInnerIO.nwrite out s; BatInnerIO.write out '\n'

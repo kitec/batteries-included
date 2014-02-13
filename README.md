@@ -13,6 +13,7 @@ Batteries
 
 * provides a consistent API for otherwise independent libraries.
 
+[![Build Status](https://travis-ci.org/ocaml-batteries-team/batteries-included.png?branch=master)](https://travis-ci.org/ocaml-batteries-team/batteries-included)
 
 Building Batteries
 ------------------
@@ -99,3 +100,4 @@ See doc/batteries/GUIDELINES and the [guidelines wiki page][batwiki-dev].
 [batwiki-dev]: https://github.com/ocaml-batteries-team/batteries-included/wiki/Developers-guidelines
 
 If you use emacs, the file `batteries_dev.el` has extra highlighting to support writing quicktests.
+

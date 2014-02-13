@@ -5,10 +5,11 @@
  * Gallium wiki. *)
 
 open Ocamlbuild_plugin
+module Pack = Ocamlbuild_pack
 
 let ocamlfind x = S[A"ocamlfind"; A x]
 
-let packs = "str"
+let packs = "bigarray,num,str"
 
 let doc_intro = "build/intro.text"
 let mkconf = "build/mkconf.byte"
@@ -94,7 +95,21 @@ let _ = dispatch begin function
 
   | After_rules ->
 
+      (* Rules to create libraries from .mllib instead of .cmo.
+         We need this because src/batteries.mllib is hidden by src/batteries.ml *)
+      rule ".mllib --> .cma"
+        ~insert:`top
+        ~prod:"%.cma"
+        ~dep:"%.mllib"
+        (Pack.Ocaml_compiler.byte_library_link_mllib "%.mllib" "%.cma");
+      rule ".mllib --> .cmxa"
+        ~insert:`top
+        ~prod:"%.cmxa"
+        ~dep:"%.mllib"
+        (Pack.Ocaml_compiler.native_library_link_mllib "%.mllib" "%.cmxa");
+
     dep ["pa_optcomp"] ["src/config_incl.ml"];
+
     for n = 1 to 30 do
       List.iter (fun symbol ->
         flag ["ocaml"; "compile"; Printf.sprintf "warn_%s%d" symbol n]

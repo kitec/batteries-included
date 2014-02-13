@@ -59,6 +59,13 @@ val rear : 'a dq -> ('a dq * 'a) option
 
 (** {6 Basic operations} *)
 
+val eq : ?eq:('a -> 'a -> bool) -> 'a dq -> 'a dq -> bool
+  (** [eq dq1 dq2] is true if [dq1] and [dq2] have the same sequence
+      of elements. A custom function can be optionally provided with
+      the [eq] parameter (default is {!Pervasives.(=)}).
+      
+      @since 2.2.0 *)
+
 val rev : 'a dq -> 'a dq
 (** [rev dq] reverses [dq]. O(1) *)
 

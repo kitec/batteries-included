@@ -163,8 +163,8 @@ val set : t -> int -> BatUChar.t -> t
 val sub : t -> int -> int -> t
 (** [sub r m n] returns a sub-rope of [r] containing all characters
     whose indexes range from [m] to [m + n - 1] (included).
-    Operates in worst-case [O(log size)] time. 
-    
+    Operates in worst-case [O(log size)] time.
+
     @raise Out_of_bounds in the same cases as sub.
 *)
 
@@ -235,14 +235,24 @@ val filter : (BatUChar.t -> bool) -> t -> t
 (** [filter f s] returns a copy of rope [s] in which only
     characters [c] such that [f c = true] remain.*)
 
+val enum : t -> BatUChar.t BatEnum.t
+(** enumerate the rope's characters
+    @since 2.2.0 *)
 
+val backwards : t -> BatUChar.t BatEnum.t
+(** enumerates the rope's characters, in reverse order
+    @since 2.2.0 *)
+
+val of_enum : BatUChar.t BatEnum.t -> t
+(** converts the enumeration into a rope
+    @since 2.2.0 *)
 
 (** {6 Finding}*)
 
 val index : t -> BatUChar.t -> int
 (** [index s c] returns the position of the leftmost
     occurrence of character [c] in rope [s].
-    
+
     @raise Not_found if [c] does not occur in [s].
 *)
 
@@ -430,6 +440,9 @@ val compare : t -> t -> int
     allows the module [Rope] to be passed as argument to the functors
     {!Set.Make} and {!Map.Make}. *)
 
+val equal : t -> t -> bool
+(** Equality of ropes (based on compare)
+    @since 2.2.0 *)
 
 open BatIO
 

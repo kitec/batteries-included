@@ -131,13 +131,64 @@ let init n f =
   else
     aux 0
 
+let of_list l =
+  let rec aux l () = match l with
+    | [] -> Nil
+    | x::l' -> Cons(x, aux l')
+  in
+  aux l
+
 let rec iter f s = match s () with
   | Nil -> ()
   | Cons(e, s) -> f e; iter f s
 
+let iteri f s =
+  let rec iteri f i s = match s () with
+  | Nil -> ()
+  | Cons(e, s) -> f i e; iteri f (i+1) s
+  in iteri f 0 s
+
+(*$T iteri
+  try iteri (fun i x -> if i<>x then raise Exit) (of_list [0;1;2;3]); true \
+  with Exit -> false
+*)
+
+let rec iter2 f s1 s2 = match s1 (), s2 () with
+  | Nil, _
+  | _, Nil -> ()
+  | Cons (x1, s1'), Cons (x2, s2') -> f x1 x2; iter2 f s1' s2'
+
+(*$T iter2
+  let r = ref 0 in \
+    iter2 (fun i j -> r := !r + i*j) (of_list [1;2]) (of_list [3;2;1]); \
+    !r = 3 + 2*2
+ *)
+
 let rec map f s () = match s () with
   | Nil -> Nil
   | Cons(x, s) -> Cons(f x, map f s)
+
+let mapi f s =
+  let rec mapi f i s () = match s () with
+  | Nil -> Nil
+  | Cons(x, s) -> Cons(f i x, mapi f (i+1) s)
+  in mapi f 0 s
+
+(*$T mapi
+  equal (of_list [0;0;0;0]) \
+    (mapi (fun i x -> i - x) (of_list [0;1;2;3]))
+ *)
+
+let rec map2 f s1 s2 () = match s1 (), s2 () with
+  | Nil, _
+  | _, Nil -> Nil
+  | Cons (x1, s1'), Cons (x2, s2') ->
+    Cons (f x1 x2, map2 f s1' s2')
+
+(*$T map2
+  equal (map2 (+) (of_list [1;2;3]) (of_list [3;2])) \
+    (of_list [4;4])
+ *)
 
 let rec fold_left f acc s = match s () with
   | Nil -> acc
@@ -158,6 +209,20 @@ let max s = match s () with
 let min s = match s () with
   | Nil -> raise (Invalid_argument "Seq.min")
   | Cons(e, s) -> fold_left Pervasives.min e s
+
+let equal ?(eq=(=)) s1 s2 =
+  let rec recurse eq s1 s2 =
+    match s1 (), s2 () with
+    | Nil, Nil -> true
+    | Nil, Cons _
+    | Cons _, Nil -> false
+    | Cons (x1, s1'), Cons (x2, s2') -> eq x1 x2 && recurse eq s1' s2'
+  in
+  recurse eq s1 s2
+
+(*$T of_list
+  equal (of_list [1;2;3]) (nil |> cons 3 |> cons 2 |> cons 1)
+*)
 
 let rec for_all f s = match s () with
   | Nil -> true
@@ -366,4 +431,8 @@ module Exceptionless = struct
   let combine s1 s2 =
     try Some (combine s1 s2)
     with Invalid_argument "Seq.combine" -> None
+
+  (*$T combine
+    equal (combine (of_list [1;2]) (of_list ["a";"b"])) (of_list [1,"a"; 2,"b"])
+  *)
 end

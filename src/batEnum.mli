@@ -133,6 +133,13 @@ val fsum : float t -> float
     @since 2.0
 *)
 
+val kahan_sum : float t -> float
+(** [kahan_sum l] returns a numerically-accurate sum of the floats of
+    [l]. See {!BatArray.fsum} for more details.
+
+    @since 2.2.0
+*)
+
 val fold2 : ('a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 (** [fold2] is similar to [fold] but will fold over two enumerations at the
     same time until one of the two enumerations ends. *)
@@ -290,6 +297,13 @@ val clump : int -> ('a -> unit) -> (unit -> 'b) -> 'a t -> 'b t
     result enumeration.  Useful to convert a char enum into string
     enum. *)
 
+val cartesian_product : 'a t -> 'b t -> ('a * 'b) t
+(** [cartesian_product e1 e2] computes the cartesian product of [e1] and [e2].
+    Pairs are enumerated in a non-specified order, but in fair enough an order
+    so that it works on infinite enums (i.e. even then, any pair is eventually
+    returned)
+    @since 2.2.0 *)
+
 (** {6 Lazy constructors}
 
     These functions are lazy which means that they will create a new modified
@@ -372,6 +386,11 @@ val concat : 'a t t -> 'a t
 
 val flatten : 'a t t -> 'a t
 (** Synonym of {!concat}*)
+
+val concat_map : ('a -> 'b t) -> 'a t -> 'b t
+(** Synonym of {!Monad.bind}, with flipped arguments.
+    [concat_map f e] is the same as [concat (map f e)].
+    @since 2.2.0 *)
 
 (** {6 Constructors}
 
@@ -729,6 +748,16 @@ end
 
 val print :  ?first:string -> ?last:string -> ?sep:string -> ('a BatInnerIO.output -> 'b -> unit) -> 'a BatInnerIO.output -> 'b t -> unit
 (** Print and consume the contents of an enumeration.*)
+
+val print_at_most :  ?first:string -> ?last:string -> ?sep:string ->
+                     limit:int -> ('a BatInnerIO.output -> 'b -> unit) ->
+                     'a BatInnerIO.output -> 'b t -> unit
+(** [print_at_most pp limit out enum] consumes [enum] to print its elements
+    into [out] (using [pp] to print individual elements).
+    At most [limit] arguments are printed, if more elements are
+      available an ellipsis "..." is added.
+    @raise Invalid_argument if the limit is <= 0.
+    @since 2.2.0 *)
 
 #endif
 

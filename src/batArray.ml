@@ -471,6 +471,25 @@ let map2 f xs ys =
      with Invalid_argument _ -> true
 *)
 
+let cartesian_product a b =
+  let na = length a in
+  let nb = length b in
+  init
+    (na * nb)
+    (fun j -> let i = j / nb in
+              a.(i), b.(j - i*nb))
+
+(*$T cartesian_product
+  let a = cartesian_product [|1;2|] [|"a";"b"|] in \
+    sort Pervasives.compare a; \
+    a = [|1,"a"; 1,"b"; 2,"a"; 2, "b" |]
+*)
+
+(*$Q cartesian_product
+  (Q.pair (Q.array Q.small_int) (Q.array Q.small_int)) \
+    (fun (a,b) -> length (cartesian_product a b) = length a * length b)
+*)
+
 let compare cmp a b =
   let length_a = Array.length a in
   let length_b = Array.length b in
@@ -560,6 +579,29 @@ let fsum = reduce (+.)
      fsum [|0.0|] = 0.0
    *)
 
+let kahan_sum arr =
+  let sum = ref 0. in
+  let err = ref 0. in
+  for i = 0 to Array.length arr - 1 do
+    let x = arr.(i) -. !err in
+    let new_sum = !sum +. x in
+    err := (new_sum -. !sum) -. x;
+    sum := new_sum +. 0.;
+    (* this suspicious +. 0. is added to help
+       the hand of the somewhat flaky unboxing optimizer;
+       it hopefully won't be necessary anymore
+       in a few OCaml versions *)
+  done;
+  !sum +. 0.
+
+(*$T kahan_sum
+   kahan_sum [| |] = 0.
+   kahan_sum [| 1.; 2. |] = 3.
+   let n, x = 1_000, 1.1 in \
+     Float.approx_equal (float n *. x) \
+                        (kahan_sum (Array.make n x))
+*)
+
 let flength a =
   float_of_int (length a)
 
@@ -607,6 +649,33 @@ let decorate_fast_sort f xs =
 (*$Q decorate_fast_sort
   (Q.pair (Q.array Q.small_int) (Q.fun1 Q.small_int (Q.option Q.int))) \
     (fun (a, f) -> is_sorted_by f (decorate_fast_sort f a))
+*)
+
+let bsearch cmp arr x =
+  let rec bsearch i j =
+    if i > j
+      then `Just_after j
+      else
+        let middle = i + (j - i) / 2 in (* avoid overflow *)
+        match cmp x arr.(middle) with
+        | BatOrd.Eq -> `At middle
+        | BatOrd.Lt -> bsearch i (middle - 1)
+        | BatOrd.Gt -> bsearch (middle + 1) j
+  in
+  if length arr = 0 then `Empty
+  else match cmp arr.(0) x, cmp arr.(length arr - 1) x with
+  | BatOrd.Gt, _ -> `All_bigger
+  | _, BatOrd.Lt -> `All_lower
+  | _ -> bsearch 0 (length arr - 1)
+
+(*$T bsearch
+  bsearch BatInt.ord [|1; 2; 2; 3; 4; 10|] 3 = `At 3
+  bsearch BatInt.ord [|1; 2; 2; 3; 4; 10|] 5 = `Just_after 4
+  bsearch BatInt.ord [|1; 2; 5; 5; 11; 12|] 1 = `At 0
+  bsearch BatInt.ord [|1; 2; 5; 5; 11; 12|] 12 = `At 5
+  bsearch BatInt.ord [|1; 2; 2; 3; 4; 9|] 10 = `All_lower
+  bsearch BatInt.ord [|1; 2; 2; 3; 4; 9|] 0 = `All_bigger
+  bsearch BatInt.ord [| |] 3 = `Empty
 *)
 
 let insert xs x i =
